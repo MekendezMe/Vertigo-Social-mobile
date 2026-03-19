@@ -5,6 +5,7 @@ import 'package:social_network_flutter/common/auth/auth_coordinator.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/environment/environment_assembly.dart';
 import 'package:social_network_flutter/common/framework/framework_assembly.dart';
+import 'package:social_network_flutter/common/framework/network/interceptors/auth_incerteptor_assembly.dart';
 import 'package:social_network_flutter/common/framework/network/network_assembly.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/common/launcher/launcher_assembly.dart';
@@ -49,8 +50,9 @@ void _registerAssemblies() {
   diContainer.registerAssemblies([
     EnvironmentAssembly(),
     FrameworkAssembly(),
-    LauncherAssembly(),
     NetworkAssembly(),
+    LauncherAssembly(),
     AuthAssembly(),
+    AuthInterceptorAssembly(),
   ]);
 }

@@ -47,20 +47,33 @@ class RequestSender {
   final ISecureStorage secureStorage;
   final Talker talker;
   final Dio dio;
-  Future<T?> send<T, B>({
+  Future<T?> send<T>({
     required IRequest request,
     required T Function(Map<String, dynamic>) fromJson,
     Map<String, dynamic>? queryParams,
-    B? body,
+    Map<String, dynamic>? body,
   }) async {
     try {
       await _checkConnectivity();
+      final headers = Map<String, String>.from(request.headers);
+      // if (request.isAuthRequired) {
+      //   final token = tokenService.accessToken;
+      //   if (token != null && token.isNotEmpty) {
+      //     headers['Authorization'] = 'Bearer $token';
+      //   } else {
+      //     throw AuthException(
+      //       message: 'Требуется авторизация. Нет токена',
+      //       code: 401,
+      //     );
+      //   }
+      // }
 
       final response = await _sendRequest(
         request: request,
         body: body,
         queryParams: queryParams,
         dio: dio,
+        headers: headers,
       );
       if (response == null || response.data == null) {
         throw ApiException(message: 'Пустой ответ от сервера', code: -1);
@@ -91,19 +104,16 @@ class RequestSender {
 
   Future<Response?> _sendRequest<T, B>({
     required IRequest request,
-    B? body,
+    Map<String, dynamic>? body,
     Map<String, dynamic>? queryParams,
     required Dio dio,
+    required Map<String, String> headers,
   }) async {
-    request.headers.addAll({});
     final response = await dio.request(
       request.method,
       data: body,
       queryParameters: queryParams,
-      options: Options(
-        method: request.httpMethod.text,
-        headers: request.headers,
-      ),
+      options: Options(method: request.httpMethod.text, headers: headers),
     );
     return response;
   }

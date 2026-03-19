@@ -4,6 +4,7 @@ import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
+import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 class AuthAssembly implements DIAssembly {
@@ -14,11 +15,14 @@ class AuthAssembly implements DIAssembly {
         secureStorage: container.resolve<ISecureStorage>(),
         talker: container.resolve<Talker>(),
         requestSender: container.resolve<RequestSender>(),
+        tokenService: container.resolve<TokenService>(),
       ),
     );
     container.registerFactory(
-      (container) =>
-          AuthBloc(authRepository: container.resolve<AuthRepository>()),
+      (container) => AuthBloc(
+        authRepository: container.resolve<AuthRepository>(),
+        talker: container.resolve<Talker>(),
+      ),
     );
   }
 }

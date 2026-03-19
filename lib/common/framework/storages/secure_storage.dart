@@ -74,9 +74,12 @@ class SecureStorage extends ISecureStorage {
   Future<void> _clearLegacyKeys() async {
     if (Platform.isAndroid) {
       final prefs = await SharedPreferences.getInstance();
-      // if (prefs.containsKey(_sessionKey)) {
-      //   await prefs.setString(_sessionKey, "");
-      // }
+      if (prefs.containsKey(refreshToken ?? "")) {
+        await prefs.setString(refreshToken ?? "", "");
+      }
+      if (prefs.containsKey(deviceId ?? "")) {
+        await prefs.setString(deviceId ?? "", "");
+      }
     }
   }
 }

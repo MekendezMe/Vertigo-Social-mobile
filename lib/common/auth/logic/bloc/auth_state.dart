@@ -36,8 +36,11 @@ class RegisterLoading extends AuthState {
 }
 
 class RegisterLoadingSuccess extends AuthState {
+  final RegisterResponseDto response;
+
+  RegisterLoadingSuccess({required this.response});
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [response];
 }
 
 class RegisterSuccess extends AuthState {

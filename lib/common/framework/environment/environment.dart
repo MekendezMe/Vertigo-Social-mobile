@@ -1,3 +1,3 @@
 class Environment {
-  final String baseUrl = '';
+  final String baseUrl = 'https://vertigo/api/v1/';
 }

@@ -4,6 +4,7 @@ import 'package:social_network_flutter/common/framework/storages/preferences_sto
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
 import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 part 'launcher_event.dart';
 part 'launcher_state.dart';
@@ -14,6 +15,7 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     required this.preferencesStorage,
     required this.tokenService,
     required this.launcherRepository,
+    required this.talker,
   }) : super(LauncherInitial()) {
     on<Initialize>(_onInitialize);
     on<LoginRequested>(_onLogin);
@@ -24,18 +26,23 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     Initialize event,
     Emitter<LauncherState> emit,
   ) async {
-    await secureStorage.load();
-    if (secureStorage.refreshToken == null) {
-      emit(LauncherLoggedOut());
-    } else {
-      await preferencesStorage.load();
-      final String? accessToken = await launcherRepository.getAccessToken();
-      final String? deviceId = secureStorage.deviceId;
-      if (!_hasAccess(deviceId, accessToken)) {
+    try {
+      await secureStorage.load();
+      if (secureStorage.refreshToken == null) {
         emit(LauncherLoggedOut());
+      } else {
+        await preferencesStorage.load();
+        final String accessToken = await launcherRepository.getAccessToken();
+        final String? deviceId = secureStorage.deviceId;
+        if (!_hasAccess(deviceId, accessToken)) {
+          emit(LauncherLoggedOut());
+        }
+        tokenService.setToken(accessToken);
+        emit(LauncherLoggedIn());
       }
-      tokenService.setToken(accessToken!);
-      emit(LauncherLoggedIn());
+    } catch (e, st) {
+      talker.handle(e, st);
+      emit(LauncherLoggedOut());
     }
   }
 
@@ -67,4 +74,5 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
   final IPreferencesStorage preferencesStorage;
   final TokenService tokenService;
   final LauncherRepository launcherRepository;
+  final Talker talker;
 }

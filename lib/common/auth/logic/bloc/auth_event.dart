@@ -8,6 +8,16 @@ class Authorize extends AuthEvent {
 }
 
 class Register extends AuthEvent {
+  final String name;
+  final String? username;
+  final String email;
+  final String password;
+  Register({
+    required this.name,
+    required this.username,
+    required this.email,
+    required this.password,
+  });
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [name, username, email, password];
 }

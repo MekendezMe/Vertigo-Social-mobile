@@ -1,11 +1,12 @@
-import 'package:dio/dio.dart';
 import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
+import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
 import 'package:social_network_flutter/common/launcher/logic/bloc/launcher_bloc.dart';
 import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 class LauncherAssembly extends DIAssembly {
   @override
@@ -13,7 +14,8 @@ class LauncherAssembly extends DIAssembly {
     container.registerSingleton(
       (container) => LauncherRepository(
         secureStorage: container.resolve<ISecureStorage>(),
-        dio: container.resolve<Dio>(),
+        talker: container.resolve<Talker>(),
+        requestSender: container.resolve<RequestSender>(),
       ),
     );
     container.registerSingleton(
@@ -22,6 +24,7 @@ class LauncherAssembly extends DIAssembly {
         preferencesStorage: container.resolve<IPreferencesStorage>(),
         secureStorage: container.resolve<ISecureStorage>(),
         tokenService: container.resolve<TokenService>(),
+        talker: container.resolve<Talker>(),
       ),
     );
   }

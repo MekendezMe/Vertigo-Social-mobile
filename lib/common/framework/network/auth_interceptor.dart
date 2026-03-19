@@ -47,7 +47,7 @@ class AuthInterceptor extends Interceptor {
       try {
         final newToken = await launcherRepository.getAccessToken();
 
-        if (newToken == null || newToken.isEmpty) {
+        if (newToken.isEmpty) {
           handler.next(err);
           return;
         }
