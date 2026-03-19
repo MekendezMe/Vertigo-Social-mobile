@@ -30,10 +30,10 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
   final Color yellow;
   final Color lightYellow;
   final Color white;
-  final Color mosRu;
   final Color lightBlueGradient;
   final Color brightLightGray;
   final Color purple;
+  final Color lightPurple;
   final Color votingBackGreen;
   final Color brown;
   final Color cameraDark;
@@ -47,19 +47,11 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
   final Color inputBorderFocused;
   final Color bottomTabBarShadow1;
   final Color bottomTabBarShadow2;
-  final Color iconDefault;
-  final Color popupBarrier;
-  final Color popupDragIndicator;
-  final Color drawerScrimColor;
-  final Color appUpdateOptionalBackground;
-  final Color appUpdateRequiredBackground;
-  final Color appUpdateOptionalTitle;
 
   Color get primary => mainGreen;
   Color get primaryExtraLight => veryLightGreen;
   Color get additional => accentGreen;
   Color get strokeButtonHighlight => veryLightGreen;
-  Color get mosruButtonHighlight => mosRu.withAlpha((255 * 0.1).round());
   Color get inputBackground => veryLightGray.withValues(alpha: 0.5);
   Color get inputHint => darkGray;
   Color get inputValue => blackText;
@@ -108,10 +100,10 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       butterscotch: const Color(0xFFFFC64B),
       lightYellow: const Color(0xFFFFEBC5),
       white: const Color(0xFFFFFFFF),
-      mosRu: const Color(0xFFCC2222),
       lightBlueGradient: const Color(0xFFBBEAEF),
       brightLightGray: const Color(0xFFF7F7F9),
-      purple: const Color(0xFF8D3DFF),
+      purple: const Color.fromARGB(255, 94, 46, 161),
+      lightPurple: const Color.fromARGB(255, 142, 86, 219),
       votingBackGreen: const Color(0xFF008B89),
       brown: const Color(0xFF621700),
       appBarShadow1: const Color(0xFF1E2C5E).withAlpha((255 * 0.05).round()),
@@ -130,13 +122,6 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       bottomTabBarShadow2: const Color(
         0xFF1E2C5E,
       ).withAlpha((0.14 * 255).round()),
-      iconDefault: const Color(0xff9B9DB5),
-      popupBarrier: const Color(0xFF868CA4).withValues(alpha: 0.44),
-      popupDragIndicator: const Color(0xFFBCC2D8).withValues(alpha: 0.7),
-      drawerScrimColor: const Color(0xFF868CA4).withValues(alpha: 0.44),
-      appUpdateOptionalBackground: const Color(0xFF4ECBBD),
-      appUpdateRequiredBackground: const Color(0xFFFFBA8B),
-      appUpdateOptionalTitle: const Color(0xFF0E3F54),
     );
   }
 
@@ -173,10 +158,10 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       butterscotch: const Color(0xFFFFC64B),
       lightYellow: const Color(0xFF472F00),
       white: const Color(0xFF121212),
-      mosRu: const Color(0xFFFF4646),
       lightBlueGradient: const Color(0xFF0D262C),
       brightLightGray: const Color(0xFF222222),
-      purple: const Color(0xFF8D3DFF),
+      purple: const Color.fromARGB(255, 94, 46, 161),
+      lightPurple: const Color.fromARGB(255, 142, 86, 219),
       votingBackGreen: const Color(0xFF008B89),
       brown: const Color(0xFF621700),
       appBarShadow1: const Color(0xFF1E2C5E).withAlpha((255 * 0.05).round()),
@@ -191,13 +176,6 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       bottomTabBarShadow2: const Color(
         0xFF1E2C5E,
       ).withAlpha((0.14 * 255).round()),
-      iconDefault: const Color(0xff9B9DB5),
-      popupBarrier: const Color(0xFF333333).withValues(alpha: 0.44),
-      popupDragIndicator: const Color(0xFF333333),
-      drawerScrimColor: const Color(0xFF333333).withValues(alpha: 0.44),
-      appUpdateOptionalBackground: const Color(0xFF4ECBBD),
-      appUpdateRequiredBackground: const Color(0xFFFFBA8B),
-      appUpdateOptionalTitle: const Color(0xFF0E3F54),
     );
   }
 
@@ -233,7 +211,6 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
     required this.yellow,
     required this.lightYellow,
     required this.white,
-    required this.mosRu,
     required this.lightBlueGradient,
     required this.brightLightGray,
     required this.purple,
@@ -247,13 +224,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
     required this.inputBorderFocused,
     required this.bottomTabBarShadow1,
     required this.bottomTabBarShadow2,
-    required this.iconDefault,
-    required this.popupBarrier,
-    required this.popupDragIndicator,
-    required this.drawerScrimColor,
-    required this.appUpdateOptionalBackground,
-    required this.appUpdateRequiredBackground,
-    required this.appUpdateOptionalTitle,
+    required this.lightPurple,
   });
 
   @override
@@ -290,7 +261,6 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       yellow: yellow,
       lightYellow: lightYellow,
       white: white,
-      mosRu: mosRu,
       lightBlueGradient: lightBlueGradient,
       brightLightGray: brightLightGray,
       purple: purple,
@@ -304,13 +274,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       inputBorderFocused: inputBorderFocused,
       bottomTabBarShadow1: bottomTabBarShadow1,
       bottomTabBarShadow2: bottomTabBarShadow2,
-      iconDefault: iconDefault,
-      popupBarrier: popupBarrier,
-      popupDragIndicator: popupDragIndicator,
-      drawerScrimColor: drawerScrimColor,
-      appUpdateOptionalBackground: appUpdateOptionalBackground,
-      appUpdateRequiredBackground: appUpdateRequiredBackground,
-      appUpdateOptionalTitle: appUpdateOptionalTitle,
+      lightPurple: lightPurple,
     );
   }
 
@@ -359,7 +323,6 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       butterscotch: Color.lerp(butterscotch, other.butterscotch, t)!,
       lightYellow: Color.lerp(lightYellow, other.lightYellow, t)!,
       white: Color.lerp(white, other.white, t)!,
-      mosRu: Color.lerp(mosRu, other.mosRu, t)!,
       lightBlueGradient: Color.lerp(
         lightBlueGradient,
         other.lightBlueGradient,
@@ -393,33 +356,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
         other.bottomTabBarShadow2,
         t,
       )!,
-      iconDefault: Color.lerp(iconDefault, other.iconDefault, t)!,
-      popupBarrier: Color.lerp(popupBarrier, other.popupBarrier, t)!,
-      popupDragIndicator: Color.lerp(
-        popupDragIndicator,
-        other.popupDragIndicator,
-        t,
-      )!,
-      drawerScrimColor: Color.lerp(
-        drawerScrimColor,
-        other.drawerScrimColor,
-        t,
-      )!,
-      appUpdateOptionalBackground: Color.lerp(
-        appUpdateOptionalBackground,
-        other.appUpdateOptionalBackground,
-        t,
-      )!,
-      appUpdateRequiredBackground: Color.lerp(
-        appUpdateRequiredBackground,
-        other.appUpdateRequiredBackground,
-        t,
-      )!,
-      appUpdateOptionalTitle: Color.lerp(
-        appUpdateOptionalTitle,
-        other.appUpdateOptionalTitle,
-        t,
-      )!,
+      lightPurple: Color.lerp(lightPurple, other.purple, t)!,
     );
   }
 }

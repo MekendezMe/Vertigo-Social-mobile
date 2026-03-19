@@ -2,8 +2,8 @@ part of 'vertigo_theme.dart';
 
 class ThemeTextStyles extends ThemeExtension<ThemeTextStyles> {
   static final String _defaultFontFamily = Platform.isAndroid
-      ? 'Roboto'
-      : '.SF UI Text';
+      ? GoogleFonts.montserrat().fontFamily ?? 'Roboto'
+      : GoogleFonts.montserrat().fontFamily ?? 'Roboto';
   final TextStyle title1Bold;
   final TextStyle title2Heavy;
   final TextStyle title2Bold;
@@ -23,6 +23,7 @@ class ThemeTextStyles extends ThemeExtension<ThemeTextStyles> {
   final TextStyle textMedium;
   final TextStyle textRegular;
   final TextStyle textListRegular;
+  final TextStyle urlText;
   ThemeTextStyles({
     required this.title1Bold,
     required this.title2Heavy,
@@ -43,6 +44,7 @@ class ThemeTextStyles extends ThemeExtension<ThemeTextStyles> {
     required this.textMedium,
     required this.textRegular,
     required this.textListRegular,
+    required this.urlText,
   });
 
   static ThemeTextStyles get light {
@@ -57,7 +59,7 @@ class ThemeTextStyles extends ThemeExtension<ThemeTextStyles> {
     return ThemeTextStyles(
       title1Bold: _styledText(
         fontSize: 26,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.normal,
         letterSpacingIOS: -0.8,
         letterSpacingAndroid: 0.7,
         heightMultiplier: 1.14,
@@ -207,6 +209,14 @@ class ThemeTextStyles extends ThemeExtension<ThemeTextStyles> {
         heightMultiplier: 1.20,
         color: colors.blackText,
       ),
+      urlText: _styledText(
+        fontSize: 15,
+        fontWeight: FontWeight.bold,
+        letterSpacingIOS: -0.75,
+        letterSpacingAndroid: -0.25,
+        heightMultiplier: 1.5,
+        color: colors.lightPurple,
+      ),
     );
   }
 
@@ -232,6 +242,7 @@ class ThemeTextStyles extends ThemeExtension<ThemeTextStyles> {
       textMedium: textMedium,
       textRegular: textRegular,
       textListRegular: textListRegular,
+      urlText: urlText,
     );
   }
 
@@ -267,9 +278,9 @@ class ThemeTextStyles extends ThemeExtension<ThemeTextStyles> {
 }
 
 extension TextStyleExtension on TextStyle {
-  static final String _defaultFontFamily = Platform.isAndroid
-      ? 'Roboto'
-      : '.SF UI Text';
+  static final String? _defaultFontFamily = Platform.isAndroid
+      ? GoogleFonts.ubuntuSans().fontFamily
+      : GoogleFonts.ubuntuSans().fontFamily;
 
   TextStyle modify({
     double? fontSize,

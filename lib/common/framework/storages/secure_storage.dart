@@ -5,7 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:social_network_flutter/common/framework/storages/storage_key.dart';
 
 abstract class ISecureStorage {
-  String? accessToken;
+  String? refreshToken;
+  String? deviceId;
   Future<void> clear();
   Future<void> load();
   Future<void> save();
@@ -26,11 +27,13 @@ class SecureStorage extends ISecureStorage {
     ),
   );
 
-  final _accessTokenKey = StorageKey(iosKey: "accessToken");
+  final _refreshTokenKey = StorageKey(iosKey: "accessToken");
+  final _deviceIdKey = StorageKey(iosKey: "deviceId");
   var _isLoaded = false;
   @override
   Future<void> clear() async {
-    accessToken = null;
+    refreshToken = null;
+    deviceId = null;
 
     // await Future.wait([_delete(key: _sessionKey)]);
 
@@ -39,8 +42,8 @@ class SecureStorage extends ISecureStorage {
 
   @override
   Future<void> load() async {
-    accessToken = await _read(key: _accessTokenKey);
-
+    refreshToken = await _read(key: _refreshTokenKey);
+    deviceId = await _read(key: _deviceIdKey);
     _isLoaded = true;
   }
 
@@ -51,7 +54,8 @@ class SecureStorage extends ISecureStorage {
       Обнаружена попытка сохранить SecureStorage без предварительной загрузки. 
       """);
     }
-    await _write(key: _accessTokenKey, value: accessToken);
+    await _write(key: _refreshTokenKey, value: refreshToken);
+    await _write(key: _deviceIdKey, value: deviceId);
   }
 
   Future<String?> _read({required StorageKey key}) async {

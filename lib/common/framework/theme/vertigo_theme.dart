@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 part 'build_context_extensions.dart';
 part 'theme_colors.dart';
@@ -14,6 +15,10 @@ class VertigoTheme {
     final colorScheme = ColorScheme.fromSwatch().copyWith(
       secondary: themeColors.primary,
       brightness: Brightness.light,
+    );
+
+    final appBarTheme = AppBarTheme(
+      backgroundColor: themeColors.scaffoldBackground,
     );
 
     final textTheme = TextTheme(
@@ -47,6 +52,7 @@ class VertigoTheme {
       splashColor: themeColors.veryLightGray,
       textTheme: textTheme,
       extensions: extensions,
+      appBarTheme: appBarTheme,
     );
   }
 
@@ -57,6 +63,10 @@ class VertigoTheme {
     final colorScheme = ColorScheme.fromSwatch().copyWith(
       secondary: themeColors.primary,
       brightness: Brightness.dark,
+    );
+
+    final appBarTheme = AppBarTheme(
+      backgroundColor: themeColors.scaffoldBackground,
     );
 
     final textTheme = TextTheme(
@@ -90,6 +100,7 @@ class VertigoTheme {
       splashColor: themeColors.veryLightGray,
       textTheme: textTheme,
       extensions: extensions,
+      appBarTheme: appBarTheme,
     );
   }
 }
