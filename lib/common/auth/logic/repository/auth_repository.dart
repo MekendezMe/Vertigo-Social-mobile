@@ -1,0 +1,9 @@
+import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
+import 'package:talker_flutter/talker_flutter.dart';
+
+class AuthRepository {
+  final ISecureStorage secureStorage;
+  final Talker talker;
+
+  AuthRepository({required this.secureStorage, required this.talker});
+}
