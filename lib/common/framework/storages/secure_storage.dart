@@ -34,9 +34,6 @@ class SecureStorage extends ISecureStorage {
   Future<void> clear() async {
     refreshToken = null;
     deviceId = null;
-
-    // await Future.wait([_delete(key: _sessionKey)]);
-
     await _clearLegacyKeys();
   }
 

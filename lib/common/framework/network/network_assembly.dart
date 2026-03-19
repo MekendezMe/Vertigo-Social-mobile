@@ -1,27 +1,19 @@
-import 'package:dio/dio.dart';
 import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
-import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
+import 'package:social_network_flutter/common/framework/network/auth_interceptor.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
-import 'package:social_network_flutter/common/launcher/logic/bloc/launcher_bloc.dart';
 import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
 
-class LauncherAssembly extends DIAssembly {
+class NetworkAssembly extends DIAssembly {
   @override
   assembly(DIContainer container) {
     container.registerSingleton(
-      (container) => LauncherRepository(
-        secureStorage: container.resolve<ISecureStorage>(),
-        dio: container.resolve<Dio>(),
-      ),
-    );
-    container.registerSingleton(
-      (container) => LauncherBloc(
-        launcherRepository: container.resolve<LauncherRepository>(),
-        preferencesStorage: container.resolve<IPreferencesStorage>(),
-        secureStorage: container.resolve<ISecureStorage>(),
+      (container) => AuthInterceptor(
         tokenService: container.resolve<TokenService>(),
+        secureStorage: container.resolve<ISecureStorage>(),
+        retry: retry,
+        launcherRepository: container.resolve<LauncherRepository>(),
       ),
     );
   }

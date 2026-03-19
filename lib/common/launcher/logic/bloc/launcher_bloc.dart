@@ -2,13 +2,19 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
+import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
+import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
 
 part 'launcher_event.dart';
 part 'launcher_state.dart';
 
 class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
-  LauncherBloc({required this.secureStorage, required this.preferencesStorage})
-    : super(LauncherInitial()) {
+  LauncherBloc({
+    required this.secureStorage,
+    required this.preferencesStorage,
+    required this.tokenService,
+    required this.launcherRepository,
+  }) : super(LauncherInitial()) {
     on<Initialize>(_onInitialize);
     on<LoginRequested>(_onLogin);
     on<LogoutRequested>(_onLogout);
@@ -23,8 +29,21 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
       emit(LauncherLoggedOut());
     } else {
       await preferencesStorage.load();
+      final String? accessToken = await launcherRepository.getAccessToken();
+      final String? deviceId = secureStorage.deviceId;
+      if (!_hasAccess(deviceId, accessToken)) {
+        emit(LauncherLoggedOut());
+      }
+      tokenService.setToken(accessToken!);
       emit(LauncherLoggedIn());
     }
+  }
+
+  bool _hasAccess(String? deviceId, String? accessToken) {
+    return accessToken != null &&
+        accessToken.isNotEmpty &&
+        deviceId != null &&
+        deviceId.isNotEmpty;
   }
 
   Future<void> _onLogin(
@@ -46,4 +65,6 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
 
   final ISecureStorage secureStorage;
   final IPreferencesStorage preferencesStorage;
+  final TokenService tokenService;
+  final LauncherRepository launcherRepository;
 }
