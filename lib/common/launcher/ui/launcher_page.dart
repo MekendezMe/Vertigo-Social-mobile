@@ -18,6 +18,11 @@ class LauncherPage extends StatefulWidget {
 }
 
 class _LauncherPageState extends State<LauncherPage> {
+  final _loggedInKey = GlobalKey<NavigatorState>();
+  final _loggedOutKey = GlobalKey<NavigatorState>();
+  final _permissionsKey = GlobalKey<NavigatorState>();
+
+  GlobalKey<NavigatorState>? _currentStateKey;
   @override
   void initState() {
     super.initState();
@@ -30,14 +35,33 @@ class _LauncherPageState extends State<LauncherPage> {
       bloc: widget.bloc,
       builder: (context, state) {
         if (state is LauncherLoggedIn) {
-          return widget.onLoggedInWidget();
+          return _buildNavigatorStack(
+            _loggedInKey,
+            (context) => widget.onLoggedInWidget(),
+          );
         }
 
         if (state is LauncherLoggedOut) {
-          return widget.onLoggedOutWidget();
+          return _buildNavigatorStack(
+            _loggedOutKey,
+            (context) => widget.onLoggedOutWidget(),
+          );
         }
 
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      },
+    );
+  }
+
+  Widget _buildNavigatorStack(
+    GlobalKey<NavigatorState> key,
+    WidgetBuilder widgetBuilder,
+  ) {
+    _currentStateKey = key;
+    return Navigator(
+      key: key,
+      onGenerateRoute: (settings) {
+        return MaterialPageRoute(builder: widgetBuilder, settings: settings);
       },
     );
   }

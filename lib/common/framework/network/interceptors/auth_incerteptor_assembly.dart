@@ -3,6 +3,7 @@ import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/network/auth_interceptor.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
+import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
 
@@ -20,6 +21,7 @@ class AuthInterceptorAssembly extends DIAssembly {
       secureStorage: container.resolve<ISecureStorage>(),
       retry: retry,
       launcherRepository: container.resolve<LauncherRepository>(),
+      logoutHandler: container.resolve<ILogoutHandler>(),
     );
     dio.interceptors.add(authInterceptor);
   }

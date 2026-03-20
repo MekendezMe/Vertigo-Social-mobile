@@ -3,8 +3,10 @@ import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
+import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/common/launcher/logic/bloc/launcher_bloc.dart';
 import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
+import 'package:social_network_flutter/common/launcher/logic/service/logout_service.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -18,6 +20,7 @@ class LauncherAssembly extends DIAssembly {
         requestSender: container.resolve<RequestSender>(),
       ),
     );
+    container.registerSingleton((container) => LogoutService());
     container.registerSingleton(
       (container) => LauncherBloc(
         launcherRepository: container.resolve<LauncherRepository>(),
@@ -25,7 +28,12 @@ class LauncherAssembly extends DIAssembly {
         secureStorage: container.resolve<ISecureStorage>(),
         tokenService: container.resolve<TokenService>(),
         talker: container.resolve<Talker>(),
+        logoutService: container.resolve<LogoutService>(),
       ),
+    );
+    container.registerSingleton<ILogoutHandler>(
+      (container) =>
+          LogoutHandler(logoutService: container.resolve<LogoutService>()),
     );
   }
 }

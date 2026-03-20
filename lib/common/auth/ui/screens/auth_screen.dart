@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:social_network_flutter/common/auth/logic/bloc/auth_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
+import 'package:social_network_flutter/ui/widgets/buttons/main_button.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key, required this.authBloc});
@@ -57,11 +58,9 @@ class _AuthScreenState extends State<AuthScreen> {
                       Container(
                         width: double.infinity,
                         padding: EdgeInsets.symmetric(vertical: 14),
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: context.color.purple,
-                          ),
+                        child: mainButton(
+                          context: context,
+                          onTap: () {},
                           child: Text(
                             "Зарегистрироваться",
                             style: theme.textTheme.bodyMedium!.modify(
