@@ -1,0 +1,30 @@
+import 'package:social_network_flutter/common/authentication/login/logic/bloc/login_bloc.dart';
+import 'package:social_network_flutter/common/authentication/login/logic/repository/login_repository.dart';
+import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
+import 'package:social_network_flutter/common/framework/di/di_container.dart';
+import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
+import 'package:social_network_flutter/common/framework/network/request_sender.dart';
+import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
+import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
+import 'package:talker_flutter/talker_flutter.dart';
+
+class LoginAssembly implements DIAssembly {
+  @override
+  assembly(DIContainer container) {
+    container.registerSingleton(
+      (container) => LoginRepository(
+        secureStorage: container.resolve<ISecureStorage>(),
+        talker: container.resolve<Talker>(),
+        requestSender: container.resolve<RequestSender>(),
+        tokenService: container.resolve<TokenService>(),
+      ),
+    );
+    container.registerFactory(
+      (container) => LoginBloc(
+        loginRepository: container.resolve<LoginRepository>(),
+        talker: container.resolve<Talker>(),
+        errorHandler: container.resolve<ErrorHandler>(),
+      ),
+    );
+  }
+}

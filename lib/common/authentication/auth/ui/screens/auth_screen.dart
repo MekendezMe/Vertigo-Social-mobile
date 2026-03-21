@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:social_network_flutter/common/auth/logic/bloc/auth_bloc.dart';
+import 'package:social_network_flutter/common/authentication/auth/logic/bloc/auth_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
+import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
 import 'package:social_network_flutter/ui/widgets/buttons/main_button.dart';
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key, required this.authBloc});
+  const AuthScreen({
+    super.key,
+    required this.authBloc,
+    required this.onShowLogin,
+    required this.onShowRegister,
+  });
   final AuthBloc authBloc;
-
+  final Function({required BuildContext context}) onShowLogin;
+  final Function({required BuildContext context}) onShowRegister;
   @override
   State<AuthScreen> createState() => _AuthScreenState();
 }
@@ -23,11 +32,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     final theme = context.theme;
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        title: Image.asset("assets/logo.png", width: 240, height: 240),
-      ),
+      appBar: appBar(context),
       body: BlocConsumer<AuthBloc, AuthState>(
         bloc: widget.authBloc,
         listener: (context, state) {},
@@ -60,7 +65,20 @@ class _AuthScreenState extends State<AuthScreen> {
                         padding: EdgeInsets.symmetric(vertical: 14),
                         child: mainButton(
                           context: context,
-                          onTap: () {},
+                          onTap: () {
+                            // CustomToast.show(
+                            //   CustomToastWidget(text: "Переход к регистрации"),
+                            //   dismissAfter: Duration(seconds: 1),
+                            // );
+                            widget.authBloc.add(
+                              Register(
+                                name: "",
+                                username: "username",
+                                email: "username",
+                                password: "s",
+                              ),
+                            );
+                          },
                           child: Text(
                             "Зарегистрироваться",
                             style: theme.textTheme.bodyMedium!.modify(
@@ -82,7 +100,10 @@ class _AuthScreenState extends State<AuthScreen> {
                         style: theme.textTheme.bodyMedium!,
                       ),
                       SizedBox(width: 6),
-                      Text("Войти", style: context.textStyle.urlText),
+                      GestureDetector(
+                        onTap: () => widget.onShowLogin(context: context),
+                        child: Text("Войти", style: context.textStyle.urlText),
+                      ),
                     ],
                   ),
                 ),

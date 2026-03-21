@@ -1,4 +1,4 @@
-import 'package:social_network_flutter/common/framework/errors/exceptions/connection_exception.dart';
+import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
 import 'package:social_network_flutter/common/launcher/logic/entities/token_request.dart';

@@ -34,6 +34,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
   final Color brightLightGray;
   final Color purple;
   final Color lightPurple;
+  final Color dimPurple;
   final Color votingBackGreen;
   final Color brown;
   final Color cameraDark;
@@ -48,7 +49,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
   final Color bottomTabBarShadow1;
   final Color bottomTabBarShadow2;
 
-  Color get primary => mainGreen;
+  Color get primary => purple;
   Color get primaryExtraLight => veryLightGreen;
   Color get additional => accentGreen;
   Color get strokeButtonHighlight => veryLightGreen;
@@ -104,6 +105,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       brightLightGray: const Color(0xFFF7F7F9),
       purple: const Color.fromARGB(255, 94, 46, 161),
       lightPurple: const Color.fromARGB(255, 142, 86, 219),
+      dimPurple: const Color.fromARGB(255, 76, 10, 168),
       votingBackGreen: const Color(0xFF008B89),
       brown: const Color(0xFF621700),
       appBarShadow1: const Color(0xFF1E2C5E).withAlpha((255 * 0.05).round()),
@@ -162,6 +164,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       brightLightGray: const Color(0xFF222222),
       purple: const Color.fromARGB(255, 94, 46, 161),
       lightPurple: const Color.fromARGB(255, 142, 86, 219),
+      dimPurple: const Color.fromARGB(255, 76, 10, 168),
       votingBackGreen: const Color(0xFF008B89),
       brown: const Color(0xFF621700),
       appBarShadow1: const Color(0xFF1E2C5E).withAlpha((255 * 0.05).round()),
@@ -225,6 +228,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
     required this.bottomTabBarShadow1,
     required this.bottomTabBarShadow2,
     required this.lightPurple,
+    required this.dimPurple,
   });
 
   @override
@@ -275,6 +279,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       bottomTabBarShadow1: bottomTabBarShadow1,
       bottomTabBarShadow2: bottomTabBarShadow2,
       lightPurple: lightPurple,
+      dimPurple: dimPurple,
     );
   }
 
@@ -357,6 +362,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
         t,
       )!,
       lightPurple: Color.lerp(lightPurple, other.purple, t)!,
+      dimPurple: Color.lerp(dimPurple, other.purple, t)!,
     );
   }
 }

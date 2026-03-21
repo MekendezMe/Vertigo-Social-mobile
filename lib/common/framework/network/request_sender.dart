@@ -1,6 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
-import 'package:social_network_flutter/common/framework/errors/exceptions/connection_exception.dart';
+import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -80,21 +80,23 @@ class RequestSender {
       }
       final data = response.data;
       if (data is! Map || data.isEmpty) {
-        throw ApiException(message: 'Сервер вернул пустой объект', code: -1);
+        throw ApiException(
+          message: 'Сервер вернул пустой объект',
+          code: response.statusCode,
+        );
       }
       final json = data as Map<String, dynamic>;
-      if (!json.containsKey('code')) {
-        throw ApiException(message: 'Сервер вернул пустой объект', code: -1);
-      }
-      if (json['code'] ?? -1 >= 300 || json['code'] < 200) {
+
+      if ((response.statusCode ?? -1) >= 300 ||
+          (response.statusCode ?? -1) < 200) {
         throw ApiException(
           message: json['message'] ?? "Ошибка сервера",
-          code: json['code'] as int? ?? -1,
+          code: response.statusCode ?? -1,
         );
       }
       return fromJson(response.data);
-    } on NoInternetException catch (e, st) {
-      talker.handle(e, st);
+    } on NoInternetException catch (e) {
+      talker.handle(e);
       rethrow;
     } catch (e, st) {
       talker.handle(e, st);
@@ -120,7 +122,8 @@ class RequestSender {
 
   Future<void> _checkConnectivity() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.none) {
+    if (connectivityResult.isEmpty ||
+        connectivityResult[0] == ConnectivityResult.none) {
       throw NoInternetException();
     }
   }

@@ -1,6 +1,6 @@
-import 'package:social_network_flutter/common/auth/logic/entities/register_request.dart';
-import 'package:social_network_flutter/common/auth/logic/entities/register_response.dart';
-import 'package:social_network_flutter/common/framework/errors/exceptions/connection_exception.dart';
+import 'package:social_network_flutter/common/authentication/auth/logic/entities/register_request.dart';
+import 'package:social_network_flutter/common/authentication/auth/logic/entities/register_response.dart';
+import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
@@ -36,7 +36,7 @@ class AuthRepository {
       return response;
     } catch (e, st) {
       talker.handle(e, st);
-      throw ApiException(message: "Ошибка сервера: $e", code: -1);
+      rethrow;
     }
   }
 }

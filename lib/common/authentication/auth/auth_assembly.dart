@@ -1,7 +1,8 @@
-import 'package:social_network_flutter/common/auth/logic/bloc/auth_bloc.dart';
-import 'package:social_network_flutter/common/auth/logic/repository/auth_repository.dart';
+import 'package:social_network_flutter/common/authentication/auth/logic/bloc/auth_bloc.dart';
+import 'package:social_network_flutter/common/authentication/auth/logic/repository/auth_repository.dart';
 import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
+import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
@@ -22,6 +23,7 @@ class AuthAssembly implements DIAssembly {
       (container) => AuthBloc(
         authRepository: container.resolve<AuthRepository>(),
         talker: container.resolve<Talker>(),
+        errorHandler: container.resolve<ErrorHandler>(),
       ),
     );
   }

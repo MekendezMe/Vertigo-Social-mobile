@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_network_flutter/common/auth/auth_assembly.dart';
-import 'package:social_network_flutter/common/auth/auth_coordinator.dart';
+import 'package:social_network_flutter/common/authentication/auth/auth_assembly.dart';
+import 'package:social_network_flutter/common/authentication/auth/auth_coordinator.dart';
+import 'package:social_network_flutter/common/authentication/login/login_assembly.dart';
+import 'package:social_network_flutter/common/authentication/login/login_coordinator.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/environment/environment_assembly.dart';
 import 'package:social_network_flutter/common/framework/framework_assembly.dart';
@@ -23,7 +25,19 @@ void main() {
   runApp(const MyApp());
 }
 
-final authCoordinator = AuthCoordinator(diContainer: diContainer);
+final loginCoordinator = LoginCoordinator(
+  diContainer: diContainer,
+  onShowMain: ({required BuildContext context}) => {"qwe": "qq"},
+  onShowForgotPassword: ({required BuildContext context}) => {"qwe": "qq"},
+);
+
+final authCoordinator = AuthCoordinator(
+  diContainer: diContainer,
+  onShowLogin: ({required BuildContext context}) =>
+      loginCoordinator.showLoginScreen(context: context),
+  onShowRegister: ({required BuildContext context}) =>
+      loginCoordinator.showLoginScreen(context: context),
+);
 
 final launcherCoordinator = LauncherCoordinator(
   diContainer: diContainer,
@@ -53,6 +67,7 @@ void _registerAssemblies() {
     NetworkAssembly(),
     LauncherAssembly(),
     AuthAssembly(),
+    LoginAssembly(),
     AuthInterceptorAssembly(),
   ]);
 }

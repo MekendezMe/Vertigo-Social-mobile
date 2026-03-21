@@ -7,7 +7,7 @@ import 'package:talker_flutter/talker_flutter.dart';
 Dio getDio({required Talker talker, required Environment environment}) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: environment.baseUrl,
+      baseUrl: environment.baseUrl + environment.version,
       connectTimeout: Duration(seconds: 30),
       receiveTimeout: Duration(seconds: 30),
     ),

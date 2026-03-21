@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
-import 'package:social_network_flutter/common/framework/network/auth_interceptor.dart';
+import 'package:social_network_flutter/common/framework/network/interceptors/auth_interceptor.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
 import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';

@@ -13,7 +13,7 @@ class TokenRequest extends IRequest {
   }
 
   @override
-  String get method => "/refreshToken";
+  String get method => "auth/refresh";
   @override
   HttpMethod get httpMethod => HttpMethod.post;
 }

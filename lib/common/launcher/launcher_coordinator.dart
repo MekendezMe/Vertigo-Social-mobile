@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/navigation/navigation_coordinator.dart';
+import 'package:social_network_flutter/common/framework/ui/overlay/custom_overlay_parent_widget.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_parent_widget.dart';
 import 'package:social_network_flutter/common/launcher/logic/bloc/launcher_bloc.dart';
 import 'package:social_network_flutter/common/launcher/ui/launcher_page.dart';
 
@@ -16,10 +18,14 @@ class LauncherCoordinator extends NavigationCoordinator {
   });
 
   Widget getLauncherPage() {
-    return LauncherPage(
-      onLoggedInWidget: onLoggedInWidget,
-      onLoggedOutWidget: onLoggedOutWidget,
-      bloc: diContainer.resolve<LauncherBloc>(),
+    return CustomOverlayParentWidget(
+      child: CustomToastParentWidget(
+        child: LauncherPage(
+          onLoggedInWidget: onLoggedInWidget,
+          onLoggedOutWidget: onLoggedOutWidget,
+          bloc: diContainer.resolve<LauncherBloc>(),
+        ),
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/environment/environment.dart';
+import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/common/framework/network/dio.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
@@ -32,5 +33,6 @@ class FrameworkAssembly extends DIAssembly {
         dio: container.resolve<Dio>(),
       ),
     );
+    container.registerSingleton((container) => ErrorHandler());
   }
 }
