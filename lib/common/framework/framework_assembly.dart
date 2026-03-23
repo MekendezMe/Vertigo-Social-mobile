@@ -7,6 +7,8 @@ import 'package:social_network_flutter/common/framework/network/dio.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
+import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
+import 'package:social_network_flutter/common/launcher/logic/service/logout_service.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -33,6 +35,14 @@ class FrameworkAssembly extends DIAssembly {
         dio: container.resolve<Dio>(),
       ),
     );
-    container.registerSingleton((container) => ErrorHandler());
+    container.registerSingleton((container) => LogoutService());
+    container.registerSingleton<ILogoutHandler>(
+      (container) =>
+          LogoutHandler(logoutService: container.resolve<LogoutService>()),
+    );
+    container.registerSingleton(
+      (container) =>
+          ErrorHandler(logoutHandler: container.resolve<ILogoutHandler>()),
+    );
   }
 }

@@ -2,29 +2,11 @@ import 'package:social_network_flutter/common/authentication/auth/logic/bloc/aut
 import 'package:social_network_flutter/common/authentication/auth/logic/repository/auth_repository.dart';
 import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
-import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
-import 'package:social_network_flutter/common/framework/network/request_sender.dart';
-import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
-import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
-import 'package:talker_flutter/talker_flutter.dart';
 
 class AuthAssembly implements DIAssembly {
   @override
   assembly(DIContainer container) {
-    container.registerSingleton(
-      (container) => AuthRepository(
-        secureStorage: container.resolve<ISecureStorage>(),
-        talker: container.resolve<Talker>(),
-        requestSender: container.resolve<RequestSender>(),
-        tokenService: container.resolve<TokenService>(),
-      ),
-    );
-    container.registerFactory(
-      (container) => AuthBloc(
-        authRepository: container.resolve<AuthRepository>(),
-        talker: container.resolve<Talker>(),
-        errorHandler: container.resolve<ErrorHandler>(),
-      ),
-    );
+    container.registerSingleton((container) => AuthRepository());
+    container.registerFactory((container) => AuthBloc());
   }
 }

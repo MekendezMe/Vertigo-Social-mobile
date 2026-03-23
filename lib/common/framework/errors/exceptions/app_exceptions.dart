@@ -13,7 +13,7 @@ class ApiException extends AppException {
 }
 
 class AuthException extends AppException {
-  AuthException({required super.message, super.code});
+  AuthException({super.message = "Не удалось авторизоваться", super.code});
 }
 
 class ValidationException extends AppException {

@@ -6,7 +6,7 @@ import 'package:social_network_flutter/common/framework/navigation/navigation_co
 
 class LoginCoordinator extends NavigationCoordinator {
   final DIContainer diContainer;
-  final Function({required BuildContext context}) onShowMain;
+  final Function() onShowMain;
   final Function({required BuildContext context}) onShowForgotPassword;
   LoginCoordinator({
     required this.diContainer,

@@ -52,12 +52,14 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
       await secureStorage.load();
       if (secureStorage.refreshToken == null) {
         logout(emit);
+        return;
       } else {
         await preferencesStorage.load();
         final String accessToken = await launcherRepository.getAccessToken();
         final String? deviceId = secureStorage.deviceId;
         if (!_hasAccess(deviceId, accessToken)) {
           logout(emit);
+          return;
         }
         tokenService.setToken(accessToken);
         emit(LauncherLoggedIn());

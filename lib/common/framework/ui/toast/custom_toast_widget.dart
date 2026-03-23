@@ -19,18 +19,24 @@ class CustomToastWidget extends StatelessWidget {
         alignment: Alignment.topCenter,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(18),
             color: context.color.dimPurple,
           ),
           padding: EdgeInsets.only(left: 4, right: 16, top: 7, bottom: 7),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width - 100,
+          ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: MainAxisSize.max,
+            // crossAxisAlignment: CrossAxisAlignment.start, // центрировать ли иконку
             children: [
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 child: Image.asset("assets/logo.png", width: 40, height: 30),
               ),
-              Text(text, style: Theme.of(context).textTheme.bodySmall),
+              Expanded(
+                child: Text(text, style: Theme.of(context).textTheme.bodySmall),
+              ),
             ],
           ),
         ),

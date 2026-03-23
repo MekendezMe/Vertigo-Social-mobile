@@ -2,42 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
+import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 
 class ErrorHandler {
+  final ILogoutHandler logoutHandler;
+
+  ErrorHandler({required this.logoutHandler});
   void handle(dynamic error, {BuildContext? context}) {
     if (error is NoInternetException) {
-      _showNoInternetToast();
+      _onNoInternet();
     } else if (error is ApiException) {
-      _showApiErrorToast(error.message);
+      _onApiError(error.message);
     } else if (error is AuthException) {
-      _showAuthErrorToast(error.message);
+      _onAuthError(error.message);
     } else {
-      _showGenericErrorToast();
+      _onError();
     }
   }
 
-  void _showNoInternetToast() {
+  void _onNoInternet() {
     CustomToast.show(
       CustomToastWidget(text: "Отсутствует подключение к интернету"),
       dismissAfter: Duration(seconds: 1),
     );
   }
 
-  void _showApiErrorToast(String message) {
+  void _onApiError(String message) {
     CustomToast.show(
       CustomToastWidget(text: message),
       dismissAfter: Duration(seconds: 1),
     );
   }
 
-  void _showAuthErrorToast(String message) {
+  void _onAuthError(String message) {
     CustomToast.show(
-      CustomToastWidget(text: message),
+      CustomToastWidget(text: "Не удалось авторизоваться"),
       dismissAfter: Duration(seconds: 1),
     );
+    logoutHandler.onLogout();
   }
 
-  void _showGenericErrorToast() {
+  void _onError() {
     CustomToast.show(
       CustomToastWidget(text: "Произошла ошибка. Попробуйте позже."),
       dismissAfter: Duration(seconds: 1),

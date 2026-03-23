@@ -75,32 +75,56 @@ class RequestSender {
         dio: dio,
         headers: headers,
       );
-      if (response == null || response.data == null) {
-        throw ApiException(message: 'Пустой ответ от сервера', code: -1);
-      }
-      final data = response.data;
-      if (data is! Map || data.isEmpty) {
-        throw ApiException(
-          message: 'Сервер вернул пустой объект',
-          code: response.statusCode,
-        );
-      }
-      final json = data as Map<String, dynamic>;
 
-      if ((response.statusCode ?? -1) >= 300 ||
-          (response.statusCode ?? -1) < 200) {
+      final statusCode = response?.statusCode ?? -1;
+
+      if (statusCode == 401) {
+        throw AuthException();
+      }
+      if (statusCode >= 400 || statusCode < 200) {
         throw ApiException(
-          message: json['message'] ?? "Ошибка сервера",
-          code: response.statusCode ?? -1,
+          message: response?.statusMessage ?? "Ошибка сервера",
+          code: statusCode,
         );
       }
+      if (statusCode == 204) {
+        return null;
+      }
+
+      if (response == null || response.data == null) {
+        throw ApiException(
+          message: 'Пустой ответ от сервера',
+          code: statusCode,
+        );
+      }
+
+      final json = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : null;
+
+      if (json?.isEmpty ?? true) {
+        throw ApiException(
+          message: "Сервер вернул пустой объект",
+          code: statusCode,
+        );
+      }
+
       return fromJson(response.data);
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode ?? -1;
+      if (statusCode == 401) {
+        throw AuthException();
+      }
+      throw ApiException(
+        message: e.message ?? "Ошибка сервера",
+        code: statusCode,
+      );
     } on NoInternetException catch (e) {
       talker.handle(e);
       rethrow;
     } catch (e, st) {
       talker.handle(e, st);
-      throw ApiException(message: "Ошибка: $e");
+      rethrow;
     }
   }
 

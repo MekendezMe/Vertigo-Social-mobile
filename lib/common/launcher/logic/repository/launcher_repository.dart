@@ -20,10 +20,7 @@ class LauncherRepository {
       final refreshToken = secureStorage.refreshToken;
 
       if (refreshToken == null) {
-        throw AuthException(
-          message: "Ошибка авторизации. Необходимо заново авторизоваться",
-          code: 401,
-        );
+        throw AuthException();
       }
 
       final request = TokenRequest(refreshToken: refreshToken);
@@ -35,19 +32,13 @@ class LauncherRepository {
       );
 
       if (response == null) {
-        throw AuthException(
-          message: "Ошибка авторизации. Необходимо заново авторизоваться",
-          code: 401,
-        );
+        throw AuthException();
       }
 
       return response.accessToken;
     } catch (e, st) {
       talker.handle(e, st);
-      throw AuthException(
-        message: "Ошибка авторизации. Необходимо заново авторизоваться",
-        code: 401,
-      );
+      throw AuthException();
     }
   }
 }

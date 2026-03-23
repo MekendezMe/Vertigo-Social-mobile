@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/launcher/logic/bloc/launcher_bloc.dart';
 
@@ -31,25 +34,50 @@ class _LauncherPageState extends State<LauncherPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<LauncherBloc, LauncherState>(
-      bloc: widget.bloc,
-      builder: (context, state) {
-        if (state is LauncherLoggedIn) {
-          return _buildNavigatorStack(
-            _loggedInKey,
-            (context) => widget.onLoggedInWidget(),
-          );
-        }
+    return _buildBackButtonHandler(
+      context: context,
+      child: BlocBuilder<LauncherBloc, LauncherState>(
+        bloc: widget.bloc,
+        builder: (context, state) {
+          if (state is LauncherLoggedIn) {
+            return _buildNavigatorStack(
+              _loggedInKey,
+              (context) => widget.onLoggedInWidget(),
+            );
+          }
 
-        if (state is LauncherLoggedOut) {
-          return _buildNavigatorStack(
-            _loggedOutKey,
-            (context) => widget.onLoggedOutWidget(),
-          );
-        }
+          if (state is LauncherLoggedOut) {
+            return _buildNavigatorStack(
+              _loggedOutKey,
+              (context) => widget.onLoggedOutWidget(),
+            );
+          }
 
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBackButtonHandler({
+    required BuildContext context,
+    required Widget child,
+  }) {
+    if (Platform.isIOS) {
+      return child;
+    }
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, _) async {
+        final didPopResult =
+            await _currentStateKey?.currentState?.maybePop() ?? false;
+        if (!didPopResult) {
+          SystemNavigator.pop();
+        }
       },
+      child: child,
     );
   }
 

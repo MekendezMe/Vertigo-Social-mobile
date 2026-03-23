@@ -37,9 +37,6 @@ class _AuthScreenState extends State<AuthScreen> {
         bloc: widget.authBloc,
         listener: (context, state) {},
         builder: (context, state) {
-          if (state is AuthorizeLoading) {
-            return CircularProgressIndicator();
-          }
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             child: Column(
@@ -65,20 +62,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         padding: EdgeInsets.symmetric(vertical: 14),
                         child: mainButton(
                           context: context,
-                          onTap: () {
-                            // CustomToast.show(
-                            //   CustomToastWidget(text: "Переход к регистрации"),
-                            //   dismissAfter: Duration(seconds: 1),
-                            // );
-                            widget.authBloc.add(
-                              Register(
-                                name: "",
-                                username: "username",
-                                email: "username",
-                                password: "s",
-                              ),
-                            );
-                          },
+                          onTap: () => widget.onShowRegister(context: context),
                           child: Text(
                             "Зарегистрироваться",
                             style: theme.textTheme.bodyMedium!.modify(

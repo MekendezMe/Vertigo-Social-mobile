@@ -13,8 +13,11 @@ class LoginLoading extends LoginState {
 }
 
 class LoginSuccess extends LoginState {
+  final int userId;
+
+  LoginSuccess({required this.userId});
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [userId];
 }
 
 class LoginFailure extends LoginState {

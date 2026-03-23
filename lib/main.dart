@@ -4,6 +4,8 @@ import 'package:social_network_flutter/common/authentication/auth/auth_assembly.
 import 'package:social_network_flutter/common/authentication/auth/auth_coordinator.dart';
 import 'package:social_network_flutter/common/authentication/login/login_assembly.dart';
 import 'package:social_network_flutter/common/authentication/login/login_coordinator.dart';
+import 'package:social_network_flutter/common/authentication/register/register_assembly.dart';
+import 'package:social_network_flutter/common/authentication/register/register_coordinator.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/environment/environment_assembly.dart';
 import 'package:social_network_flutter/common/framework/framework_assembly.dart';
@@ -12,6 +14,8 @@ import 'package:social_network_flutter/common/framework/network/network_assembly
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/common/launcher/launcher_assembly.dart';
 import 'package:social_network_flutter/common/launcher/launcher_coordinator.dart';
+import 'package:social_network_flutter/feed/feed_assembly.dart';
+import 'package:social_network_flutter/feed/feed_coordinator.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger_observer.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -25,10 +29,17 @@ void main() {
   runApp(const MyApp());
 }
 
+final mainCoordinator = FeedCoordinator(diContainer: diContainer);
+
 final loginCoordinator = LoginCoordinator(
   diContainer: diContainer,
-  onShowMain: ({required BuildContext context}) => {"qwe": "qq"},
+  onShowMain: mainCoordinator.showMain,
   onShowForgotPassword: ({required BuildContext context}) => {"qwe": "qq"},
+);
+
+final registerCoordinator = RegisterCoordinator(
+  diContainer: diContainer,
+  onShowMain: mainCoordinator.showMain,
 );
 
 final authCoordinator = AuthCoordinator(
@@ -36,12 +47,12 @@ final authCoordinator = AuthCoordinator(
   onShowLogin: ({required BuildContext context}) =>
       loginCoordinator.showLoginScreen(context: context),
   onShowRegister: ({required BuildContext context}) =>
-      loginCoordinator.showLoginScreen(context: context),
+      registerCoordinator.showRegisterScreen(context: context),
 );
 
 final launcherCoordinator = LauncherCoordinator(
   diContainer: diContainer,
-  onLoggedInWidget: authCoordinator.getAuthScreen, // TODO: MAIN COORDINATOR,
+  onLoggedInWidget: mainCoordinator.showMain,
   onLoggedOutWidget: authCoordinator.getAuthScreen,
 );
 
@@ -68,6 +79,8 @@ void _registerAssemblies() {
     LauncherAssembly(),
     AuthAssembly(),
     LoginAssembly(),
+    RegisterAssembly(),
+    FeedAssembly(),
     AuthInterceptorAssembly(),
   ]);
 }

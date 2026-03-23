@@ -35,4 +35,6 @@ class RegisterRequest extends IRequest {
   String get method => "auth/signup";
   @override
   HttpMethod get httpMethod => HttpMethod.post;
+  @override
+  bool get isAuthRequired => false;
 }
