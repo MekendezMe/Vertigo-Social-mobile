@@ -1,8 +1,15 @@
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
+import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
+import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
+import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';
+import 'package:social_network_flutter/feed/logic/entites/response/create_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_posts_response.dart';
+import 'package:social_network_flutter/feed/logic/entites/response/like_post_response.dart';
+import 'package:social_network_flutter/feed/logic/entites/response/unlike_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -19,21 +26,96 @@ class FeedRepository {
       //   fromJson: (json) => GetPostsResponse.fromJson(json),
       // );
       // if (response == null) {
-      //   throw ApiException(message: "Пустой ответ сервера", code: -1);
+      //   throw ApiException(message: "Пустой ответ сервера в методе getPosts", code: -1);
       // }
       // return response;
-      return mockGetPostsResponse;
+      return GetPostsResponse(
+        posts: List.from(_mockPosts),
+        user: User(
+          id: 1,
+          name: 'Mekendez',
+          username: 'Me',
+          avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
+        ),
+      );
     } catch (e, st) {
       talker.handle(e, st);
       rethrow;
     }
   }
+
+  Future<CreatePostResponse> createPost(CreatePostRequest request) async {
+    // final response = await requestSender.send(
+    //   request: request,
+    //   fromJson: (json) => CreatePostResponse.fromJson(json),
+    // );
+    // if (response == null) {
+    //   throw ApiException(
+    //     message: "Пустой ответ сервера в методе createPost",
+    //     code: -1,
+    //   );
+    // }
+    // return response;
+
+    final User mockUser = User(
+      id: request.userId,
+      name: 'Mekendez',
+      username: 'Me',
+      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
+    );
+
+    final newPost = Post(
+      id: _mockPosts.length + 1,
+      creator: mockUser,
+      text: request.text,
+      likesCount: 0,
+      commentsCount: 0,
+      likedByUser: false,
+      createdAt: DateTime.now(),
+    );
+    _mockPosts.insert(0, newPost);
+    return CreatePostResponse(post: newPost);
+  }
+
+  Future<LikePostResponse> likePost(LikePostRequest request) async {
+    // final response = await requestSender.send(
+    //   request: request,
+    //   fromJson: (json) => LikePostResponse.fromJson(json),
+    // );
+    // if (response == null) {
+    //   throw ApiException(
+    //     message: "Пустой ответ сервера в методе createPost",
+    //     code: -1,
+    //   );
+    // }
+    // return response;
+
+    return LikePostResponse(success: true);
+  }
+
+  Future<UnlikePostResponse> unlikePost(UnlikePostRequest request) async {
+    // final response = await requestSender.send(
+    //   request: request,
+    //   fromJson: (json) => UnlikePostResponse.fromJson(json),
+    // );
+    // if (response == null) {
+    //   throw ApiException(
+    //     message: "Пустой ответ сервера в методе createPost",
+    //     code: -1,
+    //   );
+    // }
+    // return response;
+
+    return UnlikePostResponse(success: true);
+  }
 }
 
+List<Post> _mockPosts = List.generate(10, (index) => _generateMockPost(index));
+
 final mockGetPostsResponse = GetPostsResponse(
-  posts: List.generate(10, (index) => _generateMockPost(index)),
+  posts: _mockPosts,
   user: User(
-    userId: 1,
+    id: 1,
     name: 'Mekendez',
     username: 'Me',
     avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
@@ -113,15 +195,16 @@ Post _generateMockPost(int index) {
 
   return Post(
     creator: User(
-      userId: index + 1,
+      id: index + 1,
       name: '${names[index]} ${lastNames[index]}',
       username: usernames[index],
       avatar: avatars[index],
     ),
+    id: index + 1,
     text: texts[index % texts.length],
     likesCount: likes[index],
     commentsCount: comments[index],
-    likeByUser: index % 2 == 0 ? true : false,
+    likedByUser: index % 2 == 0 ? true : false,
     createdAt: createdAt,
   );
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
@@ -26,6 +28,7 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   TextEditingController inputController = TextEditingController();
+  bool isInputError = false;
   @override
   void initState() {
     super.initState();
@@ -56,7 +59,26 @@ class _FeedScreenState extends State<FeedScreen> {
             );
           }
           if (state is FeedLoaded) {
-            return _showPostsWidget(state, inputController);
+            return RefreshIndicator(
+              backgroundColor: context.color.darkGray,
+              color: context.color.lightPurple,
+              onRefresh: () async {
+                final completer = Completer<void>();
+
+                final subscription = widget.feedBloc.stream.listen((state) {
+                  if (state is FeedLoaded || state is FeedLoadingFailure) {
+                    completer.complete();
+                  }
+                });
+
+                widget.feedBloc.add(LoadFeed());
+
+                await completer.future;
+
+                await subscription.cancel();
+              },
+              child: _showPostsWidget(state, inputController),
+            );
           }
           return SizedBox.shrink();
         },
@@ -72,7 +94,20 @@ class _FeedScreenState extends State<FeedScreen> {
         SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             final post = state.posts[index];
-            return postItemWidget(post: post, context: context);
+            return postItemWidget(
+              post: post,
+              context: context,
+              onLikePressed: () {
+                widget.feedBloc.add(
+                  LikePost(userId: state.user.id, postId: post.id),
+                );
+              },
+              onUnlikePressed: () {
+                widget.feedBloc.add(
+                  UnlikePost(userId: state.user.id, postId: post.id),
+                );
+              },
+            );
           }, childCount: state.posts.length),
         ),
       ],
@@ -108,13 +143,14 @@ class _FeedScreenState extends State<FeedScreen> {
                 SizedBox(width: 20),
                 Expanded(
                   child: SizedBox(
-                    height: 50,
                     child: mainTextField(
                       context: context,
                       controller: controller,
                       style: context.theme.textTheme.bodyLarge!,
                       hintText: "Что у вас нового?",
                       radius: 24,
+                      onChanged: onChanged,
+                      isInputError: isInputError,
                     ),
                   ),
                 ),
@@ -155,11 +191,13 @@ class _FeedScreenState extends State<FeedScreen> {
                 child: mainButton(
                   backgroundColor: context.color.dimPurple.withOpacity(0.8),
                   context: context,
-                  child: Text(
-                    "Опубликовать",
-                    style: context.theme.textTheme.bodyMedium,
-                  ),
-                  onTap: () {},
+                  child: state.isCreating
+                      ? Center(child: CircularProgressIndicator())
+                      : Text(
+                          "Опубликовать",
+                          style: context.theme.textTheme.bodyMedium,
+                        ),
+                  onTap: () => _onCreatePost(state.user.id),
                   radius: 14,
                 ),
               ),
@@ -168,5 +206,22 @@ class _FeedScreenState extends State<FeedScreen> {
         ],
       ),
     );
+  }
+
+  void onChanged(String value) {
+    setState(() {
+      isInputError = false;
+    });
+  }
+
+  void _onCreatePost(int userId) {
+    if (inputController.text.isEmpty) {
+      setState(() {
+        isInputError = true;
+      });
+      return;
+    }
+    widget.feedBloc.add(CreatePost(text: inputController.text, userId: userId));
+    inputController.text = "";
   }
 }

@@ -15,10 +15,46 @@ class FeedLoading extends FeedState {
 class FeedLoaded extends FeedState {
   final List<Post> posts;
   final User user;
+  final bool isCreating;
+  final String? createError;
+  final bool isLiking;
+  final String? likeError;
 
-  FeedLoaded({required this.posts, required this.user});
+  FeedLoaded({
+    required this.posts,
+    required this.user,
+    this.createError,
+    this.isCreating = false,
+    this.isLiking = false,
+    this.likeError,
+  });
   @override
-  List<Object?> get props => [posts, user];
+  List<Object?> get props => [
+    posts,
+    user,
+    createError,
+    isCreating,
+    isLiking,
+    likeError,
+  ];
+
+  FeedLoaded copyWith({
+    List<Post>? posts,
+    User? user,
+    bool? isCreating = false,
+    String? createError,
+    bool? isLiking = false,
+    String? likeError,
+  }) {
+    return FeedLoaded(
+      posts: posts ?? this.posts,
+      user: user ?? this.user,
+      isCreating: isCreating ?? this.isCreating,
+      createError: createError ?? this.createError,
+      isLiking: isLiking ?? this.isLiking,
+      likeError: likeError ?? this.likeError,
+    );
+  }
 }
 
 class FeedLoadingFailure extends FeedState {

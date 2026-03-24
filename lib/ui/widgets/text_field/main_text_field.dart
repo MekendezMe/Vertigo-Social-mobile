@@ -11,6 +11,7 @@ Widget mainTextField({
   Widget? prefixIcon,
   bool? obscureText,
   double? radius,
+  bool? isInputError,
   VoidCallback? onSuffixIconPressed,
   void Function(String value)? onSubmitted,
   void Function(String value)? onChanged,
@@ -51,11 +52,15 @@ Widget mainTextField({
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(currentRadius),
-        borderSide: BorderSide(color: context.color.gray),
+        borderSide: (isInputError ?? false)
+            ? BorderSide(color: context.color.red, width: 2)
+            : BorderSide(color: context.color.gray),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(currentRadius),
-        borderSide: BorderSide(color: Colors.white),
+        borderSide: (isInputError ?? false)
+            ? BorderSide(color: context.color.red, width: 2)
+            : BorderSide(color: Colors.white),
       ),
     ),
   );

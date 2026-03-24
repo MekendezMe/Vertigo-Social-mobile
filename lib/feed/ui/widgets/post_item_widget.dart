@@ -3,7 +3,12 @@ import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dart';
 
-Widget postItemWidget({required BuildContext context, required Post post}) {
+Widget postItemWidget({
+  required BuildContext context,
+  required Post post,
+  required VoidCallback onLikePressed,
+  required VoidCallback onUnlikePressed,
+}) {
   final avatarUrl = post.creator.avatar;
   final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
   return baseContainerWidget(
@@ -57,63 +62,27 @@ Widget postItemWidget({required BuildContext context, required Post post}) {
             children: [
               _baseIconContainer(
                 context: context,
-                child: IconButton(
-                  padding: EdgeInsets.only(
-                    left: 10,
-                    top: 8,
-                    bottom: 8,
-                    right: 4,
-                  ),
-                  constraints: BoxConstraints(),
-                  color: post.likeByUser
+                child: _baseIconButton(
+                  context: context,
+                  post: post,
+                  onPressed: post.likedByUser ? onUnlikePressed : onLikePressed,
+                  icon: Icons.thumb_up,
+                  text: "${post.likesCount}",
+                  color: post.likedByUser
                       ? context.color.skyBlue
-                      : context.color.gray,
-                  icon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.thumb_up, size: 20),
-                      SizedBox(width: 6),
-                      Text(
-                        "${post.likesCount}",
-                        style: post.likeByUser
-                            ? context.theme.textTheme.bodySmall
-                            : context.theme.textTheme.bodySmall!.modify(
-                                color: context.color.veryDarkGray.withOpacity(
-                                  0.9,
-                                ),
-                              ),
-                      ),
-                    ],
-                  ),
-                  onPressed: () {},
+                      : context.color.darkGray,
                 ),
               ),
               SizedBox(width: 10),
               _baseIconContainer(
                 context: context,
-                child: IconButton(
-                  padding: EdgeInsets.only(
-                    left: 10,
-                    top: 8,
-                    bottom: 8,
-                    right: 4,
-                  ),
-                  constraints: BoxConstraints(),
-                  color: context.color.darkGray,
-                  icon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.comment, size: 20),
-                      SizedBox(width: 6),
-                      Text(
-                        "${post.commentsCount}",
-                        style: context.theme.textTheme.bodySmall!.modify(
-                          color: context.color.veryDarkGray.withOpacity(0.9),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: _baseIconButton(
+                  context: context,
+                  post: post,
                   onPressed: () {},
+                  icon: Icons.comment,
+                  text: "${post.commentsCount}",
+                  color: context.color.darkGray,
                 ),
               ),
             ],
@@ -121,6 +90,37 @@ Widget postItemWidget({required BuildContext context, required Post post}) {
         ],
       ),
     ),
+  );
+}
+
+Widget _baseIconButton({
+  required BuildContext context,
+  required Post post,
+  required VoidCallback onPressed,
+  required IconData icon,
+  required String text,
+  required Color color,
+}) {
+  return IconButton(
+    splashRadius: null,
+    splashColor: Colors.transparent,
+    padding: EdgeInsets.only(left: 10, top: 8, bottom: 8, right: 4),
+    constraints: BoxConstraints(),
+    color: color,
+    icon: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 20),
+        SizedBox(width: 6),
+        Text(
+          text,
+          style: context.theme.textTheme.bodySmall!.modify(
+            color: context.color.veryDarkGray.withOpacity(0.9),
+          ),
+        ),
+      ],
+    ),
+    onPressed: onPressed,
   );
 }
 
