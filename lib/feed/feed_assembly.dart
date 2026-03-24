@@ -16,7 +16,7 @@ class FeedAssembly extends DIAssembly {
       ),
     );
 
-    container.registerFactory(
+    container.registerSingleton(
       (container) => FeedBloc(
         feedRepository: container.resolve<FeedRepository>(),
         talker: container.resolve<Talker>(),

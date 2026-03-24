@@ -7,6 +7,6 @@ class AuthAssembly implements DIAssembly {
   @override
   assembly(DIContainer container) {
     container.registerSingleton((container) => AuthRepository());
-    container.registerFactory((container) => AuthBloc());
+    container.registerSingleton((container) => AuthBloc());
   }
 }

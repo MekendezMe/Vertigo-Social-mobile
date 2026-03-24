@@ -6,10 +6,20 @@ import 'package:social_network_flutter/feed/ui/screens/feed_screen.dart';
 
 class FeedCoordinator extends NavigationCoordinator {
   final DIContainer diContainer;
+  final Function({required BuildContext context}) onShowProfile;
+  final Function({required BuildContext context}) onShowSettings;
 
-  FeedCoordinator({required this.diContainer});
+  FeedCoordinator({
+    required this.diContainer,
+    required this.onShowProfile,
+    required this.onShowSettings,
+  });
 
   Widget showMain() {
-    return FeedScreen(feedBloc: diContainer.resolve<FeedBloc>());
+    return FeedScreen(
+      feedBloc: diContainer.resolve<FeedBloc>(),
+      onShowProfile: onShowProfile,
+      onShowSettings: onShowSettings,
+    );
   }
 }

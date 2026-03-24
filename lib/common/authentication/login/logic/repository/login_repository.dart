@@ -23,7 +23,7 @@ class LoginRepository {
     try {
       final response = await requestSender.send<LoginResponse>(
         request: request,
-        fromJson: (json) => LoginResponse.fromJson(json),
+        fromJson: (json) => LoginResponse.fromJson(json['user']),
         body: request.toJson(),
       );
 

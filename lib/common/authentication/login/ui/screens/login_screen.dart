@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/authentication/login/logic/bloc/login_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
-import 'package:social_network_flutter/ui/widgets/buttons/main_button.dart';
-import 'package:social_network_flutter/ui/widgets/text_fields/main_text_field.dart';
+import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
+import 'package:social_network_flutter/ui/widgets/text_field/main_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({

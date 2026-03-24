@@ -10,11 +10,13 @@ Widget mainTextField({
   String? errorText,
   Widget? prefixIcon,
   bool? obscureText,
+  double? radius,
   VoidCallback? onSuffixIconPressed,
   void Function(String value)? onSubmitted,
   void Function(String value)? onChanged,
   void Function()? onEditingComplete,
 }) {
+  double currentRadius = radius ?? 12;
   return TextField(
     style: style,
     controller: controller,
@@ -44,13 +46,15 @@ Widget mainTextField({
               onPressed: onSuffixIconPressed,
             )
           : null,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(currentRadius),
+      ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(currentRadius),
         borderSide: BorderSide(color: context.color.gray),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(currentRadius),
         borderSide: BorderSide(color: Colors.white),
       ),
     ),

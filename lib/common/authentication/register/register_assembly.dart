@@ -20,7 +20,7 @@ class RegisterAssembly extends DIAssembly {
       ),
     );
 
-    container.registerFactory(
+    container.registerSingleton(
       (container) => RegisterBloc(
         registerRepository: container.resolve<RegisterRepository>(),
         talker: container.resolve<Talker>(),

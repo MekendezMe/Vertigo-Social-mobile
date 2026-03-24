@@ -29,7 +29,11 @@ void main() {
   runApp(const MyApp());
 }
 
-final mainCoordinator = FeedCoordinator(diContainer: diContainer);
+final mainCoordinator = FeedCoordinator(
+  diContainer: diContainer,
+  onShowProfile: ({required BuildContext context}) => {"qwe": "qq"},
+  onShowSettings: ({required BuildContext context}) => {"qwe": "qq"},
+);
 
 final loginCoordinator = LoginCoordinator(
   diContainer: diContainer,
@@ -53,7 +57,7 @@ final authCoordinator = AuthCoordinator(
 final launcherCoordinator = LauncherCoordinator(
   diContainer: diContainer,
   onLoggedInWidget: mainCoordinator.showMain,
-  onLoggedOutWidget: authCoordinator.getAuthScreen,
+  onLoggedOutWidget: mainCoordinator.showMain, // TODO вернуть auth_screen
 );
 
 class MyApp extends StatelessWidget {

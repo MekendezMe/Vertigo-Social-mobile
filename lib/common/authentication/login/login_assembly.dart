@@ -19,7 +19,7 @@ class LoginAssembly implements DIAssembly {
         tokenService: container.resolve<TokenService>(),
       ),
     );
-    container.registerFactory(
+    container.registerSingleton(
       (container) => LoginBloc(
         loginRepository: container.resolve<LoginRepository>(),
         talker: container.resolve<Talker>(),

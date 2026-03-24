@@ -6,7 +6,7 @@ import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
-import 'package:social_network_flutter/ui/widgets/buttons/main_button.dart';
+import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({

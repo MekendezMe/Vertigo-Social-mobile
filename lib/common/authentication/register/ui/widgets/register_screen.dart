@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/authentication/register/logic/bloc/register_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
-import 'package:social_network_flutter/ui/widgets/buttons/main_button.dart';
-import 'package:social_network_flutter/ui/widgets/text_fields/main_text_field.dart';
+import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
+import 'package:social_network_flutter/ui/widgets/text_field/main_text_field.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({
@@ -165,9 +165,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   bool _isCorrectPassword() {
-    if (passwordController.text.length < 6) {
+    if (passwordController.text.length < 3) {
       setState(() {
-        _passwordErrorText = "Пароль должен быть минимум из 6 символов";
+        _passwordErrorText = "Пароль должен быть минимум из 3 символов";
       });
       return false;
     }

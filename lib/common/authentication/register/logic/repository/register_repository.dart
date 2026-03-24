@@ -24,7 +24,7 @@ class RegisterRepository {
       final response = await requestSender.send<RegisterResponse>(
         request: registerRequest,
         body: registerRequest.toJson(),
-        fromJson: (json) => RegisterResponse.fromJson(json),
+        fromJson: (json) => RegisterResponse.fromJson(json['user']),
       );
       if (response == null) {
         throw ApiException(message: "Пустой ответ сервера", code: -1);
