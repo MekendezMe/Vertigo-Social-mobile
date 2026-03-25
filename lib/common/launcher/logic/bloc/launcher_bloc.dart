@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
+import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
 import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/logout_service.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
+import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 part 'launcher_event.dart';
@@ -19,6 +22,8 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
   final LauncherRepository launcherRepository;
   final Talker talker;
   final LogoutService logoutService;
+  final UserService userService;
+  final ErrorHandler errorHandler;
 
   late final StreamSubscription _logoutSub;
 
@@ -29,6 +34,8 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     required this.launcherRepository,
     required this.talker,
     required this.logoutService,
+    required this.userService,
+    required this.errorHandler,
   }) : super(LauncherInitial()) {
     on<Initialize>(_onInitialize);
     on<LoginRequested>(_onLogin);
@@ -51,26 +58,27 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     try {
       await secureStorage.load();
       if (secureStorage.refreshToken == null) {
-        logout(emit);
+        add(LogoutRequested());
         return;
       } else {
         await preferencesStorage.load();
         final String accessToken = await launcherRepository.getAccessToken();
         final String? deviceId = secureStorage.deviceId;
         if (!_hasAccess(deviceId, accessToken)) {
-          logout(emit);
+          add(LogoutRequested());
           return;
         }
         tokenService.setToken(accessToken);
-        emit(LauncherLoggedIn());
+        add(LoginRequested());
       }
     } catch (e, st) {
       talker.handle(e, st);
-      emit(LauncherLoggedOut());
+      errorHandler.handle(e);
+      add(LogoutRequested());
     }
   }
 
-  Future<void> logout(Emitter<LauncherState> emit) async {
+  Future<void> _logout(Emitter<LauncherState> emit) async {
     emit(LauncherLoggedOut());
   }
 
@@ -81,20 +89,44 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
         deviceId.isNotEmpty;
   }
 
+  Future<void> _login(Emitter<LauncherState> emit) async {
+    emit(LauncherLoggedIn());
+  }
+
   Future<void> _onLogin(
     LoginRequested event,
     Emitter<LauncherState> emit,
   ) async {
-    await secureStorage.load();
-    await preferencesStorage.load();
-    emit(LauncherLoggedIn());
+    try {
+      await userService.loadCurrentUser();
+      _login(emit);
+    } catch (e, st) {
+      talker.handle(e, st);
+      errorHandler.handle(e);
+      add(LogoutRequested());
+    }
   }
 
   Future<void> _onLogout(
     LogoutRequested event,
     Emitter<LauncherState> emit,
   ) async {
-    await secureStorage.clear();
-    emit(LauncherLoggedOut());
+    try {
+      userService.clear();
+      await secureStorage.clear();
+      userService.setUser(
+        User(
+          id: 1,
+          name: "Mekendez",
+          username: "Me",
+          avatar: "https://randomuser.me/api/portraits/men/6.jpg",
+        ),
+      ); // TODO: УБРАТЬ
+      _logout(emit);
+    } catch (e, st) {
+      talker.handle(e, st);
+      errorHandler.handle(e);
+      _logout(emit);
+    }
   }
 }

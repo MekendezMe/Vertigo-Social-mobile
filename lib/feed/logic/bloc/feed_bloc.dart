@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
+import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
@@ -16,25 +18,29 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final FeedRepository feedRepository;
   final Talker talker;
   final ErrorHandler errorHandler;
+  final UserService userService;
   FeedBloc({
     required this.feedRepository,
     required this.talker,
     required this.errorHandler,
+    required this.userService,
   }) : super(FeedInitial()) {
     on<LoadFeed>(_onLoadFeed);
 
     on<CreatePost>(_onCreatePost);
 
-    on<LikePost>(_onLikePost);
+    on<ToggleLike>(_onToggleLike);
 
-    on<UnlikePost>(_onUnlikePost);
+    // on<LikePost>(_onLikePost);
+
+    // on<UnlikePost>(_onUnlikePost);
   }
 
   Future<void> _onLoadFeed(LoadFeed event, Emitter<FeedState> emit) async {
     try {
       emit(FeedLoading());
       final response = await feedRepository.getPosts(GetPostsRequest());
-      emit(FeedLoaded(posts: response.posts, user: response.user));
+      emit(FeedLoaded(posts: response.posts, user: userService.currentUser!));
     } catch (e, st) {
       emit(FeedLoadingFailure(error: e));
       talker.handle(e, st);
@@ -48,12 +54,13 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     try {
       emit(currentState.copyWith(isCreating: true));
       final createdPost = await feedRepository.createPost(
-        CreatePostRequest(userId: event.userId, text: event.text),
+        CreatePostRequest(userId: userService.currentUserId, text: event.text),
       );
       emit(
         currentState.copyWith(
           posts: [createdPost.post, ...currentState.posts],
           isCreating: false,
+          createError: null,
         ),
       );
     } catch (e, st) {
@@ -63,69 +70,85 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     }
   }
 
-  Future<void> _onLikePost(LikePost event, Emitter<FeedState> emit) async {
+  Future<void> _onToggleLike(ToggleLike event, Emitter<FeedState> emit) async {
     if (state is! FeedLoaded) return;
     final currentState = state as FeedLoaded;
-    try {
-      emit(currentState.copyWith(isLiking: true));
-      final likeSuccess = await feedRepository.likePost(
-        LikePostRequest(userId: event.userId, postId: event.postId),
-      );
-      if (!likeSuccess.success) {
-        emit(
-          currentState.copyWith(
-            isLiking: false,
-            likeError: "Не удалось поставить лайк",
-          ),
+
+    final targetPost = currentState.posts.firstWhere(
+      (post) => post.id == event.postId,
+    );
+    final willLike = !targetPost.likedByUser;
+    final delta = willLike ? 1 : -1;
+    final errorMessage = willLike
+        ? "Не удалось поставить лайк"
+        : "Не удалось убрать лайк";
+    final originalPost = targetPost;
+
+    final optimisticPosts = currentState.posts.map((post) {
+      if (post.id == event.postId) {
+        return post.copyWith(
+          likesCount: post.likesCount + delta,
+          likedByUser: willLike,
         );
       }
-      final updatedPosts = currentState.posts.map((post) {
-        if (post.id == event.postId) {
-          return post.copyWith(
-            likesCount: post.likesCount + 1,
-            likedByUser: true,
-          );
-        }
-        return post;
-      }).toList();
-      emit(currentState.copyWith(posts: updatedPosts, isLiking: false));
+      return post;
+    }).toList();
+
+    emit(currentState.copyWith(posts: optimisticPosts, likeError: null));
+
+    try {
+      final response = willLike
+          ? await feedRepository.likePost(
+              LikePostRequest(
+                userId: userService.currentUserId,
+                postId: event.postId,
+              ),
+            )
+          : await feedRepository.unlikePost(
+              UnlikePostRequest(
+                userId: userService.currentUserId,
+                postId: event.postId,
+              ),
+            );
+
+      if (!response.success) {
+        final rolledBackPosts = _getRolledBackPosts(
+          postId: event.postId,
+          originalPost: originalPost,
+          currentState: currentState,
+        );
+        emit(
+          currentState.copyWith(
+            posts: rolledBackPosts,
+            likeError: errorMessage,
+          ),
+        );
+        throw ApiException(message: errorMessage);
+      }
     } catch (e, st) {
-      emit(currentState.copyWith(isLiking: false, likeError: e.toString()));
+      final rolledBackPosts = _getRolledBackPosts(
+        postId: event.postId,
+        originalPost: originalPost,
+        currentState: currentState,
+      );
+      emit(
+        currentState.copyWith(posts: rolledBackPosts, likeError: errorMessage),
+      );
       talker.handle(e, st);
       errorHandler.handle(e);
     }
   }
 
-  Future<void> _onUnlikePost(UnlikePost event, Emitter<FeedState> emit) async {
-    if (state is! FeedLoaded) return;
-    final currentState = state as FeedLoaded;
-    try {
-      emit(currentState.copyWith(isLiking: true));
-      final unlikeSuccess = await feedRepository.unlikePost(
-        UnlikePostRequest(userId: event.userId, postId: event.postId),
-      );
-      if (!unlikeSuccess.success) {
-        emit(
-          currentState.copyWith(
-            isLiking: false,
-            likeError: "Не удалось убрать лайк",
-          ),
-        );
+  List<Post> _getRolledBackPosts({
+    required int postId,
+    required Post originalPost,
+    required FeedLoaded currentState,
+  }) {
+    return currentState.posts.map((post) {
+      if (post.id == postId) {
+        return originalPost;
       }
-      final updatedPosts = currentState.posts.map((post) {
-        if (post.id == event.postId) {
-          return post.copyWith(
-            likesCount: post.likesCount - 1,
-            likedByUser: false,
-          );
-        }
-        return post;
-      }).toList();
-      emit(currentState.copyWith(posts: updatedPosts, isLiking: false));
-    } catch (e, st) {
-      emit(currentState.copyWith(isLiking: false, likeError: e.toString()));
-      talker.handle(e, st);
-      errorHandler.handle(e);
-    }
+      return post;
+    }).toList();
   }
 }

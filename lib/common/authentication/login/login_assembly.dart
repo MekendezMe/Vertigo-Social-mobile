@@ -1,5 +1,6 @@
 import 'package:social_network_flutter/common/authentication/login/logic/bloc/login_bloc.dart';
 import 'package:social_network_flutter/common/authentication/login/logic/repository/login_repository.dart';
+import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
@@ -17,6 +18,7 @@ class LoginAssembly implements DIAssembly {
         talker: container.resolve<Talker>(),
         requestSender: container.resolve<RequestSender>(),
         tokenService: container.resolve<TokenService>(),
+        userService: container.resolve<UserService>(),
       ),
     );
     container.registerSingleton(

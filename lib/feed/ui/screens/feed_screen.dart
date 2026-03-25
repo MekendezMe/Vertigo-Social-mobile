@@ -98,14 +98,7 @@ class _FeedScreenState extends State<FeedScreen> {
               post: post,
               context: context,
               onLikePressed: () {
-                widget.feedBloc.add(
-                  LikePost(userId: state.user.id, postId: post.id),
-                );
-              },
-              onUnlikePressed: () {
-                widget.feedBloc.add(
-                  UnlikePost(userId: state.user.id, postId: post.id),
-                );
+                widget.feedBloc.add(ToggleLike(postId: post.id));
               },
             );
           }, childCount: state.posts.length),
@@ -221,7 +214,7 @@ class _FeedScreenState extends State<FeedScreen> {
       });
       return;
     }
-    widget.feedBloc.add(CreatePost(text: inputController.text, userId: userId));
+    widget.feedBloc.add(CreatePost(text: inputController.text));
     inputController.text = "";
   }
 }

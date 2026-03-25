@@ -1,5 +1,7 @@
+import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
+import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
@@ -27,6 +29,8 @@ class LauncherAssembly extends DIAssembly {
         tokenService: container.resolve<TokenService>(),
         talker: container.resolve<Talker>(),
         logoutService: container.resolve<LogoutService>(),
+        userService: container.resolve<UserService>(),
+        errorHandler: container.resolve<ErrorHandler>(),
       ),
     );
   }

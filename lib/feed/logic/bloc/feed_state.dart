@@ -17,7 +17,6 @@ class FeedLoaded extends FeedState {
   final User user;
   final bool isCreating;
   final String? createError;
-  final bool isLiking;
   final String? likeError;
 
   FeedLoaded({
@@ -25,18 +24,10 @@ class FeedLoaded extends FeedState {
     required this.user,
     this.createError,
     this.isCreating = false,
-    this.isLiking = false,
     this.likeError,
   });
   @override
-  List<Object?> get props => [
-    posts,
-    user,
-    createError,
-    isCreating,
-    isLiking,
-    likeError,
-  ];
+  List<Object?> get props => [posts, user, createError, isCreating, likeError];
 
   FeedLoaded copyWith({
     List<Post>? posts,
@@ -51,7 +42,6 @@ class FeedLoaded extends FeedState {
       user: user ?? this.user,
       isCreating: isCreating ?? this.isCreating,
       createError: createError ?? this.createError,
-      isLiking: isLiking ?? this.isLiking,
       likeError: likeError ?? this.likeError,
     );
   }

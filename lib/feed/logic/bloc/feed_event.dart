@@ -9,26 +9,16 @@ class LoadFeed extends FeedEvent {
 
 class CreatePost extends FeedEvent {
   final String text;
-  final int userId;
 
-  CreatePost({required this.text, required this.userId});
+  CreatePost({required this.text});
   @override
-  List<Object?> get props => [text, userId];
+  List<Object?> get props => [text];
 }
 
-class LikePost extends FeedEvent {
+class ToggleLike extends FeedEvent {
   final int postId;
-  final int userId;
 
-  LikePost({required this.postId, required this.userId});
+  ToggleLike({required this.postId});
   @override
-  List<Object?> get props => [postId, userId];
-}
-
-class UnlikePost extends FeedEvent {
-  final int postId;
-  final int userId;
-  UnlikePost({required this.postId, required this.userId});
-  @override
-  List<Object?> get props => [postId, userId];
+  List<Object?> get props => [postId];
 }

@@ -1,5 +1,6 @@
 import 'package:social_network_flutter/common/authentication/login/logic/entities/login_request.dart';
 import 'package:social_network_flutter/common/authentication/login/logic/entities/login_response.dart';
+import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
@@ -11,12 +12,14 @@ class LoginRepository {
   final Talker talker;
   final RequestSender requestSender;
   final TokenService tokenService;
+  final UserService userService;
 
   LoginRepository({
     required this.secureStorage,
     required this.talker,
     required this.requestSender,
     required this.tokenService,
+    required this.userService,
   });
 
   Future<LoginResponse> login(LoginRequest request) async {
@@ -35,6 +38,7 @@ class LoginRepository {
       secureStorage.deviceId = response.deviceId;
       await secureStorage.save();
       tokenService.setToken(response.accessToken);
+      await userService.loadCurrentUser();
       return response;
     } catch (e, st) {
       talker.handle(e, st);

@@ -1,9 +1,9 @@
-class LikePostResponse {
+class ReactionPostResponse {
   final bool success;
 
-  LikePostResponse({required this.success});
+  ReactionPostResponse({required this.success});
 
-  factory LikePostResponse.fromJson(Map<String, dynamic> json) {
-    return LikePostResponse(success: json['success'] as bool);
+  factory ReactionPostResponse.fromJson(Map<String, dynamic> json) {
+    return ReactionPostResponse(success: json['success'] as bool);
   }
 }

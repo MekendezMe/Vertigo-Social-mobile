@@ -7,7 +7,6 @@ Widget postItemWidget({
   required BuildContext context,
   required Post post,
   required VoidCallback onLikePressed,
-  required VoidCallback onUnlikePressed,
 }) {
   final avatarUrl = post.creator.avatar;
   final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
@@ -65,7 +64,7 @@ Widget postItemWidget({
                 child: _baseIconButton(
                   context: context,
                   post: post,
-                  onPressed: post.likedByUser ? onUnlikePressed : onLikePressed,
+                  onPressed: onLikePressed,
                   iconSize: post.likedByUser ? 25 : 20,
                   icon: Icons.thumb_up,
                   text: "${post.likesCount}",

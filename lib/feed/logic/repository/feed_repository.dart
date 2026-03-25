@@ -1,6 +1,5 @@
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
-import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
@@ -29,15 +28,7 @@ class FeedRepository {
       //   throw ApiException(message: "Пустой ответ сервера в методе getPosts", code: -1);
       // }
       // return response;
-      return GetPostsResponse(
-        posts: List.from(_mockPosts),
-        user: User(
-          id: 1,
-          name: 'Mekendez',
-          username: 'Me',
-          avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-        ),
-      );
+      return GetPostsResponse(posts: List.from(_mockPosts));
     } catch (e, st) {
       talker.handle(e, st);
       rethrow;
@@ -48,6 +39,7 @@ class FeedRepository {
     // final response = await requestSender.send(
     //   request: request,
     //   fromJson: (json) => CreatePostResponse.fromJson(json),
+    //   body: request.toJson(),
     // );
     // if (response == null) {
     //   throw ApiException(
@@ -61,7 +53,7 @@ class FeedRepository {
       id: request.userId,
       name: 'Mekendez',
       username: 'Me',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
+      avatar: 'https://randomuser.me/api/portraits/men/6.jpg',
     );
 
     final newPost = Post(
@@ -77,10 +69,11 @@ class FeedRepository {
     return CreatePostResponse(post: newPost);
   }
 
-  Future<LikePostResponse> likePost(LikePostRequest request) async {
+  Future<ReactionPostResponse> likePost(LikePostRequest request) async {
     // final response = await requestSender.send(
     //   request: request,
     //   fromJson: (json) => LikePostResponse.fromJson(json),
+    // body: request.toJson(),
     // );
     // if (response == null) {
     //   throw ApiException(
@@ -90,13 +83,14 @@ class FeedRepository {
     // }
     // return response;
 
-    return LikePostResponse(success: true);
+    return ReactionPostResponse(success: true);
   }
 
-  Future<UnlikePostResponse> unlikePost(UnlikePostRequest request) async {
+  Future<ReactionPostResponse> unlikePost(UnlikePostRequest request) async {
     // final response = await requestSender.send(
     //   request: request,
     //   fromJson: (json) => UnlikePostResponse.fromJson(json),
+    // body: request.toJson(),
     // );
     // if (response == null) {
     //   throw ApiException(
@@ -106,21 +100,13 @@ class FeedRepository {
     // }
     // return response;
 
-    return UnlikePostResponse(success: true);
+    return ReactionPostResponse(success: true);
   }
 }
 
 List<Post> _mockPosts = List.generate(10, (index) => _generateMockPost(index));
 
-final mockGetPostsResponse = GetPostsResponse(
-  posts: _mockPosts,
-  user: User(
-    id: 1,
-    name: 'Mekendez',
-    username: 'Me',
-    avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-  ),
-);
+final mockGetPostsResponse = GetPostsResponse(posts: _mockPosts);
 
 Post _generateMockPost(int index) {
   final names = [

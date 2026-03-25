@@ -6,6 +6,7 @@ import 'package:social_network_flutter/common/authentication/login/login_assembl
 import 'package:social_network_flutter/common/authentication/login/login_coordinator.dart';
 import 'package:social_network_flutter/common/authentication/register/register_assembly.dart';
 import 'package:social_network_flutter/common/authentication/register/register_coordinator.dart';
+import 'package:social_network_flutter/common/authentication/user/user_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/environment/environment_assembly.dart';
 import 'package:social_network_flutter/common/framework/framework_assembly.dart';
@@ -80,6 +81,7 @@ void _registerAssemblies() {
     EnvironmentAssembly(),
     FrameworkAssembly(),
     NetworkAssembly(),
+    UserAssembly(),
     LauncherAssembly(),
     AuthAssembly(),
     LoginAssembly(),

@@ -3,7 +3,7 @@ import 'package:social_network_flutter/feed/logic/entites/user.dart';
 class Comment {
   final String text;
   final User author;
-  // final Comment answers;
+  // final List<Comment> answers;
   // final int answersCount;
   final int likesCount;
   final DateTime createdAt;
