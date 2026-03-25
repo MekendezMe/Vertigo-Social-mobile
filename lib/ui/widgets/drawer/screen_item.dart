@@ -19,6 +19,7 @@ Widget screenItem({
       leading: screen.icon,
       title: Text(screen.text, style: context.theme.textTheme.bodyMedium),
       onTap: () {
+        FocusScope.of(context).unfocus();
         Navigator.pop(context);
         onTap?.call();
       },

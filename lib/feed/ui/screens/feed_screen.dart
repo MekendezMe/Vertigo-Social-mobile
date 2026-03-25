@@ -8,6 +8,7 @@ import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dar
 import 'package:social_network_flutter/feed/ui/widgets/post_item_widget.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
 import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
+import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
 import 'package:social_network_flutter/ui/widgets/drawer/custom_drawer.dart';
 import 'package:social_network_flutter/ui/widgets/text_field/main_text_field.dart';
 
@@ -55,7 +56,7 @@ class _FeedScreenState extends State<FeedScreen> {
         builder: (context, state) {
           if (state is FeedLoading) {
             return Center(
-              child: CircularProgressIndicator(color: context.color.dimPurple),
+              child: customCircularProgressIndicator(context: context),
             );
           }
           if (state is FeedLoaded) {
@@ -185,7 +186,11 @@ class _FeedScreenState extends State<FeedScreen> {
                   backgroundColor: context.color.dimPurple.withOpacity(0.8),
                   context: context,
                   child: state.isCreating
-                      ? Center(child: CircularProgressIndicator())
+                      ? Center(
+                          child: customCircularProgressIndicator(
+                            context: context,
+                          ),
+                        )
                       : Text(
                           "Опубликовать",
                           style: context.theme.textTheme.bodyMedium,

@@ -10,6 +10,8 @@ import 'package:social_network_flutter/common/framework/storages/secure_storage.
 import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/logout_service.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
+import 'package:social_network_flutter/common/notifications/notification_service.dart';
+import 'package:social_network_flutter/common/permissions/permission_service.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 class FrameworkAssembly extends DIAssembly {
@@ -21,6 +23,14 @@ class FrameworkAssembly extends DIAssembly {
     container.registerSingleton<ISecureStorage>((container) => SecureStorage());
     container.registerSingleton((container) => Talker());
     container.registerSingleton((container) => TokenService());
+    container.registerSingleton(
+      (container) => PermissionService(
+        preferencesStorage: container.resolve<IPreferencesStorage>(),
+      ),
+    );
+    container.registerSingleton<INotificationService>(
+      (container) => NotificationService(),
+    );
     container.registerSingleton<Dio>(
       (container) => getDio(
         talker: container.resolve<Talker>(),

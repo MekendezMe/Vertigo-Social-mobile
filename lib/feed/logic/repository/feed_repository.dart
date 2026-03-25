@@ -72,12 +72,12 @@ class FeedRepository {
   Future<ReactionPostResponse> likePost(LikePostRequest request) async {
     // final response = await requestSender.send(
     //   request: request,
-    //   fromJson: (json) => LikePostResponse.fromJson(json),
+    //   fromJson: (json) => ReactionPostResponse.fromJson(json),
     // body: request.toJson(),
     // );
     // if (response == null) {
     //   throw ApiException(
-    //     message: "Пустой ответ сервера в методе createPost",
+    //     message: "Пустой ответ сервера в методе likePost",
     //     code: -1,
     //   );
     // }
@@ -89,12 +89,12 @@ class FeedRepository {
   Future<ReactionPostResponse> unlikePost(UnlikePostRequest request) async {
     // final response = await requestSender.send(
     //   request: request,
-    //   fromJson: (json) => UnlikePostResponse.fromJson(json),
+    //   fromJson: (json) => ReactionPostResponse.fromJson(json),
     // body: request.toJson(),
     // );
     // if (response == null) {
     //   throw ApiException(
-    //     message: "Пустой ответ сервера в методе createPost",
+    //     message: "Пустой ответ сервера в методе unlikePost",
     //     code: -1,
     //   );
     // }

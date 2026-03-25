@@ -15,18 +15,21 @@ import 'package:social_network_flutter/common/framework/network/network_assembly
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/common/launcher/launcher_assembly.dart';
 import 'package:social_network_flutter/common/launcher/launcher_coordinator.dart';
+import 'package:social_network_flutter/common/notifications/notification_service.dart';
 import 'package:social_network_flutter/feed/feed_assembly.dart';
 import 'package:social_network_flutter/feed/feed_coordinator.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger_observer.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _registerAssemblies();
   final talker = TalkerFlutter.init();
   FlutterError.onError = (details) =>
       talker.handle(details.exception, details.stack);
   Bloc.observer = TalkerBlocObserver(talker: talker);
+  final notificationService = diContainer.resolve<INotificationService>();
+  await notificationService.init();
   runApp(const MyApp());
 }
 

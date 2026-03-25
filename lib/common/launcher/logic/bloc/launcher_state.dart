@@ -7,6 +7,11 @@ class LauncherInitial extends LauncherState {
   List<Object?> get props => [];
 }
 
+class LauncherLoading extends LauncherState {
+  @override
+  List<Object?> get props => [];
+}
+
 class LauncherLoggedOutInitial extends LauncherState {
   @override
   List<Object> get props => [];

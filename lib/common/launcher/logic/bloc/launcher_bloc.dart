@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
@@ -9,6 +10,7 @@ import 'package:social_network_flutter/common/framework/storages/secure_storage.
 import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/logout_service.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
+import 'package:social_network_flutter/common/permissions/permission_service.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -24,6 +26,7 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
   final LogoutService logoutService;
   final UserService userService;
   final ErrorHandler errorHandler;
+  final PermissionService permissionService;
 
   late final StreamSubscription _logoutSub;
 
@@ -36,6 +39,7 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     required this.logoutService,
     required this.userService,
     required this.errorHandler,
+    required this.permissionService,
   }) : super(LauncherInitial()) {
     on<Initialize>(_onInitialize);
     on<LoginRequested>(_onLogin);
@@ -100,6 +104,7 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     try {
       await userService.loadCurrentUser();
       _login(emit);
+      final status = await permissionService.requestNotificationIfNeeded();
     } catch (e, st) {
       talker.handle(e, st);
       errorHandler.handle(e);
@@ -114,6 +119,7 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     try {
       userService.clear();
       await secureStorage.clear();
+      await preferencesStorage.clear();
       userService.setUser(
         User(
           id: 1,
@@ -122,6 +128,7 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
           avatar: "https://randomuser.me/api/portraits/men/6.jpg",
         ),
       ); // TODO: УБРАТЬ
+      permissionService.requestNotificationIfNeeded(); // TODO: убрать
       _logout(emit);
     } catch (e, st) {
       talker.handle(e, st);
