@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:social_network_flutter/common/framework/storages/storage_key.dart';
-import 'package:social_network_flutter/common/permissions/permission_strings.dart';
+import 'package:social_network_flutter/common/framework/permissions/permission_strings.dart';
 
 abstract class IPreferencesStorage {
   bool? requestNotificationPermissions;

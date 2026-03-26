@@ -2,7 +2,9 @@ import 'package:social_network_flutter/common/framework/network/request_sender.d
 
 class UnlikePostRequest extends IRequest {
   @override
-  String get method => 'feed/removeLikePost';
+  String get method => 'posts/like';
+  @override
+  HttpMethod get httpMethod => HttpMethod.delete;
 
   final int userId;
   final int postId;

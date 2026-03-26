@@ -2,7 +2,9 @@ import 'package:social_network_flutter/common/framework/network/request_sender.d
 
 class LikePostRequest extends IRequest {
   @override
-  String get method => 'feed/likePost';
+  String get method => 'posts/like';
+  @override
+  HttpMethod get httpMethod => HttpMethod.post;
 
   final int userId;
   final int postId;

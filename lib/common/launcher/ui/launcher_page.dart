@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/launcher/logic/bloc/launcher_bloc.dart';
-import 'package:social_network_flutter/common/permissions/permission_service.dart';
 import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
 
 class LauncherPage extends StatefulWidget {

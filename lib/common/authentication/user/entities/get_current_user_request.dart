@@ -2,7 +2,7 @@ import 'package:social_network_flutter/common/framework/network/request_sender.d
 
 class GetCurrentUserRequest extends IRequest {
   @override
-  String get method => "auth/getProfile";
+  String get method => "users/me";
 
   @override
   // TODO: implement httpMethod

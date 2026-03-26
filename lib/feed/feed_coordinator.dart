@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
+import 'package:social_network_flutter/common/framework/media/media_service.dart';
 import 'package:social_network_flutter/common/framework/navigation/navigation_coordinator.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/ui/screens/feed_screen.dart';
+import 'package:social_network_flutter/feed/ui/widgets/modal_gallery_widget.dart';
 
 class FeedCoordinator extends NavigationCoordinator {
   final DIContainer diContainer;
@@ -20,6 +22,24 @@ class FeedCoordinator extends NavigationCoordinator {
       feedBloc: diContainer.resolve<FeedBloc>(),
       onShowProfile: onShowProfile,
       onShowSettings: onShowSettings,
+      onShowGallery:
+          ({
+            required BuildContext context,
+            required List<String> images,
+            required int index,
+          }) => _showGallery(context, images, index),
+    );
+  }
+
+  void _showGallery(
+    BuildContext context,
+    List<String> images,
+    int initialIndex,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) =>
+          ModalGallery(images: images, initialIndex: initialIndex),
     );
   }
 }

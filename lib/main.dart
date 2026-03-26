@@ -15,7 +15,7 @@ import 'package:social_network_flutter/common/framework/network/network_assembly
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/common/launcher/launcher_assembly.dart';
 import 'package:social_network_flutter/common/launcher/launcher_coordinator.dart';
-import 'package:social_network_flutter/common/notifications/notification_service.dart';
+import 'package:social_network_flutter/common/framework/notifications/notification_service.dart';
 import 'package:social_network_flutter/feed/feed_assembly.dart';
 import 'package:social_network_flutter/feed/feed_coordinator.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger_observer.dart';

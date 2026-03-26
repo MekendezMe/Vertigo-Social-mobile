@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,10 +19,17 @@ class FeedScreen extends StatefulWidget {
     required this.feedBloc,
     required this.onShowProfile,
     required this.onShowSettings,
+    required this.onShowGallery,
   });
   final FeedBloc feedBloc;
   final Function({required BuildContext context}) onShowProfile;
   final Function({required BuildContext context}) onShowSettings;
+  final Function({
+    required BuildContext context,
+    required List<String> images,
+    required int index,
+  })
+  onShowGallery;
 
   @override
   State<FeedScreen> createState() => _FeedScreenState();
@@ -78,7 +86,11 @@ class _FeedScreenState extends State<FeedScreen> {
 
                 await subscription.cancel();
               },
-              child: _showPostsWidget(state, inputController),
+              child: _showPostsWidget(
+                state,
+                inputController,
+                widget.onShowGallery,
+              ),
             );
           }
           return SizedBox.shrink();
@@ -87,7 +99,16 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Widget _showPostsWidget(FeedLoaded state, TextEditingController controller) {
+  Widget _showPostsWidget(
+    FeedLoaded state,
+    TextEditingController controller,
+    void Function({
+      required BuildContext context,
+      required List<String> images,
+      required int index,
+    })
+    onShowGallery,
+  ) {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(child: _createPostWidget(state, controller)),
@@ -101,6 +122,7 @@ class _FeedScreenState extends State<FeedScreen> {
               onLikePressed: () {
                 widget.feedBloc.add(ToggleLike(postId: post.id));
               },
+              onShowGallery: onShowGallery,
             );
           }, childCount: state.posts.length),
         ),
@@ -119,9 +141,10 @@ class _FeedScreenState extends State<FeedScreen> {
           Container(
             padding: EdgeInsets.only(top: 10),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: EdgeInsets.only(left: 14),
+                  padding: EdgeInsets.only(left: 14, top: 10),
                   decoration: BoxDecoration(shape: BoxShape.circle),
                   child: ClipOval(
                     child: hasAvatar
@@ -136,22 +159,28 @@ class _FeedScreenState extends State<FeedScreen> {
                 ),
                 SizedBox(width: 20),
                 Expanded(
-                  child: SizedBox(
-                    child: mainTextField(
-                      context: context,
-                      controller: controller,
-                      style: context.theme.textTheme.bodyLarge!,
-                      hintText: "Что у вас нового?",
-                      radius: 24,
-                      onChanged: onChanged,
-                      isInputError: isInputError,
-                    ),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        child: mainTextField(
+                          context: context,
+                          controller: controller,
+                          style: context.theme.textTheme.bodyLarge!,
+                          hintText: "Что у вас нового?",
+                          radius: 24,
+                          onChanged: onChanged,
+                          isInputError: isInputError,
+                        ),
+                      ),
+                      SizedBox(height: 18),
+                      _buildImageGrid(state.images ?? []),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 25),
+          SizedBox(height: 14),
           Divider(color: context.color.gray, thickness: 0.8),
           SizedBox(height: 25),
           Row(
@@ -160,13 +189,17 @@ class _FeedScreenState extends State<FeedScreen> {
                 children: [
                   IconButton(
                     iconSize: 25,
-                    onPressed: () {},
+                    onPressed: () {
+                      widget.feedBloc.add(PickImageFromCamera());
+                    },
                     icon: Icon(Icons.photo),
                     color: context.color.gray,
                   ),
                   IconButton(
                     iconSize: 25,
-                    onPressed: () {},
+                    onPressed: () {
+                      widget.feedBloc.add(PickImagesFromGallery());
+                    },
                     icon: Icon(Icons.attach_file),
                     color: context.color.gray,
                   ),
@@ -195,7 +228,7 @@ class _FeedScreenState extends State<FeedScreen> {
                           "Опубликовать",
                           style: context.theme.textTheme.bodyMedium,
                         ),
-                  onTap: () => _onCreatePost(state.user.id),
+                  onTap: () => _onCreatePost(state.user.id, state.images ?? []),
                   radius: 14,
                 ),
               ),
@@ -206,20 +239,46 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
+  Widget _buildImageGrid(List<File> images) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemCount: images.length,
+      itemBuilder: (context, index) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.file(
+            images[index],
+            fit: BoxFit.cover,
+            width: 30,
+            height: 30,
+          ),
+        );
+      },
+    );
+  }
+
   void onChanged(String value) {
     setState(() {
       isInputError = false;
     });
   }
 
-  void _onCreatePost(int userId) {
-    if (inputController.text.isEmpty) {
+  void _onCreatePost(int userId, List<File> images) {
+    if (inputController.text.isEmpty && images.isEmpty) {
       setState(() {
         isInputError = true;
       });
       return;
     }
-    widget.feedBloc.add(CreatePost(text: inputController.text));
-    inputController.text = "";
+    widget.feedBloc.add(CreatePost(text: inputController.text, images: images));
+    setState(() {
+      inputController.text = "";
+    });
   }
 }
