@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/authentication/register/logic/bloc/register_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
 import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
+import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
 import 'package:social_network_flutter/ui/widgets/text_field/main_text_field.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -13,7 +16,7 @@ class RegisterScreen extends StatefulWidget {
     required this.onShowMain,
   });
   final RegisterBloc registerBloc;
-  final Function() onShowMain;
+  final Function({required BuildContext context}) onShowMain;
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
@@ -21,13 +24,13 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController nameController = TextEditingController();
   TextEditingController usernameController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
   bool _obscureText = true;
   String _emailErrorText = "";
   String _passwordErrorText = "";
-  String _nameErrorText = "";
   String _usernameErrorText = "";
+  final String _nameErrorText = "";
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
@@ -37,7 +40,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         bloc: widget.registerBloc,
         listener: (context, state) {
           if (state is RegisterSuccess) {
-            widget.onShowMain.call();
+            CustomToast.show(
+              CustomToastWidget(text: "Успешно! Переход на главный экран"),
+              dismissAfter: Duration(milliseconds: 500),
+            );
+            widget.onShowMain(context: context);
           }
         },
         builder: (context, state) {
@@ -76,32 +83,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 40),
                   mainTextField(
                     context: context,
-                    controller: nameController,
-                    labelText: "Name*",
+                    controller: usernameController,
+                    labelText: "Username*",
                     style: theme.textTheme.bodyMedium!,
-                    errorText: _nameErrorText,
-                    onChanged: _nameOnChanged,
+                    errorText: _usernameErrorText,
+                    onChanged: _usernameOnChanged,
                   ),
                   SizedBox(height: 40),
                   mainTextField(
                     context: context,
-                    controller: usernameController,
-                    labelText: "Username",
+                    controller: nameController,
+                    labelText: "Name",
                     style: theme.textTheme.bodyMedium!,
-                    errorText: _usernameErrorText,
+                    errorText: _nameErrorText,
                   ),
                   SizedBox(height: 40),
                   SizedBox(
                     width: double.infinity,
                     child: mainButton(
                       context: context,
-                      child: Text(
-                        "Регистрация",
-                        style: theme.textTheme.bodyMedium!.modify(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
+                      child: state is Registering
+                          ? Padding(
+                              padding: EdgeInsets.all(6),
+                              child: customCircularProgressIndicator(
+                                context: context,
+                              ),
+                            )
+                          : Text(
+                              "Регистрация",
+                              style: theme.textTheme.bodyMedium!.modify(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
                       onTap: _onRegister,
                     ),
                   ),
@@ -126,9 +140,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
-  void _nameOnChanged(String value) {
+  void _usernameOnChanged(String value) {
     setState(() {
-      _nameErrorText = "";
+      _usernameErrorText = "";
     });
   }
 
@@ -147,9 +161,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isCorrectData() {
     final isEmailValid = _isCorrectEmail();
     final isPasswordValid = _isCorrectPassword();
-    final isNameValid = _isCorrectName();
+    final isUsernameValid = _isCorrectUsername();
 
-    return isEmailValid && isPasswordValid && isNameValid;
+    return isEmailValid && isPasswordValid && isUsernameValid;
   }
 
   bool _isCorrectEmail() {
@@ -175,10 +189,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return true;
   }
 
-  bool _isCorrectName() {
-    if (nameController.text.isEmpty) {
+  bool _isCorrectUsername() {
+    if (usernameController.text.isEmpty) {
       setState(() {
-        _nameErrorText = "Данное поле обязательно";
+        _usernameErrorText = "Данное поле обязательно";
       });
       return false;
     }

@@ -50,6 +50,9 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     try {
       emit(FeedLoading());
       final response = await feedRepository.getPosts(GetPostsRequest());
+      if (userService.currentUser == null) {
+        throw AuthException();
+      }
       emit(FeedLoaded(posts: response.posts, user: userService.currentUser!));
     } catch (e, st) {
       emit(FeedLoadingFailure(error: e));

@@ -6,6 +6,6 @@ class GetCurrentUserResponse {
   GetCurrentUserResponse({required this.user});
 
   factory GetCurrentUserResponse.fromJson(Map<String, dynamic> json) {
-    return GetCurrentUserResponse(user: User.fromJson(json['user']));
+    return GetCurrentUserResponse(user: User.fromJson(json));
   }
 }

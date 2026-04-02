@@ -1,5 +1,5 @@
+import 'package:social_network_flutter/common/authentication/entities/auth_response.dart';
 import 'package:social_network_flutter/common/authentication/register/entities/register_request.dart';
-import 'package:social_network_flutter/common/authentication/register/entities/register_response.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
@@ -22,12 +22,12 @@ class RegisterRepository {
     required this.userService,
   });
 
-  Future<RegisterResponse> register(RegisterRequest registerRequest) async {
+  Future<AuthResponse> register(RegisterRequest registerRequest) async {
     try {
-      final response = await requestSender.send<RegisterResponse>(
+      final response = await requestSender.send<AuthResponse>(
         request: registerRequest,
         body: registerRequest.toJson(),
-        fromJson: (json) => RegisterResponse.fromJson(json['user']),
+        fromJson: (json) => AuthResponse.fromJson(json),
       );
       if (response == null) {
         throw ApiException(message: "Пустой ответ сервера", code: -1);

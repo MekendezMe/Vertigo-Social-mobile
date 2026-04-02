@@ -5,6 +5,5 @@ class GetCurrentUserRequest extends IRequest {
   String get method => "users/me";
 
   @override
-  // TODO: implement httpMethod
   HttpMethod get httpMethod => HttpMethod.get;
 }

@@ -23,6 +23,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
 
   Future<void> _onRegister(Register event, Emitter<RegisterState> emit) async {
     try {
+      emit(Registering());
       final response = await registerRepository.register(
         RegisterRequest(
           name: event.name,
@@ -31,13 +32,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
           username: event.username,
         ),
       );
-      emit(
-        RegisterSuccess(
-          userId: response.userId,
-          name: response.name,
-          username: response.username,
-        ),
-      );
+      emit(RegisterSuccess());
     } catch (e, st) {
       emit(RegisterFailure(error: e));
       talker.handle(e, st);

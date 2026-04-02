@@ -7,17 +7,14 @@ class LoginInitial extends LoginState {
   List<Object?> get props => [];
 }
 
-class LoginLoading extends LoginState {
+class Logining extends LoginState {
   @override
   List<Object?> get props => [];
 }
 
 class LoginSuccess extends LoginState {
-  final int userId;
-
-  LoginSuccess({required this.userId});
   @override
-  List<Object?> get props => [userId];
+  List<Object?> get props => [];
 }
 
 class LoginFailure extends LoginState {

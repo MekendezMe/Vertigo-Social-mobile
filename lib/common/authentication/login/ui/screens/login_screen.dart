@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/authentication/login/logic/bloc/login_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
 import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
+import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
 import 'package:social_network_flutter/ui/widgets/text_field/main_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -14,7 +17,7 @@ class LoginScreen extends StatefulWidget {
     required this.onShowForgotPassword,
   });
   final LoginBloc loginBloc;
-  final Function() onShowMain;
+  final Function({required BuildContext context}) onShowMain;
   final Function({required BuildContext context}) onShowForgotPassword;
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -40,7 +43,11 @@ class _LoginScreenState extends State<LoginScreen> {
         bloc: widget.loginBloc,
         listener: (context, state) {
           if (state is LoginSuccess) {
-            widget.onShowMain.call();
+            CustomToast.show(
+              CustomToastWidget(text: "Успешно! Переход на главный экран"),
+              dismissAfter: Duration(milliseconds: 500),
+            );
+            widget.onShowMain.call(context: context);
           }
         },
         builder: (context, state) {
@@ -81,13 +88,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     child: mainButton(
                       context: context,
-                      child: Text(
-                        "Вход",
-                        style: theme.textTheme.bodyMedium!.modify(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
+                      child: state is Logining
+                          ? Padding(
+                              padding: EdgeInsets.all(6),
+                              child: customCircularProgressIndicator(
+                                context: context,
+                              ),
+                            )
+                          : Text(
+                              "Вход",
+                              style: theme.textTheme.bodyMedium!.modify(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
                       onTap: _onLogin,
                     ),
                   ),

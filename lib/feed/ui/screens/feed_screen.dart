@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
+import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dart';
 import 'package:social_network_flutter/feed/ui/widgets/post_item_widget.dart';
@@ -20,8 +21,10 @@ class FeedScreen extends StatefulWidget {
     required this.onShowProfile,
     required this.onShowSettings,
     required this.onShowGallery,
+    required this.logoutHandler,
   });
   final FeedBloc feedBloc;
+  final ILogoutHandler logoutHandler;
   final Function({required BuildContext context}) onShowProfile;
   final Function({required BuildContext context}) onShowSettings;
   final Function({
@@ -113,6 +116,12 @@ class _FeedScreenState extends State<FeedScreen> {
       slivers: [
         SliverToBoxAdapter(child: _createPostWidget(state, controller)),
         SliverToBoxAdapter(child: SizedBox(height: 30)),
+        SliverToBoxAdapter(
+          child: ElevatedButton(
+            onPressed: () => widget.logoutHandler.onLogout(),
+            child: Text("Выйти"),
+          ),
+        ),
         SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             final post = state.posts[index];

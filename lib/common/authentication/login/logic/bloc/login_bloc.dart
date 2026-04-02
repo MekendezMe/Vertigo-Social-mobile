@@ -23,10 +23,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   Future<void> _onLogin(Login event, Emitter<LoginState> emit) async {
     try {
+      emit(Logining());
       final response = await loginRepository.login(
         LoginRequest(email: event.email, password: event.password),
       );
-      emit(LoginSuccess(userId: response.userId));
+      emit(LoginSuccess());
     } catch (e, st) {
       emit(LoginFailure(error: e));
       errorHandler.handle(e);

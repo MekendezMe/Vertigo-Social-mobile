@@ -1,4 +1,3 @@
-import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
@@ -8,7 +7,6 @@ import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_re
 import 'package:social_network_flutter/feed/logic/entites/response/create_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_posts_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/like_post_response.dart';
-import 'package:social_network_flutter/feed/logic/entites/response/unlike_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -51,8 +49,7 @@ class FeedRepository {
 
     final User mockUser = User(
       id: request.userId,
-      name: 'Mekendez',
-      username: 'Me',
+      username: 'Mekendez',
       avatar: 'https://randomuser.me/api/portraits/men/6.jpg',
     );
 

@@ -30,6 +30,9 @@ class CustomToast {
   }
 
   static void _showOverlay(OverlayEntry overlay) {
+    if (!_overlayContext.mounted) {
+      return;
+    }
     if (_lastOverlay?.mounted == true) {
       _lastOverlay?.remove();
     }

@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/navigation/navigation_coordinator.dart';
 import 'package:social_network_flutter/common/framework/ui/overlay/custom_overlay_parent_widget.dart';

@@ -2,14 +2,12 @@ import 'package:social_network_flutter/common/framework/network/request_sender.d
 
 class TokenRequest extends IRequest {
   final String refreshToken;
+  final String deviceId;
 
-  TokenRequest({required this.refreshToken});
+  TokenRequest({required this.refreshToken, required this.deviceId});
 
-  factory TokenRequest.fromJson(Map<String, dynamic> json) {
-    return TokenRequest(refreshToken: json['refresh_token'] as String);
-  }
   Map<String, dynamic> toJson() {
-    return {'refresh_token': refreshToken};
+    return {'refresh_token': refreshToken, 'device_id': deviceId};
   }
 
   @override

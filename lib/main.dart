@@ -41,13 +41,13 @@ final mainCoordinator = FeedCoordinator(
 
 final loginCoordinator = LoginCoordinator(
   diContainer: diContainer,
-  onShowMain: mainCoordinator.showMain,
+  showMain: mainCoordinator.showMain,
   onShowForgotPassword: ({required BuildContext context}) => {"qwe": "qq"},
 );
 
 final registerCoordinator = RegisterCoordinator(
   diContainer: diContainer,
-  onShowMain: mainCoordinator.showMain,
+  showMain: mainCoordinator.showMain,
 );
 
 final authCoordinator = AuthCoordinator(
@@ -61,7 +61,7 @@ final authCoordinator = AuthCoordinator(
 final launcherCoordinator = LauncherCoordinator(
   diContainer: diContainer,
   onLoggedInWidget: mainCoordinator.showMain,
-  onLoggedOutWidget: mainCoordinator.showMain, // TODO вернуть auth_screen
+  onLoggedOutWidget: authCoordinator.getAuthScreen,
 );
 
 class MyApp extends StatelessWidget {

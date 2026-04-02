@@ -4,7 +4,7 @@ import 'package:social_network_flutter/common/framework/network/request_sender.d
 
 class CreatePostRequest extends IRequest {
   @override
-  String get method => "feed/createPost";
+  String get method => "posts";
   @override
   HttpMethod get httpMethod => HttpMethod.post;
 

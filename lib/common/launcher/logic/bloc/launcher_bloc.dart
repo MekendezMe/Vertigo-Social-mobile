@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
@@ -11,7 +10,6 @@ import 'package:social_network_flutter/common/launcher/logic/repository/launcher
 import 'package:social_network_flutter/common/launcher/logic/service/logout_service.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
-import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 part 'launcher_event.dart';
@@ -44,6 +42,7 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     on<Initialize>(_onInitialize);
     on<LoginRequested>(_onLogin);
     on<LogoutRequested>(_onLogout);
+
     _logoutSub = logoutService.stream.listen((_) {
       add(LogoutRequested());
     });
@@ -60,19 +59,24 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     Emitter<LauncherState> emit,
   ) async {
     try {
+      if (state is LauncherLoggedOut) {
+        return;
+      }
       await secureStorage.load();
       if (secureStorage.refreshToken == null) {
         add(LogoutRequested());
         return;
       } else {
         await preferencesStorage.load();
-        final String accessToken = await launcherRepository.getAccessToken();
+        final tokens = await launcherRepository.getTokens();
         final String? deviceId = secureStorage.deviceId;
-        if (!_hasAccess(deviceId, accessToken)) {
+        if (!_hasAccess(deviceId, tokens.accessToken)) {
           add(LogoutRequested());
           return;
         }
-        tokenService.setToken(accessToken);
+        secureStorage.refreshToken = tokens.refreshToken;
+        secureStorage.save();
+        tokenService.setToken(tokens.accessToken);
         add(LoginRequested());
       }
     } catch (e, st) {
@@ -117,18 +121,14 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     Emitter<LauncherState> emit,
   ) async {
     try {
+      if (secureStorage.deviceId != null &&
+          secureStorage.deviceId!.isNotEmpty) {
+        await launcherRepository.logout();
+      }
       userService.clear();
       await secureStorage.clear();
+      await secureStorage.save();
       await preferencesStorage.clear();
-      userService.setUser(
-        User(
-          id: 1,
-          name: "Mekendez",
-          username: "Me",
-          avatar: "https://randomuser.me/api/portraits/men/6.jpg",
-        ),
-      ); // TODO: УБРАТЬ
-      permissionService.requestNotificationIfNeeded(); // TODO: убрать
       _logout(emit);
     } catch (e, st) {
       talker.handle(e, st);

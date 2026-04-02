@@ -76,14 +76,16 @@ class RequestSender {
         headers: headers,
       );
 
-      final statusCode = response?.statusCode ?? -1;
+      if (response == null) throw ApiException(message: "Ошибка сервера");
+
+      final statusCode = response.statusCode ?? -1;
 
       if (statusCode == 401) {
         throw AuthException();
       }
       if (statusCode >= 400 || statusCode < 200) {
         throw ApiException(
-          message: response?.statusMessage ?? "Ошибка сервера",
+          message: response.data['error'] ?? "Ошибка сервера",
           code: statusCode,
         );
       }
@@ -91,7 +93,7 @@ class RequestSender {
         return null;
       }
 
-      if (response == null || response.data == null) {
+      if (response.data == null) {
         throw ApiException(
           message: 'Пустой ответ от сервера',
           code: statusCode,
@@ -116,7 +118,7 @@ class RequestSender {
         throw AuthException();
       }
       throw ApiException(
-        message: e.message ?? "Ошибка сервера",
+        message: e.response?.data['error'] ?? "Ошибка сервера",
         code: statusCode,
       );
     } on NoInternetException catch (e) {

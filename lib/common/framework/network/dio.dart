@@ -8,8 +8,8 @@ Dio getDio({required Talker talker, required Environment environment}) {
   final dio = Dio(
     BaseOptions(
       baseUrl: environment.baseUrl + environment.version,
-      connectTimeout: Duration(seconds: 30),
-      receiveTimeout: Duration(seconds: 30),
+      connectTimeout: Duration(seconds: 60),
+      receiveTimeout: Duration(seconds: 60),
     ),
   );
 
@@ -22,6 +22,7 @@ Dio getDio({required Talker talker, required Environment environment}) {
         printRequestHeaders: true,
         printResponseHeaders: true,
         printResponseData: true,
+        printRequestExtra: true,
       ),
     ),
   );

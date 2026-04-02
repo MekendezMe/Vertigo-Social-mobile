@@ -8,13 +8,8 @@ class RegisterInitial extends RegisterState {
 }
 
 class RegisterSuccess extends RegisterState {
-  final int userId;
-  final String? username;
-  final String name;
-
-  RegisterSuccess({required this.userId, required this.name, this.username});
   @override
-  List<Object?> get props => [userId, username, name];
+  List<Object?> get props => [];
 }
 
 class RegisterFailure extends RegisterState {
@@ -23,4 +18,9 @@ class RegisterFailure extends RegisterState {
   RegisterFailure({this.error});
   @override
   List<Object?> get props => [error];
+}
+
+class Registering extends RegisterState {
+  @override
+  List<Object?> get props => [];
 }

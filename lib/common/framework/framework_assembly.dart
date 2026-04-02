@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:social_network_flutter/common/framework/device/device_info_service.dart';
 import 'package:social_network_flutter/common/framework/di/di_assembly.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/environment/environment.dart';

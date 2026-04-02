@@ -2,7 +2,7 @@ import 'package:social_network_flutter/common/framework/network/request_sender.d
 
 class LoginRequest extends IRequest {
   @override
-  String get method => "auth/signin";
+  String get method => "auth/login";
   @override
   bool get isAuthRequired => false;
   @override

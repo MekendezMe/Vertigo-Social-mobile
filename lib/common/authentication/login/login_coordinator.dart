@@ -6,11 +6,11 @@ import 'package:social_network_flutter/common/framework/navigation/navigation_co
 
 class LoginCoordinator extends NavigationCoordinator {
   final DIContainer diContainer;
-  final Function() onShowMain;
+  final Widget Function() showMain;
   final Function({required BuildContext context}) onShowForgotPassword;
   LoginCoordinator({
     required this.diContainer,
-    required this.onShowMain,
+    required this.showMain,
     required this.onShowForgotPassword,
   });
   void showLoginScreen({required BuildContext context}) {
@@ -22,5 +22,9 @@ class LoginCoordinator extends NavigationCoordinator {
         onShowForgotPassword: onShowForgotPassword,
       ),
     );
+  }
+
+  void onShowMain({required BuildContext context}) {
+    pushReplacement(context: context, page: showMain());
   }
 }

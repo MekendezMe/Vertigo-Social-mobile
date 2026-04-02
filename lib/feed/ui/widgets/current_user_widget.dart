@@ -29,7 +29,7 @@ Widget currentUserWidget({required BuildContext context, required Post post}) {
             Row(
               children: [
                 Text(
-                  post.creator.name,
+                  post.creator.username,
                   style: context.theme.textTheme.bodyMedium,
                 ),
               ],

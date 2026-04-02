@@ -26,6 +26,13 @@ class _LauncherPageState extends State<LauncherPage> {
   final _loggedOutKey = GlobalKey<NavigatorState>();
 
   GlobalKey<NavigatorState>? _currentStateKey;
+
+  @override
+  void dispose() {
+    print("🔴 [LauncherPage] dispose() ВЫЗВАН");
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -36,8 +43,9 @@ class _LauncherPageState extends State<LauncherPage> {
   Widget build(BuildContext context) {
     return _buildBackButtonHandler(
       context: context,
-      child: BlocBuilder<LauncherBloc, LauncherState>(
+      child: BlocConsumer<LauncherBloc, LauncherState>(
         bloc: widget.bloc,
+        listener: (context, state) {},
         builder: (context, state) {
           if (state is LauncherLoggedIn) {
             return _buildNavigatorStack(
@@ -89,6 +97,7 @@ class _LauncherPageState extends State<LauncherPage> {
   ) {
     _currentStateKey = key;
     return Navigator(
+      initialRoute: '/',
       key: key,
       onGenerateRoute: (settings) {
         return MaterialPageRoute(builder: widgetBuilder, settings: settings);

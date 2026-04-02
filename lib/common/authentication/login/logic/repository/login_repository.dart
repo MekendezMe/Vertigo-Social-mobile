@@ -1,5 +1,5 @@
+import 'package:social_network_flutter/common/authentication/entities/auth_response.dart';
 import 'package:social_network_flutter/common/authentication/login/logic/entities/login_request.dart';
-import 'package:social_network_flutter/common/authentication/login/logic/entities/login_response.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
@@ -22,11 +22,11 @@ class LoginRepository {
     required this.userService,
   });
 
-  Future<LoginResponse> login(LoginRequest request) async {
+  Future<AuthResponse> login(LoginRequest request) async {
     try {
-      final response = await requestSender.send<LoginResponse>(
+      final response = await requestSender.send<AuthResponse>(
         request: request,
-        fromJson: (json) => LoginResponse.fromJson(json['user']),
+        fromJson: (json) => AuthResponse.fromJson(json),
         body: request.toJson(),
       );
 

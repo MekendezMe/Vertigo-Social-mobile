@@ -6,6 +6,6 @@ class CreatePostResponse {
   CreatePostResponse({required this.post});
 
   factory CreatePostResponse.fromJson(Map<String, dynamic> json) {
-    return CreatePostResponse(post: Post.fromJson(json['post']));
+    return CreatePostResponse(post: Post.fromJson(json));
   }
 }

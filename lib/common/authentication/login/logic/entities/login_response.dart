@@ -3,16 +3,16 @@ class LoginResponse {
   final String refreshToken;
   final String deviceId;
   final int userId;
-  final String name;
-  final String? username;
+  final String username;
+  final String? name;
 
   LoginResponse({
     required this.accessToken,
     required this.refreshToken,
     required this.deviceId,
     required this.userId,
-    required this.name,
-    this.username,
+    required this.username,
+    this.name,
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
@@ -21,8 +21,8 @@ class LoginResponse {
       refreshToken: json['refresh_token'] as String,
       deviceId: json['device_id'] as String,
       userId: json['user_id'] as int,
-      name: json['name'] as String,
-      username: json['username'] as String?,
+      username: json['username'] as String,
+      name: json['name'] as String?,
     );
   }
 }

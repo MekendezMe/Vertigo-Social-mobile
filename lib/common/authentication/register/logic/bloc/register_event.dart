@@ -3,13 +3,14 @@ part of 'register_bloc.dart';
 abstract class RegisterEvent extends Equatable {}
 
 class Register extends RegisterEvent {
-  final String name;
-  final String? username;
+  final String username;
+  final String? name;
+
   final String email;
   final String password;
   Register({
-    required this.name,
     required this.username,
+    this.name,
     required this.email,
     required this.password,
   });

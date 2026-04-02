@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/authentication/register/logic/bloc/register_bloc.dart';
-import 'package:social_network_flutter/common/authentication/register/ui/widgets/register_screen.dart';
+import 'package:social_network_flutter/common/authentication/register/ui/screens/register_screen.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/navigation/navigation_coordinator.dart';
 
 class RegisterCoordinator extends NavigationCoordinator {
   final DIContainer diContainer;
-  final Function() onShowMain;
+  final Widget Function() showMain;
 
-  RegisterCoordinator({required this.diContainer, required this.onShowMain});
+  RegisterCoordinator({required this.diContainer, required this.showMain});
   void showRegisterScreen({required BuildContext context}) {
     push(
       context: context,
@@ -17,5 +17,9 @@ class RegisterCoordinator extends NavigationCoordinator {
         onShowMain: onShowMain,
       ),
     );
+  }
+
+  void onShowMain({required BuildContext context}) {
+    pushReplacement(context: context, page: showMain());
   }
 }
