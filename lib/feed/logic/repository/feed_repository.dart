@@ -1,10 +1,13 @@
+import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
+import 'package:social_network_flutter/feed/logic/entites/request/get_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/create_post_response.dart';
+import 'package:social_network_flutter/feed/logic/entites/response/get_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_posts_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/like_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
@@ -18,15 +21,40 @@ class FeedRepository {
 
   Future<GetPostsResponse> getPosts(GetPostsRequest request) async {
     try {
-      // final response = await requestSender.send(
-      //   request: request,
-      //   fromJson: (json) => GetPostsResponse.fromJson(json),
-      // );
-      // if (response == null) {
-      //   throw ApiException(message: "Пустой ответ сервера в методе getPosts", code: -1);
-      // }
-      // return response;
-      return GetPostsResponse(posts: List.from(_mockPosts));
+      final response = await requestSender.send(
+        request: request,
+        fromJson: (json) => GetPostsResponse.fromJson(json),
+        queryParams: request.queryParamsToJson(),
+      );
+      if (response == null) {
+        throw ApiException(
+          message: "Пустой ответ сервера в методе ${request.method}",
+          code: -1,
+        );
+      }
+      return response;
+      // return GetPostsResponse(posts: List.from(_mockPosts));
+    } catch (e, st) {
+      talker.handle(e, st);
+      rethrow;
+    }
+  }
+
+  Future<GetPostResponse> getPost(GetPostRequest request) async {
+    try {
+      final response = await requestSender.send(
+        request: request,
+        fromJson: (json) => GetPostResponse.fromJson(json),
+        pathParams: request.paramsIntoPath(),
+      );
+      if (response == null) {
+        throw ApiException(
+          message: "Пустой ответ сервера в методе ${request.method}",
+          code: -1,
+        );
+      }
+      return response;
+      // return GetPostsResponse(posts: List.from(_mockPosts));
     } catch (e, st) {
       talker.handle(e, st);
       rethrow;
@@ -104,7 +132,10 @@ class FeedRepository {
 
 List<Post> _mockPosts = List.generate(10, (index) => _generateMockPost(index));
 
-final mockGetPostsResponse = GetPostsResponse(posts: _mockPosts);
+final mockGetPostsResponse = GetPostsResponse(
+  posts: _mockPosts,
+  isLastPage: false,
+);
 
 Post _generateMockPost(int index) {
   final names = [

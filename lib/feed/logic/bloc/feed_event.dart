@@ -3,8 +3,19 @@ part of 'feed_bloc.dart';
 abstract class FeedEvent extends Equatable {}
 
 class LoadFeed extends FeedEvent {
+  final int pageNumber;
+
+  LoadFeed({required this.pageNumber});
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [pageNumber];
+}
+
+class LoadMorePosts extends FeedEvent {
+  final int pageNumber;
+
+  LoadMorePosts({required this.pageNumber});
+  @override
+  List<Object?> get props => [pageNumber];
 }
 
 class CreatePost extends FeedEvent {

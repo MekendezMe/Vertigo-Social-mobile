@@ -52,6 +52,7 @@ class RequestSender {
     required T Function(Map<String, dynamic>) fromJson,
     Map<String, dynamic>? queryParams,
     Map<String, dynamic>? body,
+    Map<String, dynamic>? pathParams,
   }) async {
     try {
       await _checkConnectivity();
@@ -68,8 +69,17 @@ class RequestSender {
       //   }
       // }
 
+      String method = request.method;
+
+      if (pathParams != null && pathParams.isNotEmpty) {
+        pathParams.forEach((key, value) {
+          method = method.replaceAll('{$key}', value.toString());
+        });
+      }
+
       final response = await _sendRequest(
         request: request,
+        method: method,
         body: body,
         queryParams: queryParams,
         dio: dio,
@@ -132,13 +142,14 @@ class RequestSender {
 
   Future<Response?> _sendRequest<T, B>({
     required IRequest request,
+    required String method,
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParams,
     required Dio dio,
     required Map<String, String> headers,
   }) async {
     final response = await dio.request(
-      request.method,
+      method,
       data: body,
       queryParameters: queryParams,
       options: Options(method: request.httpMethod.text, headers: headers),

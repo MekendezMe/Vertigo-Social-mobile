@@ -20,6 +20,8 @@ class FeedLoaded extends FeedState {
   final String? likeError;
   final List<File>? images;
   final bool? isImageLoading;
+  final bool? isLoadingMore;
+  final bool? isLastPage;
 
   FeedLoaded({
     required this.posts,
@@ -29,6 +31,8 @@ class FeedLoaded extends FeedState {
     this.likeError,
     this.images,
     this.isImageLoading = false,
+    this.isLoadingMore = false,
+    this.isLastPage = false,
   });
   @override
   List<Object?> get props => [
@@ -39,6 +43,8 @@ class FeedLoaded extends FeedState {
     likeError,
     images,
     isImageLoading,
+    isLoadingMore,
+    isLastPage,
   ];
 
   FeedLoaded copyWith({
@@ -49,6 +55,8 @@ class FeedLoaded extends FeedState {
     String? likeError,
     List<File>? images,
     bool? isImageLoading = false,
+    bool? isLoadingMore = false,
+    bool? isLastPage = false,
   }) {
     return FeedLoaded(
       posts: posts ?? this.posts,
@@ -58,6 +66,8 @@ class FeedLoaded extends FeedState {
       likeError: likeError ?? this.likeError,
       images: images ?? this.images,
       isImageLoading: isImageLoading ?? this.isImageLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      isLastPage: isLastPage ?? this.isLastPage,
     );
   }
 }

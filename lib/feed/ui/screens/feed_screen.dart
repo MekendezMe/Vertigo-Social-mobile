@@ -39,12 +39,15 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
+  late final ScrollController _scrollController;
   TextEditingController inputController = TextEditingController();
   bool isInputError = false;
+  int _pageNumber = 1;
   @override
   void initState() {
     super.initState();
-    widget.feedBloc.add(LoadFeed());
+    _scrollController = ScrollController()..addListener(_onScroll);
+    widget.feedBloc.add(LoadFeed(pageNumber: _pageNumber));
   }
 
   @override
@@ -83,7 +86,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   }
                 });
 
-                widget.feedBloc.add(LoadFeed());
+                widget.feedBloc.add(LoadFeed(pageNumber: _pageNumber));
 
                 await completer.future;
 
@@ -113,6 +116,7 @@ class _FeedScreenState extends State<FeedScreen> {
     onShowGallery,
   ) {
     return CustomScrollView(
+      controller: _scrollController,
       slivers: [
         SliverToBoxAdapter(child: _createPostWidget(state, controller)),
         SliverToBoxAdapter(child: SizedBox(height: 30)),
@@ -246,6 +250,23 @@ class _FeedScreenState extends State<FeedScreen> {
         ],
       ),
     );
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+
+    final blocState = context.read<FeedBloc>().state;
+
+    if (blocState is! FeedLoaded || (blocState.isLoadingMore ?? false)) {
+      return;
+    }
+    final max = _scrollController.position.maxScrollExtent;
+    final current = _scrollController.position.pixels;
+
+    if (current >= max - 200 && !(blocState.isLastPage ?? false)) {
+      _pageNumber += 1;
+      context.read<FeedBloc>().add(LoadMorePosts(pageNumber: _pageNumber));
+    }
   }
 
   Widget _buildImageGrid(List<File> images) {

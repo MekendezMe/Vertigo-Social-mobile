@@ -37,6 +37,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     required this.mediaService,
   }) : super(FeedInitial()) {
     on<LoadFeed>(_onLoadFeed);
+    on<LoadMorePosts>(_onLoadMorePosts);
 
     on<CreatePost>(_onCreatePost);
 
@@ -49,13 +50,47 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   Future<void> _onLoadFeed(LoadFeed event, Emitter<FeedState> emit) async {
     try {
       emit(FeedLoading());
-      final response = await feedRepository.getPosts(GetPostsRequest());
+      final response = await feedRepository.getPosts(
+        GetPostsRequest(pageNumber: event.pageNumber),
+      );
       if (userService.currentUser == null) {
         throw AuthException();
       }
-      emit(FeedLoaded(posts: response.posts, user: userService.currentUser!));
+      emit(
+        FeedLoaded(
+          posts: response.posts,
+          user: userService.currentUser!,
+          isLastPage: response.isLastPage,
+        ),
+      );
     } catch (e, st) {
       emit(FeedLoadingFailure(error: e));
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onLoadMorePosts(
+    LoadMorePosts event,
+    Emitter<FeedState> emit,
+  ) async {
+    if (state is! FeedLoaded) return;
+    final current = state as FeedLoaded;
+    try {
+      emit(current.copyWith(isLoadingMore: true));
+      final response = await feedRepository.getPosts(
+        GetPostsRequest(pageNumber: event.pageNumber),
+      );
+      emit(
+        current.copyWith(
+          isLoadingMore: false,
+          posts: [...current.posts, ...response.posts],
+          isLastPage: response.isLastPage,
+        ),
+      );
+    } catch (e, st) {
+      emit(current.copyWith(isLoadingMore: false));
+      // emit(FeedLoadingFailure(error: e));
       talker.handle(e, st);
       errorHandler.handle(e);
     }
