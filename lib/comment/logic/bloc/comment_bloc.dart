@@ -23,6 +23,8 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     required this.userService,
   }) : super(CommentInitial()) {
     on<LoadComments>(_onLoadComments);
+
+    on<LoadMoreComments>(_onLoadMoreComments);
   }
 
   Future<void> _onLoadComments(
@@ -45,6 +47,35 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
           post: response.post,
           comments: response.comments,
           isLastPage: response.lastPage,
+        ),
+      );
+    } catch (e, st) {
+      emit(CommentsLoadingFailure(error: e));
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onLoadMoreComments(
+    LoadMoreComments event,
+    Emitter<CommentState> emit,
+  ) async {
+    if (state is! CommentsLoaded) {
+      return;
+    }
+    final current = state as CommentsLoaded;
+    try {
+      emit(current.copyWith(isLoadingMore: true));
+      final response = await commentRepository.getCommentsByPost(
+        GetCommentsRequest(postId: event.postId, pageNumber: event.pageNumber),
+      );
+
+      emit(
+        current.copyWith(
+          comments: [...current.comments, ...response.comments],
+          isLastPage: response.lastPage,
+          isLoadingMore: false,
+          currentPage: event.pageNumber,
         ),
       );
     } catch (e, st) {

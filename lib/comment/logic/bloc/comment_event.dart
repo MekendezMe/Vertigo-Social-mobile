@@ -8,5 +8,14 @@ class LoadComments extends CommentEvent {
 
   LoadComments({required this.postId, this.pageNumber});
   @override
-  List<Object?> get props => [postId];
+  List<Object?> get props => [postId, pageNumber];
+}
+
+class LoadMoreComments extends CommentEvent {
+  final int pageNumber;
+  final int postId;
+
+  LoadMoreComments({required this.pageNumber, required this.postId});
+  @override
+  List<Object?> get props => [pageNumber, postId];
 }

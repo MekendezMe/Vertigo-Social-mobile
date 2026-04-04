@@ -17,27 +17,37 @@ class CommentsLoaded extends CommentState {
   final List<Comment> comments;
   final bool isLastPage;
   final int currentPage;
+  final bool? isLoadingMore;
 
   CommentsLoaded({
     required this.comments,
     required this.isLastPage,
     required this.post,
     this.currentPage = 1,
+    this.isLoadingMore = false,
   });
   @override
-  List<Object?> get props => [comments, isLastPage, post, currentPage];
+  List<Object?> get props => [
+    comments,
+    isLastPage,
+    post,
+    currentPage,
+    isLoadingMore,
+  ];
 
   CommentsLoaded copyWith({
     List<Comment>? comments,
     Post? post,
     bool? isLastPage,
     int? currentPage,
+    bool? isLoadingMore,
   }) {
     return CommentsLoaded(
       comments: comments ?? this.comments,
       isLastPage: isLastPage ?? this.isLastPage,
       post: post ?? this.post,
       currentPage: currentPage ?? this.currentPage,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 }

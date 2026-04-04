@@ -4,9 +4,22 @@ import 'package:social_network_flutter/comment/ui/widgets/comment_item_widget.da
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
 
-class CommentBottomSheetScreen extends StatelessWidget {
-  const CommentBottomSheetScreen({super.key, required this.commentBloc});
+class CommentScreen extends StatefulWidget {
+  const CommentScreen({super.key, required this.commentBloc});
   final CommentBloc commentBloc;
+
+  @override
+  State<CommentScreen> createState() => _CommentScreenState();
+}
+
+class _CommentScreenState extends State<CommentScreen> {
+  late final ScrollController _scrollController;
+  @override
+  void initState() {
+    _scrollController = ScrollController()..addListener(_onScroll);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -30,36 +43,35 @@ class CommentBottomSheetScreen extends StatelessWidget {
           Divider(color: context.color.darkGray),
           Expanded(
             child: BlocConsumer<CommentBloc, CommentState>(
-              bloc: commentBloc,
+              bloc: widget.commentBloc,
               listener: (context, state) {},
               builder: (context, state) {
                 if (state is CommentsLoadingFailure) {
-                  SliverFillRemaining(
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: Text(
-                        'Нет комментариев',
-                        style: context.theme.textTheme.bodyLarge,
-                      ),
-                    ),
-                  );
+                  emptyCommentWidget();
                 }
                 if (state is CommentsLoaded) {
                   return CustomScrollView(
+                    controller: _scrollController,
                     slivers: [
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final comment = state.comments[index];
-                          return commentItemWidget(
-                            comment: comment,
-                            commentBloc: commentBloc,
-                            context: context,
-                            // onLikePressed: () {
-                            //   commentBloc.add(ToggleLike(postId: post.id));
-                            // },
-                          );
-                        }, childCount: state.comments.length),
-                      ),
+                      if (state.comments.isEmpty)
+                        emptyCommentWidget()
+                      else
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final comment = state.comments[index];
+                            return commentItemWidget(
+                              comment: comment,
+                              commentBloc: widget.commentBloc,
+                              context: context,
+                              // onLikePressed: () {
+                              //   commentBloc.add(ToggleLike(postId: post.id));
+                              // },
+                            );
+                          }, childCount: state.comments.length),
+                        ),
                     ],
                   );
                 }
@@ -70,6 +82,37 @@ class CommentBottomSheetScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget emptyCommentWidget() {
+    return SliverFillRemaining(
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Text(
+          'Нет комментариев',
+          style: context.theme.textTheme.bodyLarge,
+        ),
+      ),
+    );
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+
+    final blocState = context.read<CommentBloc>().state;
+
+    if (blocState is! CommentsLoaded || (blocState.isLoadingMore ?? false)) {
+      return;
+    }
+    final max = _scrollController.position.maxScrollExtent;
+    final current = _scrollController.position.pixels;
+
+    if (current >= max - 200 && !(blocState.isLastPage)) {
+      final nextPage = blocState.currentPage + 1;
+      context.read<CommentBloc>().add(
+        LoadMoreComments(pageNumber: nextPage, postId: blocState.post.id),
+      );
+    }
   }
 
   Widget _buildDragHandle(BuildContext context) {

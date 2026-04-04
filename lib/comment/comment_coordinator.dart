@@ -22,9 +22,8 @@ class CommentCoordinator extends NavigationCoordinator {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => CommentBottomSheetScreen(
-        commentBloc: diContainer.resolve<CommentBloc>(),
-      ),
+      builder: (context) =>
+          CommentScreen(commentBloc: diContainer.resolve<CommentBloc>()),
     );
   }
 }

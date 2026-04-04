@@ -2,8 +2,9 @@ import 'package:social_network_flutter/common/framework/network/request_sender.d
 
 class GetAnswersRequest extends IRequest {
   final int commentId;
+  final int pageNumber;
 
-  GetAnswersRequest({required this.commentId});
+  GetAnswersRequest({required this.commentId, required this.pageNumber});
   @override
   HttpMethod get httpMethod => HttpMethod.get;
 
@@ -12,5 +13,9 @@ class GetAnswersRequest extends IRequest {
 
   Map<String, dynamic> paramsIntoPath() {
     return {"commentId": commentId};
+  }
+
+  Map<String, dynamic> queryParamsToJson() {
+    return {"page_number": pageNumber};
   }
 }

@@ -66,6 +66,25 @@ Widget commentItemWidget({
           children: [
             Text(createdDate, style: context.theme.textTheme.bodySmall),
             SizedBox(width: 6),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () => _onShowAnswers(
+                    commentBloc: commentBloc,
+                    comment: comment,
+                  ),
+                  icon: Icon(Icons.comment),
+                  iconSize: 20,
+                  color: context.color.darkGray,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  "${comment.answersCount}",
+                  style: context.theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
+            SizedBox(width: 6),
             Text("Ответить", style: context.theme.textTheme.bodySmall),
             Spacer(),
             Row(
@@ -91,3 +110,8 @@ Widget commentItemWidget({
     ),
   );
 }
+
+void _onShowAnswers({
+  required CommentBloc commentBloc,
+  required Comment comment,
+}) {}

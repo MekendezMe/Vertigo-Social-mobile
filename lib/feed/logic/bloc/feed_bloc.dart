@@ -92,7 +92,6 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       );
     } catch (e, st) {
       emit(current.copyWith(isLoadingMore: false));
-      // emit(FeedLoadingFailure(error: e));
       talker.handle(e, st);
       errorHandler.handle(e);
     }
