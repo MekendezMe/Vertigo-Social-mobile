@@ -3,26 +3,28 @@ import 'package:social_network_flutter/feed/logic/entites/user.dart';
 class Comment {
   final String text;
   final User author;
-  // final List<Comment> answers;
-  // final int answersCount;
+  final int answersCount;
   final int likesCount;
-  final DateTime createdAt;
+  final bool likedByUser;
+  final String createdAt;
 
   Comment({
     required this.text,
     required this.author,
-    // required this.answers,
-    // required this.answersCount,
+    required this.likedByUser,
     required this.likesCount,
+    required this.answersCount,
     required this.createdAt,
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
-      author: User.fromJson(json['author']),
-      text: json['text'] as String,
+      author: User.fromJson(json['user']),
+      text: json['content'] as String,
+      likedByUser: json['liked_by_user'] as bool,
+      answersCount: json['answers_count'] as int,
       likesCount: json['likes_count'] as int,
-      createdAt: json['created_at'] as DateTime,
+      createdAt: json['created_at'] as String,
     );
   }
 }

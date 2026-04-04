@@ -59,9 +59,6 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     Emitter<LauncherState> emit,
   ) async {
     try {
-      if (state is LauncherLoggedOut) {
-        return;
-      }
       await secureStorage.load();
       if (secureStorage.refreshToken == null) {
         add(LogoutRequested());

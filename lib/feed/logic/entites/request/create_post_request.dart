@@ -8,17 +8,12 @@ class CreatePostRequest extends IRequest {
   @override
   HttpMethod get httpMethod => HttpMethod.post;
 
-  final int userId;
   final String text;
   final List<File> images;
 
-  CreatePostRequest({
-    required this.userId,
-    required this.text,
-    required this.images,
-  });
+  CreatePostRequest({required this.text, required this.images});
 
   Map<String, dynamic> toJson() {
-    return {"user_id": userId, "text": text, "images": images};
+    return {"content": text, "images": images};
   }
 }

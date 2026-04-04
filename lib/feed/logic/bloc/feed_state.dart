@@ -19,6 +19,7 @@ class FeedLoaded extends FeedState {
   final String? createError;
   final String? likeError;
   final List<File>? images;
+  final int currentPage;
   final bool? isImageLoading;
   final bool? isLoadingMore;
   final bool? isLastPage;
@@ -30,6 +31,7 @@ class FeedLoaded extends FeedState {
     this.isCreating = false,
     this.likeError,
     this.images,
+    this.currentPage = 1,
     this.isImageLoading = false,
     this.isLoadingMore = false,
     this.isLastPage = false,
@@ -42,6 +44,7 @@ class FeedLoaded extends FeedState {
     isCreating,
     likeError,
     images,
+    currentPage,
     isImageLoading,
     isLoadingMore,
     isLastPage,
@@ -50,13 +53,14 @@ class FeedLoaded extends FeedState {
   FeedLoaded copyWith({
     List<Post>? posts,
     User? user,
-    bool? isCreating = false,
+    bool? isCreating,
     String? createError,
     String? likeError,
     List<File>? images,
-    bool? isImageLoading = false,
-    bool? isLoadingMore = false,
-    bool? isLastPage = false,
+    int? currentPage,
+    bool? isImageLoading,
+    bool? isLoadingMore,
+    bool? isLastPage,
   }) {
     return FeedLoaded(
       posts: posts ?? this.posts,
@@ -65,6 +69,7 @@ class FeedLoaded extends FeedState {
       createError: createError ?? this.createError,
       likeError: likeError ?? this.likeError,
       images: images ?? this.images,
+      currentPage: currentPage ?? this.currentPage,
       isImageLoading: isImageLoading ?? this.isImageLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       isLastPage: isLastPage ?? this.isLastPage,

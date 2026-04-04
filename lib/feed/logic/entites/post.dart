@@ -6,7 +6,7 @@ class Post {
   final String text;
   final int likesCount;
   final int commentsCount;
-  final DateTime createdAt;
+  final String createdAt;
   final bool likedByUser;
   final List<String> images;
 
@@ -24,13 +24,13 @@ class Post {
   factory Post.fromJson(Map<String, dynamic> json) {
     return Post(
       id: json['post_id'] as int,
-      creator: User.fromJson(json['creator']),
-      text: json['text'] as String,
-      images: json['images'] as List<String>,
+      creator: User.fromJson(json['user']),
+      text: json['content'] as String,
+      images: (json['images'] as List?)?.cast<String>() ?? [],
       likesCount: json['likes_count'] as int,
       commentsCount: json['comments_count'] as int,
       likedByUser: json['liked_by_user'] as bool,
-      createdAt: json['created_at'] as DateTime,
+      createdAt: json['created_at'] as String,
     );
   }
 
@@ -40,7 +40,7 @@ class Post {
     String? text,
     int? likesCount,
     int? commentsCount,
-    DateTime? createdAt,
+    String? createdAt,
     bool? likedByUser,
     List<String>? images,
   }) {

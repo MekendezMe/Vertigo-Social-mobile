@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
+import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_icon_button.dart';
@@ -10,6 +11,7 @@ import 'package:social_network_flutter/feed/ui/widgets/image_list.dart';
 Widget postItemWidget({
   required BuildContext context,
   required Post post,
+  required FeedBloc feedBloc,
   required VoidCallback onLikePressed,
   required void Function({
     required BuildContext context,
@@ -17,6 +19,7 @@ Widget postItemWidget({
     required int index,
   })
   onShowGallery,
+  required Function({required BuildContext context}) onShowComments,
 }) {
   return baseContainerWidget(
     context: context,
@@ -64,7 +67,7 @@ Widget postItemWidget({
                 child: baseIconButton(
                   context: context,
                   post: post,
-                  onPressed: () {},
+                  onPressed: () => onShowComments(context: context),
                   icon: Icons.comment,
                   text: "${post.commentsCount}",
                   color: context.color.darkGray,
@@ -77,5 +80,3 @@ Widget postItemWidget({
     ),
   );
 }
-
-void _openImage() {}

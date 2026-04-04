@@ -9,7 +9,7 @@ class GetPostsRequest extends IRequest {
 
   GetPostsRequest({required this.pageNumber});
   @override
-  String get method => "posts/";
+  String get method => "posts";
   @override
   HttpMethod get httpMethod => HttpMethod.get;
 }

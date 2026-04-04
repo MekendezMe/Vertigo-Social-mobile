@@ -3,9 +3,9 @@ part of 'feed_bloc.dart';
 abstract class FeedEvent extends Equatable {}
 
 class LoadFeed extends FeedEvent {
-  final int pageNumber;
+  final int? pageNumber;
 
-  LoadFeed({required this.pageNumber});
+  LoadFeed({this.pageNumber});
   @override
   List<Object?> get props => [pageNumber];
 }

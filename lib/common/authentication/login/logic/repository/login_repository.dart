@@ -40,8 +40,7 @@ class LoginRepository {
       tokenService.setToken(response.accessToken);
       await userService.loadCurrentUser();
       return response;
-    } catch (e, st) {
-      talker.handle(e, st);
+    } catch (e) {
       rethrow;
     }
   }

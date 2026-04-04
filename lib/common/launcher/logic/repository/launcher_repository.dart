@@ -62,8 +62,7 @@ class LauncherRepository {
       }
 
       return response;
-    } catch (e, st) {
-      talker.handle(e, st);
+    } catch (e) {
       rethrow;
     }
   }

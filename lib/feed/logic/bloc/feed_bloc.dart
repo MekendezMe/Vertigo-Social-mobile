@@ -10,6 +10,7 @@ import 'package:social_network_flutter/common/framework/notifications/notificati
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
+import 'package:social_network_flutter/comment/logic/entities/request/get_comments_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';
@@ -51,7 +52,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     try {
       emit(FeedLoading());
       final response = await feedRepository.getPosts(
-        GetPostsRequest(pageNumber: event.pageNumber),
+        GetPostsRequest(pageNumber: event.pageNumber ?? 1),
       );
       if (userService.currentUser == null) {
         throw AuthException();
@@ -85,6 +86,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         current.copyWith(
           isLoadingMore: false,
           posts: [...current.posts, ...response.posts],
+          currentPage: event.pageNumber,
           isLastPage: response.isLastPage,
         ),
       );
@@ -102,11 +104,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     try {
       emit(currentState.copyWith(isCreating: true));
       final createdPost = await feedRepository.createPost(
-        CreatePostRequest(
-          userId: userService.currentUserId,
-          text: event.text,
-          images: event.images,
-        ),
+        CreatePostRequest(text: event.text, images: event.images),
       );
       emit(
         currentState.copyWith(

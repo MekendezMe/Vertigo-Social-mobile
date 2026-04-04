@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/navigation/navigation_coordinator.dart';
-import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/ui/screens/feed_screen.dart';
 import 'package:social_network_flutter/feed/ui/widgets/modal_gallery_widget.dart';
@@ -10,11 +9,13 @@ class FeedCoordinator extends NavigationCoordinator {
   final DIContainer diContainer;
   final Function({required BuildContext context}) onShowProfile;
   final Function({required BuildContext context}) onShowSettings;
+  final Function({required BuildContext context}) onShowComments;
 
   FeedCoordinator({
     required this.diContainer,
     required this.onShowProfile,
     required this.onShowSettings,
+    required this.onShowComments,
   });
 
   // void onShowMain({required BuildContext context}) {
@@ -38,9 +39,9 @@ class FeedCoordinator extends NavigationCoordinator {
   Widget showMain() {
     return FeedScreen(
       feedBloc: diContainer.resolve<FeedBloc>(),
-      logoutHandler: diContainer.resolve<ILogoutHandler>(),
       onShowProfile: onShowProfile,
       onShowSettings: onShowSettings,
+      onShowComments: onShowComments,
       onShowGallery:
           ({
             required BuildContext context,

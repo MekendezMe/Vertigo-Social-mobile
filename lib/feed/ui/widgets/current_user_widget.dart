@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/helpers/date_parser.dart';
 
 Widget currentUserWidget({required BuildContext context, required Post post}) {
+  DateTime createdAt = parseCustomDate(post.createdAt);
   final avatarUrl = post.creator.avatar;
   final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
   return Container(
@@ -34,7 +36,7 @@ Widget currentUserWidget({required BuildContext context, required Post post}) {
                 ),
               ],
             ),
-            Text("сегодня в ${post.createdAt.hour}:${post.createdAt.minute}"),
+            Text("сегодня в ${createdAt.hour}:${createdAt.minute}"),
           ],
         ),
       ],
