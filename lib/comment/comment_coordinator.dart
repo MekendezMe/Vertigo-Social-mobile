@@ -10,11 +10,14 @@ class CommentCoordinator extends NavigationCoordinator {
 
   CommentCoordinator({required this.diContainer});
 
-  void onShowCommentScreen({required BuildContext context}) {
-    _onShowCommentModal(context);
+  void onShowCommentScreen({
+    required BuildContext context,
+    required int postId,
+  }) {
+    _onShowCommentModal(context, postId);
   }
 
-  void _onShowCommentModal(BuildContext context) {
+  void _onShowCommentModal(BuildContext context, postId) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -22,8 +25,10 @@ class CommentCoordinator extends NavigationCoordinator {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) =>
-          CommentScreen(commentBloc: diContainer.resolve<CommentBloc>()),
+      builder: (context) => CommentScreen(
+        commentBloc: diContainer.resolve<CommentBloc>(),
+        postId: postId,
+      ),
     );
   }
 }

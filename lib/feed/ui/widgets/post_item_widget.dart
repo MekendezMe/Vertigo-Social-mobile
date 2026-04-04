@@ -19,7 +19,8 @@ Widget postItemWidget({
     required int index,
   })
   onShowGallery,
-  required Function({required BuildContext context}) onShowComments,
+  required Function({required BuildContext context, required int postId})
+  onShowComments,
 }) {
   return baseContainerWidget(
     context: context,
@@ -67,7 +68,8 @@ Widget postItemWidget({
                 child: baseIconButton(
                   context: context,
                   post: post,
-                  onPressed: () => onShowComments(context: context),
+                  onPressed: () =>
+                      onShowComments(context: context, postId: post.id),
                   icon: Icons.comment,
                   text: "${post.commentsCount}",
                   color: context.color.darkGray,

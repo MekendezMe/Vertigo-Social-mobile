@@ -1,13 +1,11 @@
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
-import 'package:social_network_flutter/comment/logic/entities/request/get_comments_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/create_post_response.dart';
-import 'package:social_network_flutter/comment/logic/entities/response/get_comments_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_posts_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/like_post_response.dart';

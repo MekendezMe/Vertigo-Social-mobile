@@ -18,7 +18,7 @@ Widget commentItemWidget({
       : '?';
   return Container(
     margin: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-    padding: EdgeInsets.only(bottom: 20, top: 14, right: 18, left: 14),
+    padding: EdgeInsets.only(bottom: 16, top: 14, right: 6, left: 10),
     decoration: BoxDecoration(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(20),
@@ -66,43 +66,41 @@ Widget commentItemWidget({
           children: [
             Text(createdDate, style: context.theme.textTheme.bodySmall),
             SizedBox(width: 6),
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () => _onShowAnswers(
-                    commentBloc: commentBloc,
-                    comment: comment,
+            IconButton(
+              onPressed: () =>
+                  _onShowAnswers(commentBloc: commentBloc, comment: comment),
+              icon: Row(
+                children: [
+                  Icon(Icons.comment),
+                  SizedBox(width: 6),
+                  Text(
+                    "${comment.answersCount}",
+                    style: context.theme.textTheme.bodySmall,
                   ),
-                  icon: Icon(Icons.comment),
-                  iconSize: 20,
-                  color: context.color.darkGray,
-                ),
-                SizedBox(width: 6),
-                Text(
-                  "${comment.answersCount}",
-                  style: context.theme.textTheme.bodySmall,
-                ),
-              ],
+                ],
+              ),
+              iconSize: 20,
+              color: context.color.darkGray,
             ),
-            SizedBox(width: 6),
+            SizedBox(width: 8),
             Text("Ответить", style: context.theme.textTheme.bodySmall),
             Spacer(),
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.thumb_up),
-                  iconSize: comment.likedByUser ? 25 : 20,
-                  color: comment.likedByUser
-                      ? context.color.skyBlue
-                      : context.color.darkGray,
-                ),
-                SizedBox(width: 6),
-                Text(
-                  "${comment.likesCount}",
-                  style: context.theme.textTheme.bodySmall,
-                ),
-              ],
+            IconButton(
+              onPressed: () {},
+              icon: Row(
+                children: [
+                  Icon(Icons.thumb_up),
+                  SizedBox(width: 6),
+                  Text(
+                    "${comment.likesCount}",
+                    style: context.theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              iconSize: comment.likedByUser ? 25 : 20,
+              color: comment.likedByUser
+                  ? context.color.skyBlue
+                  : context.color.darkGray,
             ),
           ],
         ),

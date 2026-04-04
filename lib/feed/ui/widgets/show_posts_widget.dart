@@ -21,7 +21,8 @@ class ShowPostsWidget extends StatefulWidget {
     required int index,
   })
   onShowGallery;
-  final Function({required BuildContext context}) onShowComments;
+  final Function({required BuildContext context, required int postId})
+  onShowComments;
 
   @override
   State<ShowPostsWidget> createState() => _ShowPostsWidgetState();

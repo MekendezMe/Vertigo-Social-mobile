@@ -11,5 +11,5 @@ DateTime parseCustomDate(String dateString) {
 }
 
 String formatDate(String date) {
-  return DateFormat('d MMM в H:mm', 'ru').format(parseCustomDate(date));
+  return DateFormat('d MMM в H:mm').format(parseCustomDate(date));
 }

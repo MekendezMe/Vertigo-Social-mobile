@@ -10,7 +10,6 @@ import 'package:social_network_flutter/common/framework/notifications/notificati
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
-import 'package:social_network_flutter/comment/logic/entities/request/get_comments_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';

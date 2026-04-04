@@ -9,7 +9,8 @@ class FeedCoordinator extends NavigationCoordinator {
   final DIContainer diContainer;
   final Function({required BuildContext context}) onShowProfile;
   final Function({required BuildContext context}) onShowSettings;
-  final Function({required BuildContext context}) onShowComments;
+  final Function({required BuildContext context, required int postId})
+  onShowComments;
 
   FeedCoordinator({
     required this.diContainer,

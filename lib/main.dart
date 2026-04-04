@@ -45,8 +45,8 @@ final mainCoordinator = FeedCoordinator(
   diContainer: diContainer,
   onShowProfile: ({required BuildContext context}) => {"qwe": "qq"},
   onShowSettings: ({required BuildContext context}) => {"qwe": "qq"},
-  onShowComments: ({required BuildContext context}) =>
-      commentCoordinator.onShowCommentScreen(context: context),
+  onShowComments: ({required BuildContext context, required int postId}) =>
+      commentCoordinator.onShowCommentScreen(context: context, postId: postId),
 );
 
 final commentCoordinator = CommentCoordinator(diContainer: diContainer);

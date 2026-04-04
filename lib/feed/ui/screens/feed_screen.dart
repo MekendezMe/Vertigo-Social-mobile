@@ -21,7 +21,8 @@ class FeedScreen extends StatefulWidget {
   final FeedBloc feedBloc;
   final Function({required BuildContext context}) onShowProfile;
   final Function({required BuildContext context}) onShowSettings;
-  final Function({required BuildContext context}) onShowComments;
+  final Function({required BuildContext context, required int postId})
+  onShowComments;
   final Function({
     required BuildContext context,
     required List<String> images,

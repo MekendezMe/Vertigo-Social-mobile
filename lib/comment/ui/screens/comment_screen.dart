@@ -5,8 +5,13 @@ import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart
 import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
 
 class CommentScreen extends StatefulWidget {
-  const CommentScreen({super.key, required this.commentBloc});
+  const CommentScreen({
+    super.key,
+    required this.commentBloc,
+    required this.postId,
+  });
   final CommentBloc commentBloc;
+  final int postId;
 
   @override
   State<CommentScreen> createState() => _CommentScreenState();
@@ -17,6 +22,7 @@ class _CommentScreenState extends State<CommentScreen> {
   @override
   void initState() {
     _scrollController = ScrollController()..addListener(_onScroll);
+    widget.commentBloc.add(LoadComments(postId: widget.postId));
     super.initState();
   }
 
