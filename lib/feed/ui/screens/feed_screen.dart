@@ -6,6 +6,7 @@ import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/ui/widgets/show_posts_widget.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
+import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
 import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
 import 'package:social_network_flutter/ui/widgets/drawer/custom_drawer.dart';
 
@@ -41,6 +42,28 @@ class _FeedScreenState extends State<FeedScreen> {
     widget.feedBloc.add(LoadFeed());
   }
 
+  Widget _buildLoadingFailure({String? error}) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            error ?? "Ошибка при загрузке",
+            style: context.theme.textTheme.headlineMedium,
+          ),
+          SizedBox(height: 8),
+          mainButton(
+            context: context,
+            child: Text("Повторить"),
+            onTap: () {
+              widget.feedBloc.add(LoadFeed());
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,6 +86,9 @@ class _FeedScreenState extends State<FeedScreen> {
             return Center(
               child: customCircularProgressIndicator(context: context),
             );
+          }
+          if (state is FeedLoadingFailure) {
+            return _buildLoadingFailure(error: state.error?.toString());
           }
           if (state is FeedLoaded) {
             return RefreshIndicator(

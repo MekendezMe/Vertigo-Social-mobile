@@ -21,6 +21,7 @@ class CommentCoordinator extends NavigationCoordinator {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: context.color.veryLightGray,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

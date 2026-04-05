@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_network_flutter/comment/logic/entities/request/create_comments_request.dart';
 import 'package:social_network_flutter/comment/logic/entities/request/get_answers_request.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
@@ -24,8 +25,8 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     required this.userService,
   }) : super(CommentInitial()) {
     on<LoadComments>(_onLoadComments);
-
     on<LoadMoreComments>(_onLoadMoreComments);
+    on<CreateComment>(_onCreateComment);
 
     on<LoadAnswers>(_onLoadAnswers);
     on<LoadMoreAnswers>(_onLoadMoreAnswers);
@@ -82,6 +83,33 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       );
     } catch (e, st) {
       emit(CommentsLoadingFailure(error: e));
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onCreateComment(
+    CreateComment event,
+    Emitter<CommentState> emit,
+  ) async {
+    if (state is! CommentsLoaded) {
+      return;
+    }
+    final current = state as CommentsLoaded;
+    emit(current.copyWith(isCreate: true));
+    try {
+      final response = await commentRepository.createComment(
+        CreateCommentsRequest(postId: event.postId, content: event.content),
+      );
+      emit(
+        current.copyWith(
+          comments: [response.comment, ...current.comments],
+          isCreate: false,
+          createError: null,
+        ),
+      );
+    } catch (e, st) {
+      emit(current.copyWith(createError: e.toString(), isCreate: false));
       talker.handle(e, st);
       errorHandler.handle(e);
     }

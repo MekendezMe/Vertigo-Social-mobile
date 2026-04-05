@@ -58,6 +58,15 @@ Widget commentItemWidget({
               comment.author.username,
               style: context.theme.textTheme.bodyMedium,
             ),
+            if (comment.answerToUser != null) ...[
+              SizedBox(width: 6),
+              Text(
+                "@${comment.answerToUser!.username}",
+                style: context.theme.textTheme.bodyMedium!.modify(
+                  color: context.color.gray,
+                ),
+              ),
+            ],
           ],
         ),
         SizedBox(height: 8),

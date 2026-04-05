@@ -19,6 +19,8 @@ class CommentsLoaded extends CommentState {
   final bool isLastPage;
   final int currentPage;
   final bool isLoadingMore;
+  final bool isCreate;
+  final String? createError;
 
   final List<Comment> answers;
   final bool answerIsLastPage;
@@ -34,6 +36,8 @@ class CommentsLoaded extends CommentState {
     this.parent,
     this.currentPage = 1,
     this.isLoadingMore = false,
+    this.isCreate = false,
+    this.createError,
     this.answers = const [],
     this.answerIsLastPage = false,
     this.answerCurrentPage = 1,
@@ -48,6 +52,8 @@ class CommentsLoaded extends CommentState {
     post,
     currentPage,
     isLoadingMore,
+    isCreate,
+    createError,
     answers,
     answerIsLastPage,
     answerCurrentPage,
@@ -70,6 +76,8 @@ class CommentsLoaded extends CommentState {
     Comment? parent,
     String? answersError,
     bool? answersLoading,
+    bool? isCreate,
+    String? createError,
   }) {
     return CommentsLoaded(
       comments: comments ?? this.comments,
@@ -84,6 +92,8 @@ class CommentsLoaded extends CommentState {
       parent: parent ?? this.parent,
       answersError: answersError ?? this.answersError,
       answersLoading: answersLoading ?? this.answersLoading,
+      isCreate: isCreate ?? this.isCreate,
+      createError: createError ?? this.createError,
     );
   }
 }

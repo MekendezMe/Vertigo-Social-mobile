@@ -1,4 +1,7 @@
+import 'package:social_network_flutter/comment/logic/entities/request/create_comments_request.dart';
 import 'package:social_network_flutter/comment/logic/entities/request/get_answers_request.dart';
+import 'package:social_network_flutter/comment/logic/entities/response/create_answers_response.dart';
+import 'package:social_network_flutter/comment/logic/entities/response/create_comments_response.dart';
 import 'package:social_network_flutter/comment/logic/entities/response/get_answers_response.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
@@ -28,6 +31,28 @@ class CommentRepository {
         );
       }
 
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CreateCommentsResponse> createComment(
+    CreateCommentsRequest request,
+  ) async {
+    try {
+      final response = await requestSender.send<CreateCommentsResponse>(
+        request: request,
+        fromJson: (json) => CreateCommentsResponse.fromJson(json),
+        body: request.toJson(),
+      );
+
+      if (response == null) {
+        throw ApiException(
+          message: "Пустой ответ сервера в методе ${request.method}",
+          code: -1,
+        );
+      }
       return response;
     } catch (e) {
       rethrow;

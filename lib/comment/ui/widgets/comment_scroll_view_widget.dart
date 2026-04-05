@@ -16,10 +16,11 @@ Widget commentScrollView(
   bool isEmpty = current.type == NavigationType.comments
       ? state.comments.isEmpty
       : state.answers.isEmpty;
+  final key = current.type == NavigationType.comments
+      ? "${current.type.name}_${state.post.id}"
+      : null;
   return CustomScrollView(
-    key: PageStorageKey(
-      '${current.type.name}_${current.type == NavigationType.comments ? state.post?.id : current.commentId}',
-    ),
+    key: key != null ? PageStorageKey(key) : null,
     controller: controller,
     slivers: [
       if (isEmpty)

@@ -12,6 +12,7 @@ import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart
 import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
 import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
 import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
+import 'package:social_network_flutter/ui/widgets/text_field/main_text_field.dart';
 
 class CommentScreen extends StatefulWidget {
   const CommentScreen({
@@ -30,6 +31,8 @@ class _CommentScreenState extends State<CommentScreen> {
   final List<NavigationItem> _navigationStack = [];
   final Map<String, ScrollController> _scrollControllers = {};
   ScrollController? _currentScrollController;
+  final TextEditingController _commentController = TextEditingController();
+  bool _isCommentError = false;
 
   @override
   void dispose() {
@@ -41,7 +44,10 @@ class _CommentScreenState extends State<CommentScreen> {
   }
 
   ScrollController _getScrollController(int parentId, NavigationType type) {
-    final key = '${type.name}_$parentId';
+    String key = type.name;
+    // if (type == NavigationType.comments) {
+    //   key += "_$parentId";
+    // }
     if (!_scrollControllers.containsKey(key)) {
       _scrollControllers[key] = ScrollController();
     }
@@ -192,36 +198,45 @@ class _CommentScreenState extends State<CommentScreen> {
                       ),
                     );
                   }
-                  return RefreshIndicator(
-                    backgroundColor: context.color.darkGray,
-                    color: context.color.lightPurple,
-                    onRefresh: () async {
-                      final completer = Completer<void>();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: RefreshIndicator(
+                          backgroundColor: context.color.darkGray,
+                          color: context.color.lightPurple,
+                          onRefresh: () async {
+                            final completer = Completer<void>();
+                            _commentController.text = "";
 
-                      final subscription = widget.commentBloc.stream.listen((
-                        state,
-                      ) {
-                        if (state is CommentsLoaded ||
-                            state is CommentsLoadingFailure) {
-                          completer.complete();
-                        }
-                      });
+                            final subscription = widget.commentBloc.stream
+                                .listen((state) {
+                                  if (state is CommentsLoaded ||
+                                      state is CommentsLoadingFailure) {
+                                    completer.complete();
+                                  }
+                                });
 
-                      _loadComments();
+                            _loadComments();
 
-                      await completer.future;
+                            await completer.future;
 
-                      await subscription.cancel();
-                    },
-                    child: commentScrollView(
-                      context,
-                      state,
-                      _navigationStack.last,
-                      scrollController,
-                      ({required Comment comment}) =>
-                          _navigateToAnswers(comment),
-                      widget.commentBloc,
-                    ),
+                            await subscription.cancel();
+                          },
+                          child: commentScrollView(
+                            context,
+                            state,
+                            _navigationStack.last,
+                            scrollController,
+                            ({required Comment comment}) =>
+                                _navigateToAnswers(comment),
+                            widget.commentBloc,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      commentCreateWidget(context, state),
+                    ],
                   );
                 }
                 return SizedBox.shrink();
@@ -231,6 +246,80 @@ class _CommentScreenState extends State<CommentScreen> {
         ],
       ),
     );
+  }
+
+  Widget commentCreateWidget(BuildContext context, CommentsLoaded state) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 14,
+            right: 14,
+            top: 14,
+            bottom: keyboardHeight + 14,
+          ),
+          child: Column(
+            children: [
+              Divider(color: context.color.darkGray),
+              SizedBox(height: 14),
+              mainTextField(
+                context: context,
+                controller: _commentController,
+                style: context.theme.textTheme.bodyMedium!,
+                onChanged: _commentOnChanged,
+                isInputError: _isCommentError,
+              ),
+              SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: SizedBox(
+                  width: 200,
+                  child: mainButton(
+                    context: context,
+                    child: state.isCreate
+                        ? Padding(
+                            padding: EdgeInsets.all(6),
+                            child: customCircularProgressIndicator(
+                              context: context,
+                            ),
+                          )
+                        : Text("Комментировать"),
+                    onTap: () => createComment(state.post.id),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void createComment(int postId) {
+    if (!_isCorrectComment()) {
+      return;
+    }
+    widget.commentBloc.add(
+      CreateComment(postId: postId, content: _commentController.text),
+    );
+  }
+
+  bool _isCorrectComment() {
+    if (_commentController.text.isEmpty) {
+      setState(() {
+        _isCommentError = true;
+      });
+      return false;
+    }
+    _isCommentError = false;
+    return true;
+  }
+
+  void _commentOnChanged(String value) {
+    setState(() {
+      _isCommentError = false;
+    });
   }
 
   void _onScroll() {
