@@ -19,3 +19,21 @@ class LoadMoreComments extends CommentEvent {
   @override
   List<Object?> get props => [pageNumber, postId];
 }
+
+class LoadAnswers extends CommentEvent {
+  final int? pageNumber;
+  final int commentId;
+
+  LoadAnswers({required this.commentId, this.pageNumber});
+  @override
+  List<Object?> get props => [commentId, pageNumber];
+}
+
+class LoadMoreAnswers extends CommentEvent {
+  final int pageNumber;
+  final int commentId;
+
+  LoadMoreAnswers({required this.pageNumber, required this.commentId});
+  @override
+  List<Object?> get props => [pageNumber, commentId];
+}

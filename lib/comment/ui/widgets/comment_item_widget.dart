@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
-import 'package:social_network_flutter/feed/logic/entites/comment.dart';
+import 'package:social_network_flutter/comment/logic/entities/comment.dart';
 import 'package:social_network_flutter/helpers/date_parser.dart';
 
 Widget commentItemWidget({
   required BuildContext context,
   required Comment comment,
   required CommentBloc commentBloc,
+  required VoidCallback? onReplyPressed,
 }) {
   final avatarUrl = comment.author.avatar?.isNotEmpty == true
       ? comment.author.avatar
@@ -67,8 +68,7 @@ Widget commentItemWidget({
             Text(createdDate, style: context.theme.textTheme.bodySmall),
             SizedBox(width: 6),
             IconButton(
-              onPressed: () =>
-                  _onShowAnswers(commentBloc: commentBloc, comment: comment),
+              onPressed: () => onReplyPressed?.call(),
               icon: Row(
                 children: [
                   Icon(Icons.comment),
@@ -108,8 +108,3 @@ Widget commentItemWidget({
     ),
   );
 }
-
-void _onShowAnswers({
-  required CommentBloc commentBloc,
-  required Comment comment,
-}) {}

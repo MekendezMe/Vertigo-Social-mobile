@@ -1,4 +1,4 @@
-import 'package:social_network_flutter/feed/logic/entites/comment.dart';
+import 'package:social_network_flutter/comment/logic/entities/comment.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart' show Post;
 
 class GetCommentsResponse {

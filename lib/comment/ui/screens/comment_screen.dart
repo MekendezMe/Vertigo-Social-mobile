@@ -1,8 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_network_flutter/comment/ui/widgets/comment_item_widget.dart';
+import 'package:social_network_flutter/comment/logic/entities/comment.dart';
+import 'package:social_network_flutter/comment/logic/helpers/navigation_type_helper.dart';
+import 'package:social_network_flutter/comment/ui/widgets/build_drag_handle_widget.dart';
+import 'package:social_network_flutter/comment/ui/widgets/build_header_widget.dart';
+import 'package:social_network_flutter/comment/ui/widgets/comment_scroll_view_widget.dart';
+import 'package:social_network_flutter/comment/ui/widgets/empty_comment_widget.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
+import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
+import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
 
 class CommentScreen extends StatefulWidget {
   const CommentScreen({
@@ -18,16 +27,110 @@ class CommentScreen extends StatefulWidget {
 }
 
 class _CommentScreenState extends State<CommentScreen> {
-  late final ScrollController _scrollController;
+  final List<NavigationItem> _navigationStack = [];
+  final Map<String, ScrollController> _scrollControllers = {};
+  ScrollController? _currentScrollController;
+
+  @override
+  void dispose() {
+    _currentScrollController?.removeListener(_onScroll);
+    for (var controller in _scrollControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  ScrollController _getScrollController(int parentId, NavigationType type) {
+    final key = '${type.name}_$parentId';
+    if (!_scrollControllers.containsKey(key)) {
+      _scrollControllers[key] = ScrollController();
+    }
+    return _scrollControllers[key]!;
+  }
+
+  int getCurrentId(NavigationItem item) {
+    if (item.type == NavigationType.comments) {
+      return item.postId!;
+    } else {
+      return item.commentId!;
+    }
+  }
+
+  void updateController() {
+    if (_currentScrollController != null) {
+      _currentScrollController?.removeListener(_onScroll);
+    }
+    final current = _navigationStack.last;
+    _currentScrollController = _getScrollController(
+      getCurrentId(current),
+      current.type,
+    );
+    _currentScrollController?.addListener(_onScroll);
+  }
+
   @override
   void initState() {
-    _scrollController = ScrollController()..addListener(_onScroll);
-    widget.commentBloc.add(LoadComments(postId: widget.postId));
     super.initState();
+    _navigationStack.add(NavigationItem.comments(postId: widget.postId));
+    updateController();
+    _loadComments();
+  }
+
+  void _loadComments() {
+    final current = _navigationStack.last;
+    if (current.type == NavigationType.comments) {
+      widget.commentBloc.add(LoadComments(postId: current.postId!));
+    } else {
+      widget.commentBloc.add(LoadAnswers(commentId: current.commentId!));
+    }
+  }
+
+  void _navigateToAnswers(Comment comment) {
+    setState(() {
+      _navigationStack.add(NavigationItem.answers(commentId: comment.id));
+      updateController();
+    });
+
+    _loadComments();
+  }
+
+  void _navigateBack() {
+    if (_navigationStack.length > 1) {
+      setState(() {
+        _navigationStack.removeLast();
+        updateController();
+      });
+    }
+  }
+
+  bool get _canGoBack => _navigationStack.length > 1;
+
+  Widget _buildLoadingFailure({String? error}) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          emptyCommentWidget(error ?? "Ошибка при загрузке", context),
+          SizedBox(height: 8),
+          mainButton(
+            context: context,
+            child: Text("Повторить"),
+            onTap: () {
+              _loadComments();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoading(BuildContext context) {
+    return Center(child: customCircularProgressIndicator(context: context));
   }
 
   @override
   Widget build(BuildContext context) {
+    final current = _navigationStack.last;
     return Container(
       height: MediaQuery.of(context).size.height * 0.9,
       decoration: BoxDecoration(
@@ -36,49 +139,89 @@ class _CommentScreenState extends State<CommentScreen> {
       ),
       child: Column(
         children: [
-          _buildDragHandle(context),
-          SizedBox(height: 16),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'Комментарии',
-              style: context.theme.textTheme.headlineMedium,
-            ),
-          ),
-          SizedBox(height: 16),
+          buildDragHandle(context),
+          buildHeader(context, current, _canGoBack, _navigateBack),
           Divider(color: context.color.darkGray),
           Expanded(
             child: BlocConsumer<CommentBloc, CommentState>(
               bloc: widget.commentBloc,
               listener: (context, state) {},
               builder: (context, state) {
+                if (state is CommentsLoading) {
+                  return _buildLoading(context);
+                }
                 if (state is CommentsLoadingFailure) {
-                  emptyCommentWidget();
+                  return _buildLoadingFailure();
                 }
                 if (state is CommentsLoaded) {
-                  return CustomScrollView(
-                    controller: _scrollController,
-                    slivers: [
-                      if (state.comments.isEmpty)
-                        emptyCommentWidget()
-                      else
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            final comment = state.comments[index];
-                            return commentItemWidget(
-                              comment: comment,
-                              commentBloc: widget.commentBloc,
-                              context: context,
-                              // onLikePressed: () {
-                              //   commentBloc.add(ToggleLike(postId: post.id));
-                              // },
-                            );
-                          }, childCount: state.comments.length),
-                        ),
-                    ],
+                  bool isAnswersError =
+                      current.type == NavigationType.answers &&
+                      state.answersError != null;
+                  final isComments = current.type == NavigationType.comments;
+                  final scrollController = _getScrollController(
+                    getCurrentId(current),
+                    current.type,
+                  );
+                  final isEmpty = isComments
+                      ? state.comments.isEmpty
+                      : state.answers.isEmpty;
+                  if (state.answersLoading) {
+                    return _buildLoading(context);
+                  }
+                  if (isAnswersError) {
+                    return _buildLoadingFailure(error: state.answersError);
+                  }
+                  if (isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            isComments
+                                ? Icons.chat_bubble_outline
+                                : Icons.reply_outlined,
+                            size: 48,
+                            color: context.color.gray,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            isComments ? 'Нет комментариев' : 'Нет ответов',
+                            style: context.theme.textTheme.headlineMedium,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return RefreshIndicator(
+                    backgroundColor: context.color.darkGray,
+                    color: context.color.lightPurple,
+                    onRefresh: () async {
+                      final completer = Completer<void>();
+
+                      final subscription = widget.commentBloc.stream.listen((
+                        state,
+                      ) {
+                        if (state is CommentsLoaded ||
+                            state is CommentsLoadingFailure) {
+                          completer.complete();
+                        }
+                      });
+
+                      _loadComments();
+
+                      await completer.future;
+
+                      await subscription.cancel();
+                    },
+                    child: commentScrollView(
+                      context,
+                      state,
+                      _navigationStack.last,
+                      scrollController,
+                      ({required Comment comment}) =>
+                          _navigateToAnswers(comment),
+                      widget.commentBloc,
+                    ),
                   );
                 }
                 return SizedBox.shrink();
@@ -90,48 +233,46 @@ class _CommentScreenState extends State<CommentScreen> {
     );
   }
 
-  Widget emptyCommentWidget() {
-    return SliverFillRemaining(
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: Text(
-          'Нет комментариев',
-          style: context.theme.textTheme.bodyLarge,
-        ),
-      ),
-    );
-  }
-
   void _onScroll() {
-    if (!_scrollController.hasClients) return;
+    final currentStack = _navigationStack.last;
+    bool isComments = currentStack.type == NavigationType.comments;
+    final id = getCurrentId(currentStack);
+    final scrollController = _getScrollController(id, currentStack.type);
+
+    if (!scrollController.hasClients) return;
 
     final blocState = context.read<CommentBloc>().state;
 
-    if (blocState is! CommentsLoaded || (blocState.isLoadingMore ?? false)) {
-      return;
-    }
-    final max = _scrollController.position.maxScrollExtent;
-    final current = _scrollController.position.pixels;
+    if (blocState is! CommentsLoaded) return;
 
-    if (current >= max - 200 && !(blocState.isLastPage)) {
-      final nextPage = blocState.currentPage + 1;
-      context.read<CommentBloc>().add(
-        LoadMoreComments(pageNumber: nextPage, postId: blocState.post.id),
-      );
-    }
-  }
+    final isLoadingMore = currentStack.type == NavigationType.comments
+        ? blocState.isLoadingMore
+        : blocState.answerIsLoadingMore;
 
-  Widget _buildDragHandle(BuildContext context) {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.only(top: 12),
-        width: 40,
-        height: 4,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-    );
+    final isLastPage = currentStack.type == NavigationType.comments
+        ? blocState.isLastPage
+        : blocState.answerIsLastPage;
+
+    if (isLoadingMore || isLastPage) return;
+
+    final max = scrollController.position.maxScrollExtent;
+    final current = scrollController.position.pixels;
+
+    if (current >= max - 200) {
+      if (isComments) {
+        final nextPage = blocState.currentPage + 1;
+        context.read<CommentBloc>().add(
+          LoadMoreComments(pageNumber: nextPage, postId: blocState.post.id),
+        );
+      } else {
+        final nextPage = blocState.answerCurrentPage + 1;
+        context.read<CommentBloc>().add(
+          LoadMoreAnswers(
+            pageNumber: nextPage,
+            commentId: blocState.parent!.id,
+          ),
+        );
+      }
+    }
   }
 }
