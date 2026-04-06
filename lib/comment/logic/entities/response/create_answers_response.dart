@@ -1,11 +1,11 @@
 import 'package:social_network_flutter/comment/logic/entities/comment.dart';
 
 class CreateAnswersResponse {
-  final Comment comment;
+  final Comment answer;
 
   factory CreateAnswersResponse.fromJson(Map<String, dynamic> json) {
-    return CreateAnswersResponse(comment: Comment.fromJson(json['comment']));
+    return CreateAnswersResponse(answer: Comment.fromJson(json));
   }
 
-  CreateAnswersResponse({required this.comment});
+  CreateAnswersResponse({required this.answer});
 }

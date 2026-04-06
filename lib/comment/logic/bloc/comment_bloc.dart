@@ -1,12 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_network_flutter/comment/logic/entities/request/create_answers_request.dart';
 import 'package:social_network_flutter/comment/logic/entities/request/create_comments_request.dart';
 import 'package:social_network_flutter/comment/logic/entities/request/get_answers_request.dart';
+import 'package:social_network_flutter/comment/logic/entities/request/like_comment_request.dart';
+import 'package:social_network_flutter/comment/logic/entities/request/unlike_comment_request.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/comment/logic/entities/comment.dart';
 import 'package:social_network_flutter/comment/logic/entities/request/get_comments_request.dart';
 import 'package:social_network_flutter/comment/logic/repository/comment_repository.dart';
+import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -30,6 +34,9 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
 
     on<LoadAnswers>(_onLoadAnswers);
     on<LoadMoreAnswers>(_onLoadMoreAnswers);
+    on<CreateAnswer>(_onCreateAnswer);
+
+    on<ToggleLike>(_onToggleLike);
   }
 
   Future<void> _onLoadComments(
@@ -103,13 +110,20 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       );
       emit(
         current.copyWith(
-          comments: [response.comment, ...current.comments],
+          comments: [...current.comments, response.comment],
           isCreate: false,
           createError: null,
+          isCreateSuccess: true,
         ),
       );
     } catch (e, st) {
-      emit(current.copyWith(createError: e.toString(), isCreate: false));
+      emit(
+        current.copyWith(
+          createError: e.toString(),
+          isCreate: false,
+          isCreateSuccess: false,
+        ),
+      );
       talker.handle(e, st);
       errorHandler.handle(e);
     }
@@ -180,5 +194,136 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       talker.handle(e, st);
       errorHandler.handle(e);
     }
+  }
+
+  Future<void> _onCreateAnswer(
+    CreateAnswer event,
+    Emitter<CommentState> emit,
+  ) async {
+    if (state is! CommentsLoaded) {
+      return;
+    }
+    final current = state as CommentsLoaded;
+    emit(current.copyWith(isAnswersCreate: true));
+    try {
+      final response = await commentRepository.createAnswer(
+        CreateAnswersRequest(
+          commentId: event.commentId,
+          content: event.content,
+          userId: event.userId,
+          postId: event.postId,
+        ),
+      );
+      final answers = List<Comment>.from(current.answers);
+      final index = answers.indexWhere((c) => c.id == event.commentId);
+
+      bool isAnswerToRootComment = false;
+
+      if (index != -1) {
+        answers.insert(index + 1, response.answer);
+      } else {
+        answers.add(response.answer);
+        isAnswerToRootComment = true;
+      }
+      emit(
+        current.copyWith(
+          answers: answers,
+          isAnswersCreate: false,
+          isCreateAnswersSuccess: true,
+          isAnswerToRootComment: isAnswerToRootComment,
+        ),
+      );
+    } catch (e, st) {
+      emit(
+        current.copyWith(isAnswersCreate: false, isCreateAnswersSuccess: false),
+      );
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onToggleLike(
+    ToggleLike event,
+    Emitter<CommentState> emit,
+  ) async {
+    if (state is! CommentsLoaded) return;
+    final currentState = state as CommentsLoaded;
+    final comments = event.isComment
+        ? currentState.comments
+        : currentState.answers;
+
+    final targetComment = comments.firstWhere(
+      (comment) => comment.id == event.commentId,
+    );
+    final willLike = !targetComment.likedByUser;
+    final delta = willLike ? 1 : -1;
+    final errorMessage = willLike
+        ? "Не удалось поставить лайк"
+        : "Не удалось убрать лайк";
+    final originalComment = targetComment;
+
+    final optimisticComments = comments.map((comment) {
+      if (comment.id == event.commentId) {
+        return comment.copyWith(
+          likesCount: comment.likesCount + delta,
+          likedByUser: willLike,
+        );
+      }
+      return comment;
+    }).toList();
+
+    emit(currentState.copyWith(comments: optimisticComments, likeError: null));
+
+    try {
+      final response = willLike
+          ? await commentRepository.likeComment(
+              LikeCommentRequest(commentId: event.commentId),
+            )
+          : await commentRepository.unlikeComment(
+              UnlikeCommentRequest(commentId: event.commentId),
+            );
+
+      if (!response.success) {
+        final rolledBackComments = _getRolledBackComments(
+          commentId: event.commentId,
+          originalComment: originalComment,
+          currentState: currentState,
+        );
+        emit(
+          currentState.copyWith(
+            comments: rolledBackComments,
+            likeError: errorMessage,
+          ),
+        );
+        throw ApiException(message: errorMessage);
+      }
+    } catch (e, st) {
+      final rolledBackComments = _getRolledBackComments(
+        commentId: event.commentId,
+        originalComment: originalComment,
+        currentState: currentState,
+      );
+      emit(
+        currentState.copyWith(
+          comments: rolledBackComments,
+          likeError: errorMessage,
+        ),
+      );
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  List<Comment> _getRolledBackComments({
+    required int commentId,
+    required Comment originalComment,
+    required CommentsLoaded currentState,
+  }) {
+    return currentState.comments.map((comment) {
+      if (comment.id == commentId) {
+        return originalComment;
+      }
+      return comment;
+    }).toList();
   }
 }

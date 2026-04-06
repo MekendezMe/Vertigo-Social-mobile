@@ -46,3 +46,29 @@ class LoadMoreAnswers extends CommentEvent {
   @override
   List<Object?> get props => [pageNumber, commentId];
 }
+
+class CreateAnswer extends CommentEvent {
+  final int postId;
+  final String content;
+  final int commentId;
+  final int userId;
+
+  CreateAnswer({
+    required this.postId,
+    required this.content,
+    required this.commentId,
+    required this.userId,
+  });
+  @override
+  List<Object?> get props => [postId, content, commentId, userId];
+}
+
+class ToggleLike extends CommentEvent {
+  final int commentId;
+  final bool isComment;
+
+  ToggleLike({required this.commentId, required this.isComment});
+
+  @override
+  List<Object?> get props => [commentId, isComment];
+}

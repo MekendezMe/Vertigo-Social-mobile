@@ -35,4 +35,26 @@ class Comment {
       createdAt: json['created_at'] as String,
     );
   }
+
+  Comment copyWith({
+    int? id,
+    String? text,
+    User? author,
+    int? answersCount,
+    int? likesCount,
+    bool? likedByUser,
+    User? answerToUser,
+    String? createdAt,
+  }) {
+    return Comment(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      author: author ?? this.author,
+      answersCount: answersCount ?? this.answersCount,
+      likesCount: likesCount ?? this.likesCount,
+      likedByUser: likedByUser ?? this.likedByUser,
+      answerToUser: answerToUser ?? this.answerToUser,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }

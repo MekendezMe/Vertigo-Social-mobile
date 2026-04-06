@@ -13,7 +13,7 @@ Widget buildHeader(
       : 'Ответы';
 
   return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     child: Row(
       children: [
         if (canGoBack)

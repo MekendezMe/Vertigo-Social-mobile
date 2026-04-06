@@ -4,7 +4,7 @@ class CreateCommentsResponse {
   final Comment comment;
 
   factory CreateCommentsResponse.fromJson(Map<String, dynamic> json) {
-    return CreateCommentsResponse(comment: Comment.fromJson(json['comment']));
+    return CreateCommentsResponse(comment: Comment.fromJson(json));
   }
 
   CreateCommentsResponse({required this.comment});

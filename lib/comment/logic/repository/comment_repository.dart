@@ -1,8 +1,12 @@
+import 'package:social_network_flutter/comment/logic/entities/request/create_answers_request.dart';
 import 'package:social_network_flutter/comment/logic/entities/request/create_comments_request.dart';
 import 'package:social_network_flutter/comment/logic/entities/request/get_answers_request.dart';
+import 'package:social_network_flutter/comment/logic/entities/request/like_comment_request.dart';
+import 'package:social_network_flutter/comment/logic/entities/request/unlike_comment_request.dart';
 import 'package:social_network_flutter/comment/logic/entities/response/create_answers_response.dart';
 import 'package:social_network_flutter/comment/logic/entities/response/create_comments_response.dart';
 import 'package:social_network_flutter/comment/logic/entities/response/get_answers_response.dart';
+import 'package:social_network_flutter/comment/logic/entities/response/reaction_comment_response.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/comment/logic/entities/request/get_comments_request.dart';
@@ -81,5 +85,62 @@ class CommentRepository {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<CreateAnswersResponse> createAnswer(
+    CreateAnswersRequest request,
+  ) async {
+    try {
+      final response = await requestSender.send<CreateAnswersResponse>(
+        request: request,
+        fromJson: (json) => CreateAnswersResponse.fromJson(json),
+        body: request.toJson(),
+        pathParams: request.paramsIntoPath(),
+      );
+
+      if (response == null) {
+        throw ApiException(
+          message: "Пустой ответ сервера в методе ${request.method}",
+          code: -1,
+        );
+      }
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ReactionCommentResponse> likeComment(
+    LikeCommentRequest request,
+  ) async {
+    final response = await requestSender.send(
+      request: request,
+      fromJson: (json) => ReactionCommentResponse.fromJson(json),
+      pathParams: request.paramsIntoPath(),
+    );
+    if (response == null) {
+      throw ApiException(
+        message: "Пустой ответ сервера в методе ${request.method}}",
+        code: -1,
+      );
+    }
+    return response;
+  }
+
+  Future<ReactionCommentResponse> unlikeComment(
+    UnlikeCommentRequest request,
+  ) async {
+    final response = await requestSender.send(
+      request: request,
+      fromJson: (json) => ReactionCommentResponse.fromJson(json),
+      pathParams: request.paramsIntoPath(),
+    );
+    if (response == null) {
+      throw ApiException(
+        message: "Пустой ответ сервера в методе ${request.method}",
+        code: -1,
+      );
+    }
+    return response;
   }
 }

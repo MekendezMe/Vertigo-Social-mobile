@@ -3,20 +3,20 @@ import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/comment/logic/entities/comment.dart';
 import 'package:social_network_flutter/helpers/date_parser.dart';
+import 'package:social_network_flutter/ui/widgets/avatar/build_avatar.dart';
 
 Widget commentItemWidget({
   required BuildContext context,
   required Comment comment,
   required CommentBloc commentBloc,
   required VoidCallback? onReplyPressed,
+  required void Function({required Comment comment}) onAnswerPressed,
+  required Function({required Comment comment}) onLikePressed,
 }) {
   final avatarUrl = comment.author.avatar?.isNotEmpty == true
       ? comment.author.avatar
       : null;
   final createdDate = formatDate(comment.createdAt);
-  final firstLetter = comment.author.username.isNotEmpty
-      ? comment.author.username[0].toUpperCase()
-      : '?';
   return Container(
     margin: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
     padding: EdgeInsets.only(bottom: 16, top: 14, right: 6, left: 10),
@@ -27,43 +27,22 @@ Widget commentItemWidget({
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          alignment: WrapAlignment.start,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            if (avatarUrl != null)
-              ClipOval(
-                child: Image.network(
-                  avatarUrl,
-                  width: 45,
-                  height: 45,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return CircleAvatar(
-                      child: Text(
-                        firstLetter,
-                        style: context.theme.textTheme.bodyMedium,
-                      ),
-                    );
-                  },
-                ),
-              )
-            else
-              CircleAvatar(
-                child: Text(
-                  firstLetter,
-                  style: context.theme.textTheme.bodyMedium,
-                ),
-              ),
-            SizedBox(width: 6),
+            buildAvatar(context, comment.author.username, avatarUrl),
             Text(
               comment.author.username,
               style: context.theme.textTheme.bodyMedium,
             ),
             if (comment.answerToUser != null) ...[
-              SizedBox(width: 6),
               Text(
                 "@${comment.answerToUser!.username}",
                 style: context.theme.textTheme.bodyMedium!.modify(
-                  color: context.color.gray,
+                  color: context.color.veryDarkBlueGreen,
                 ),
               ),
             ],
@@ -92,10 +71,13 @@ Widget commentItemWidget({
               color: context.color.darkGray,
             ),
             SizedBox(width: 8),
-            Text("Ответить", style: context.theme.textTheme.bodySmall),
+            GestureDetector(
+              onTap: () => onAnswerPressed(comment: comment),
+              child: Text("Ответить", style: context.theme.textTheme.bodySmall),
+            ),
             Spacer(),
             IconButton(
-              onPressed: () {},
+              onPressed: () => onLikePressed(comment: comment),
               icon: Row(
                 children: [
                   Icon(Icons.thumb_up),

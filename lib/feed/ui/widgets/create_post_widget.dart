@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dart';
+import 'package:social_network_flutter/ui/widgets/avatar/build_avatar.dart';
 import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
 import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
 import 'package:social_network_flutter/ui/widgets/text_field/main_text_field.dart';
@@ -56,7 +57,6 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
   Widget build(BuildContext context) {
     final state = widget.state;
     final avatarUrl = state.user.avatar;
-    final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
     return baseContainerWidget(
       context: context,
       child: Column(
@@ -70,16 +70,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                 Container(
                   padding: EdgeInsets.only(left: 14, top: 10),
                   decoration: BoxDecoration(shape: BoxShape.circle),
-                  child: ClipOval(
-                    child: hasAvatar
-                        ? Image.network(
-                            avatarUrl,
-                            width: 45,
-                            height: 45,
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                  ),
+                  child: buildAvatar(context, state.user.username, avatarUrl),
                 ),
                 SizedBox(width: 20),
                 Expanded(

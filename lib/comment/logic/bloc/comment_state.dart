@@ -21,6 +21,7 @@ class CommentsLoaded extends CommentState {
   final bool isLoadingMore;
   final bool isCreate;
   final String? createError;
+  final bool isCreateSuccess;
 
   final List<Comment> answers;
   final bool answerIsLastPage;
@@ -28,6 +29,11 @@ class CommentsLoaded extends CommentState {
   final bool answersLoading;
   final bool answerIsLoadingMore;
   final String? answersError;
+  final bool isAnswersCreate;
+  final bool isCreateAnswersSuccess;
+  final bool isAnswerToRootComment;
+
+  final String? likeError;
 
   CommentsLoaded({
     required this.comments,
@@ -38,12 +44,17 @@ class CommentsLoaded extends CommentState {
     this.isLoadingMore = false,
     this.isCreate = false,
     this.createError,
+    this.isCreateSuccess = false,
     this.answers = const [],
     this.answerIsLastPage = false,
     this.answerCurrentPage = 1,
     this.answersLoading = false,
     this.answerIsLoadingMore = false,
     this.answersError,
+    this.isAnswersCreate = false,
+    this.isCreateAnswersSuccess = false,
+    this.likeError,
+    this.isAnswerToRootComment = false,
   });
   @override
   List<Object?> get props => [
@@ -61,6 +72,11 @@ class CommentsLoaded extends CommentState {
     parent,
     answersError,
     answersLoading,
+    isCreateSuccess,
+    isAnswersCreate,
+    isCreateAnswersSuccess,
+    isAnswerToRootComment,
+    likeError,
   ];
 
   CommentsLoaded copyWith({
@@ -78,6 +94,11 @@ class CommentsLoaded extends CommentState {
     bool? answersLoading,
     bool? isCreate,
     String? createError,
+    bool? isCreateSuccess,
+    bool? isAnswersCreate,
+    bool? isCreateAnswersSuccess,
+    String? likeError,
+    bool? isAnswerToRootComment,
   }) {
     return CommentsLoaded(
       comments: comments ?? this.comments,
@@ -94,6 +115,12 @@ class CommentsLoaded extends CommentState {
       answersLoading: answersLoading ?? this.answersLoading,
       isCreate: isCreate ?? this.isCreate,
       createError: createError ?? this.createError,
+      isCreateSuccess: isCreateSuccess ?? false,
+      isAnswersCreate: isAnswersCreate ?? this.isAnswersCreate,
+      isCreateAnswersSuccess: isCreateAnswersSuccess ?? false,
+      likeError: likeError ?? this.likeError,
+      isAnswerToRootComment:
+          isAnswerToRootComment ?? this.isAnswerToRootComment,
     );
   }
 }

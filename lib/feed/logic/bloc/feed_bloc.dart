@@ -112,13 +112,13 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
           images: null,
         ),
       );
-      final canSend = await permissionService.canSendNotifications();
-      if (canSend) {
-        await notificationService.showNotification(
-          title: 'Добро пожаловать!',
-          body: 'Вы успешно вошли в приложение',
-        );
-      }
+      // final canSend = await permissionService.canSendNotifications();
+      // if (canSend) {
+      //   await notificationService.showNotification(
+      //     title: 'Добро пожаловать!',
+      //     body: 'Вы успешно вошли в приложение',
+      //   );
+      // }
     } catch (e, st) {
       emit(currentState.copyWith(isCreating: false, createError: e.toString()));
       talker.handle(e, st);
@@ -154,17 +154,9 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
     try {
       final response = willLike
-          ? await feedRepository.likePost(
-              LikePostRequest(
-                userId: userService.currentUserId,
-                postId: event.postId,
-              ),
-            )
+          ? await feedRepository.likePost(LikePostRequest(postId: event.postId))
           : await feedRepository.unlikePost(
-              UnlikePostRequest(
-                userId: userService.currentUserId,
-                postId: event.postId,
-              ),
+              UnlikePostRequest(postId: event.postId),
             );
 
       if (!response.success) {

@@ -6,13 +6,15 @@ import 'package:social_network_flutter/comment/logic/entities/comment.dart';
 import 'package:social_network_flutter/comment/logic/helpers/navigation_type_helper.dart';
 import 'package:social_network_flutter/comment/ui/widgets/build_drag_handle_widget.dart';
 import 'package:social_network_flutter/comment/ui/widgets/build_header_widget.dart';
+import 'package:social_network_flutter/comment/ui/widgets/comment_create_widget.dart';
 import 'package:social_network_flutter/comment/ui/widgets/comment_scroll_view_widget.dart';
 import 'package:social_network_flutter/comment/ui/widgets/empty_comment_widget.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
 import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
-import 'package:social_network_flutter/ui/widgets/text_field/main_text_field.dart';
 
 class CommentScreen extends StatefulWidget {
   const CommentScreen({
@@ -32,7 +34,10 @@ class _CommentScreenState extends State<CommentScreen> {
   final Map<String, ScrollController> _scrollControllers = {};
   ScrollController? _currentScrollController;
   final TextEditingController _commentController = TextEditingController();
-  bool _isCommentError = false;
+  // bool _isCommentError = false;
+  final FocusNode _commentFocusNode = FocusNode();
+  bool _isAnswer = false;
+  Comment? _replyingComment;
 
   @override
   void dispose() {
@@ -40,6 +45,8 @@ class _CommentScreenState extends State<CommentScreen> {
     for (var controller in _scrollControllers.values) {
       controller.dispose();
     }
+    _commentController.dispose();
+    _commentFocusNode.dispose();
     super.dispose();
   }
 
@@ -95,6 +102,7 @@ class _CommentScreenState extends State<CommentScreen> {
     setState(() {
       _navigationStack.add(NavigationItem.answers(commentId: comment.id));
       updateController();
+      _replyingComment = comment;
     });
 
     _loadComments();
@@ -147,11 +155,40 @@ class _CommentScreenState extends State<CommentScreen> {
         children: [
           buildDragHandle(context),
           buildHeader(context, current, _canGoBack, _navigateBack),
-          Divider(color: context.color.darkGray),
+          Divider(color: context.color.darkGray, height: 1, thickness: 0.5),
           Expanded(
             child: BlocConsumer<CommentBloc, CommentState>(
               bloc: widget.commentBloc,
-              listener: (context, state) {},
+              listener: (context, state) {
+                if (state is CommentsLoaded) {
+                  if (state.isCreateSuccess) {
+                    CustomToast.show(
+                      CustomToastWidget(text: "Комментарий создан"),
+                      dismissAfter: const Duration(milliseconds: 500),
+                    );
+                    onSuccessCreate(state);
+                    _animateScroll(toStart: false);
+                  }
+                  if (current.type == NavigationType.comments &&
+                      state.isCreateAnswersSuccess &&
+                      _replyingComment != null) {
+                    _navigateToAnswers(_replyingComment!);
+                    _animateScroll(toStart: false);
+                  }
+                  if (current.type == NavigationType.answers &&
+                      state.isCreateAnswersSuccess) {
+                    CustomToast.show(
+                      CustomToastWidget(text: "Ответ создан"),
+                      dismissAfter: const Duration(milliseconds: 500),
+                    );
+                    onSuccessCreate(state);
+                    if (state.isAnswerToRootComment) {
+                      _animateScroll(toStart: false);
+                    }
+                    // _navigateToFirstComment();
+                  }
+                }
+              },
               builder: (context, state) {
                 if (state is CommentsLoading) {
                   return _buildLoading(context);
@@ -223,19 +260,31 @@ class _CommentScreenState extends State<CommentScreen> {
 
                             await subscription.cancel();
                           },
-                          child: commentScrollView(
-                            context,
-                            state,
-                            _navigationStack.last,
-                            scrollController,
-                            ({required Comment comment}) =>
+                          child: CommentScrollViewWidget(
+                            state: state,
+                            current: _navigationStack.last,
+                            controller: scrollController,
+                            onReplyPressed: ({required Comment comment}) =>
                                 _navigateToAnswers(comment),
-                            widget.commentBloc,
+                            commentBloc: widget.commentBloc,
+                            onAnswerPressed: ({required Comment comment}) =>
+                                onAnswerPressed(comment),
+                            onLikePressed: ({required Comment comment}) =>
+                                onLikePressed(comment),
                           ),
                         ),
                       ),
                       SizedBox(height: 10),
-                      commentCreateWidget(context, state),
+                      CommentCreateWidget(
+                        state: state,
+                        commentBloc: widget.commentBloc,
+                        replyingComment: _replyingComment,
+                        current: current,
+                        onCloseAnswerPressed: onCloseAnswerPressed,
+                        controller: _commentController,
+                        commentFocusNode: _commentFocusNode,
+                        isAnswer: _isAnswer,
+                      ),
                     ],
                   );
                 }
@@ -248,77 +297,53 @@ class _CommentScreenState extends State<CommentScreen> {
     );
   }
 
-  Widget commentCreateWidget(BuildContext context, CommentsLoaded state) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 14,
-            right: 14,
-            top: 14,
-            bottom: keyboardHeight + 14,
-          ),
-          child: Column(
-            children: [
-              Divider(color: context.color.darkGray),
-              SizedBox(height: 14),
-              mainTextField(
-                context: context,
-                controller: _commentController,
-                style: context.theme.textTheme.bodyMedium!,
-                onChanged: _commentOnChanged,
-                isInputError: _isCommentError,
-              ),
-              SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: SizedBox(
-                  width: 200,
-                  child: mainButton(
-                    context: context,
-                    child: state.isCreate
-                        ? Padding(
-                            padding: EdgeInsets.all(6),
-                            child: customCircularProgressIndicator(
-                              context: context,
-                            ),
-                          )
-                        : Text("Комментировать"),
-                    onTap: () => createComment(state.post.id),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void createComment(int postId) {
-    if (!_isCorrectComment()) {
-      return;
-    }
-    widget.commentBloc.add(
-      CreateComment(postId: postId, content: _commentController.text),
-    );
-  }
-
-  bool _isCorrectComment() {
-    if (_commentController.text.isEmpty) {
-      setState(() {
-        _isCommentError = true;
-      });
-      return false;
-    }
-    _isCommentError = false;
-    return true;
-  }
-
-  void _commentOnChanged(String value) {
+  void onSuccessCreate(CommentsLoaded state) {
     setState(() {
-      _isCommentError = false;
+      _commentController.text = "";
+      _isAnswer = false;
+      _replyingComment = null;
+    });
+
+    _commentFocusNode.unfocus();
+  }
+
+  void onCloseAnswerPressed() {
+    setState(() {
+      _isAnswer = false;
+      _replyingComment = null;
+      _commentController.text = "";
+    });
+    _commentFocusNode.unfocus();
+  }
+
+  void onLikePressed(Comment comment) {
+    final isComment = _navigationStack.last.type == NavigationType.comments;
+    widget.commentBloc.add(
+      ToggleLike(commentId: comment.id, isComment: isComment),
+    );
+  }
+
+  void _animateScroll({bool toStart = true}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_currentScrollController != null &&
+          _currentScrollController!.hasClients) {
+        _currentScrollController!.animateTo(
+          toStart ? 0 : _currentScrollController!.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  void onAnswerPressed(Comment comment) {
+    setState(() {
+      _isAnswer = true;
+      _replyingComment = comment;
+    });
+    _commentController.text = "@${comment.author.username} ";
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _commentFocusNode.requestFocus();
     });
   }
 

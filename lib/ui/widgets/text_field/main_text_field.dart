@@ -16,6 +16,7 @@ Widget mainTextField({
   void Function(String value)? onSubmitted,
   void Function(String value)? onChanged,
   void Function()? onEditingComplete,
+  FocusNode? focusNode,
 }) {
   double currentRadius = radius ?? 12;
   return TextField(
@@ -29,6 +30,7 @@ Widget mainTextField({
     onChanged: (value) {
       onChanged?.call(value);
     },
+    focusNode: focusNode,
     decoration: InputDecoration(
       labelStyle: style,
       hintStyle: style,

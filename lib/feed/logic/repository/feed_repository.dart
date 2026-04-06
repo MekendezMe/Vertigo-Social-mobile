@@ -8,7 +8,7 @@ import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_re
 import 'package:social_network_flutter/feed/logic/entites/response/create_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_posts_response.dart';
-import 'package:social_network_flutter/feed/logic/entites/response/like_post_response.dart';
+import 'package:social_network_flutter/feed/logic/entites/response/reaction_post_response.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 class FeedRepository {
@@ -96,37 +96,33 @@ class FeedRepository {
   }
 
   Future<ReactionPostResponse> likePost(LikePostRequest request) async {
-    // final response = await requestSender.send(
-    //   request: request,
-    //   fromJson: (json) => ReactionPostResponse.fromJson(json),
-    // body: request.toJson(),
-    // );
-    // if (response == null) {
-    //   throw ApiException(
-    //     message: "Пустой ответ сервера в методе likePost",
-    //     code: -1,
-    //   );
-    // }
-    // return response;
-
-    return ReactionPostResponse(success: true);
+    final response = await requestSender.send(
+      request: request,
+      fromJson: (json) => ReactionPostResponse.fromJson(json),
+      pathParams: request.paramsIntoPath(),
+    );
+    if (response == null) {
+      throw ApiException(
+        message: "Пустой ответ сервера в методе ${request.method}",
+        code: -1,
+      );
+    }
+    return response;
   }
 
   Future<ReactionPostResponse> unlikePost(UnlikePostRequest request) async {
-    // final response = await requestSender.send(
-    //   request: request,
-    //   fromJson: (json) => ReactionPostResponse.fromJson(json),
-    // body: request.toJson(),
-    // );
-    // if (response == null) {
-    //   throw ApiException(
-    //     message: "Пустой ответ сервера в методе unlikePost",
-    //     code: -1,
-    //   );
-    // }
-    // return response;
-
-    return ReactionPostResponse(success: true);
+    final response = await requestSender.send(
+      request: request,
+      fromJson: (json) => ReactionPostResponse.fromJson(json),
+      pathParams: request.paramsIntoPath(),
+    );
+    if (response == null) {
+      throw ApiException(
+        message: "Пустой ответ сервера в методе ${request.method}",
+        code: -1,
+      );
+    }
+    return response;
   }
 }
 
