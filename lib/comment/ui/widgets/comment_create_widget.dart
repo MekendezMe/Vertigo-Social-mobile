@@ -13,6 +13,7 @@ class CommentCreateWidget extends StatefulWidget {
     required this.state,
     required this.current,
     this.replyingComment,
+    this.rootComment,
     required this.commentBloc,
     required this.onCloseAnswerPressed,
     required this.isAnswer,
@@ -25,6 +26,7 @@ class CommentCreateWidget extends StatefulWidget {
   final FocusNode commentFocusNode;
   final TextEditingController controller;
   final Comment? replyingComment;
+  final Comment? rootComment;
   final CommentBloc commentBloc;
   final Function() onCloseAnswerPressed;
 
@@ -72,6 +74,11 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
                       onPressed: () {
                         widget.onCloseAnswerPressed();
                       },
+                      style: IconButton.styleFrom(
+                        splashFactory: NoSplash.splashFactory,
+                        highlightColor: Colors.transparent,
+                        overlayColor: Colors.transparent,
+                      ),
                       icon: Row(
                         children: [
                           Text(
@@ -118,11 +125,14 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
                     onTap: isComments && !widget.isAnswer
                         ? () => createComment(widget.state.post.id)
                         : () {
-                            if (widget.replyingComment == null) return;
+                            if (widget.rootComment == null) return;
+                            int authorId = widget.replyingComment != null
+                                ? widget.replyingComment!.author.id
+                                : widget.rootComment!.author.id;
                             createAnswer(
-                              widget.replyingComment!.id,
+                              widget.rootComment!.id,
                               widget.state.post.id,
-                              widget.replyingComment!.author.id,
+                              authorId,
                             );
                           },
                   ),
@@ -139,19 +149,37 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
     if (!_isCorrectComment()) {
       return;
     }
-    widget.commentBloc.add(
-      CreateComment(postId: postId, content: widget.controller.text),
-    );
+    final content = _convertContent(widget.controller.text);
+    widget.commentBloc.add(CreateComment(postId: postId, content: content));
+  }
+
+  String _convertContent(String content) {
+    if (!content.startsWith("@")) return content;
+
+    int spaceIndex = content.indexOf(' ');
+    if (spaceIndex == -1) return content;
+
+    final String author = content.substring(1, spaceIndex);
+    final String rest = content.substring(spaceIndex + 1).trim();
+    final comment = widget.replyingComment ?? widget.rootComment;
+    if (comment == null) return content;
+    final commentAuthorUsername = comment.author.username;
+    if (commentAuthorUsername == author.trim()) {
+      return rest;
+    }
+
+    return content;
   }
 
   void createAnswer(int commentId, int postId, int userId) {
     if (!_isCorrectComment()) {
       return;
     }
+    final content = _convertContent(widget.controller.text);
     widget.commentBloc.add(
       CreateAnswer(
         commentId: commentId,
-        content: widget.controller.text,
+        content: content,
         postId: postId,
         userId: userId,
       ),
@@ -165,7 +193,10 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
       });
       return false;
     }
-    _isCommentError = false;
+    setState(() {
+      _isCommentError = false;
+    });
+
     return true;
   }
 

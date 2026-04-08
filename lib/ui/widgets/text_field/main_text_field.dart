@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 
 Widget mainTextField({
@@ -17,6 +18,7 @@ Widget mainTextField({
   void Function(String value)? onChanged,
   void Function()? onEditingComplete,
   FocusNode? focusNode,
+  List<TextInputFormatter>? inputFormatters,
 }) {
   double currentRadius = radius ?? 12;
   return TextField(
@@ -30,6 +32,7 @@ Widget mainTextField({
     onChanged: (value) {
       onChanged?.call(value);
     },
+    inputFormatters: inputFormatters,
     focusNode: focusNode,
     decoration: InputDecoration(
       labelStyle: style,

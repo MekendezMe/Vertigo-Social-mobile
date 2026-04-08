@@ -32,6 +32,7 @@ class CommentScrollViewWidget extends StatelessWidget {
     final key = current.type == NavigationType.comments
         ? "${current.type.name}_${state.post.id}"
         : null;
+    final isComment = current.type == NavigationType.comments;
     return CustomScrollView(
       key: key != null ? PageStorageKey(key) : null,
       controller: controller,
@@ -44,12 +45,12 @@ class CommentScrollViewWidget extends StatelessWidget {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final comment = current.type == NavigationType.comments
+                final comment = isComment
                     ? state.comments[index]
                     : state.answers[index];
                 return commentItemWidget(
                   comment: comment,
-                  onReplyPressed: current.type == NavigationType.comments
+                  onReplyPressed: isComment
                       ? () => onReplyPressed(comment: comment)
                       : null,
                   commentBloc: commentBloc,
@@ -58,7 +59,7 @@ class CommentScrollViewWidget extends StatelessWidget {
                   onLikePressed: onLikePressed,
                 );
               },
-              childCount: current.type == NavigationType.comments
+              childCount: isComment
                   ? state.comments.length
                   : state.answers.length,
             ),

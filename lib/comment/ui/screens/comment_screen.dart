@@ -34,10 +34,10 @@ class _CommentScreenState extends State<CommentScreen> {
   final Map<String, ScrollController> _scrollControllers = {};
   ScrollController? _currentScrollController;
   final TextEditingController _commentController = TextEditingController();
-  // bool _isCommentError = false;
   final FocusNode _commentFocusNode = FocusNode();
   bool _isAnswer = false;
   Comment? _replyingComment;
+  Comment? _rootComment;
 
   @override
   void dispose() {
@@ -92,10 +92,17 @@ class _CommentScreenState extends State<CommentScreen> {
   void _loadComments() {
     final current = _navigationStack.last;
     if (current.type == NavigationType.comments) {
+      clearRootComment();
       widget.commentBloc.add(LoadComments(postId: current.postId!));
     } else {
       widget.commentBloc.add(LoadAnswers(commentId: current.commentId!));
     }
+  }
+
+  void clearRootComment() {
+    setState(() {
+      _rootComment = null;
+    });
   }
 
   void _navigateToAnswers(Comment comment) {
@@ -103,6 +110,7 @@ class _CommentScreenState extends State<CommentScreen> {
       _navigationStack.add(NavigationItem.answers(commentId: comment.id));
       updateController();
       _replyingComment = comment;
+      _rootComment = comment;
     });
 
     _loadComments();
@@ -113,6 +121,7 @@ class _CommentScreenState extends State<CommentScreen> {
       setState(() {
         _navigationStack.removeLast();
         updateController();
+        clearRootComment();
       });
     }
   }
@@ -164,28 +173,28 @@ class _CommentScreenState extends State<CommentScreen> {
                   if (state.isCreateSuccess) {
                     CustomToast.show(
                       CustomToastWidget(text: "Комментарий создан"),
-                      dismissAfter: const Duration(milliseconds: 500),
+                      dismissAfter: const Duration(milliseconds: 1500),
                     );
-                    onSuccessCreate(state);
+                    onCreate(state);
                     _animateScroll(toStart: false);
                   }
                   if (current.type == NavigationType.comments &&
                       state.isCreateAnswersSuccess &&
-                      _replyingComment != null) {
-                    _navigateToAnswers(_replyingComment!);
+                      _rootComment != null) {
+                    _navigateToAnswers(_replyingComment ?? _rootComment!);
+                    onCreate(state);
                     _animateScroll(toStart: false);
                   }
                   if (current.type == NavigationType.answers &&
                       state.isCreateAnswersSuccess) {
                     CustomToast.show(
                       CustomToastWidget(text: "Ответ создан"),
-                      dismissAfter: const Duration(milliseconds: 500),
+                      dismissAfter: const Duration(milliseconds: 1500),
                     );
-                    onSuccessCreate(state);
+                    onCreate(state);
                     if (state.isAnswerToRootComment) {
                       _animateScroll(toStart: false);
                     }
-                    // _navigateToFirstComment();
                   }
                 }
               },
@@ -214,66 +223,66 @@ class _CommentScreenState extends State<CommentScreen> {
                   if (isAnswersError) {
                     return _buildLoadingFailure(error: state.answersError);
                   }
-                  if (isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            isComments
-                                ? Icons.chat_bubble_outline
-                                : Icons.reply_outlined,
-                            size: 48,
-                            color: context.color.gray,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            isComments ? 'Нет комментариев' : 'Нет ответов',
-                            style: context.theme.textTheme.headlineMedium,
-                          ),
-                        ],
-                      ),
-                    );
-                  }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: RefreshIndicator(
-                          backgroundColor: context.color.darkGray,
-                          color: context.color.lightPurple,
-                          onRefresh: () async {
-                            final completer = Completer<void>();
-                            _commentController.text = "";
+                      if (isEmpty)
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                isComments
+                                    ? Icons.chat_bubble_outline
+                                    : Icons.reply_outlined,
+                                size: 48,
+                                color: context.color.gray,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                isComments ? 'Нет комментариев' : 'Нет ответов',
+                                style: context.theme.textTheme.headlineMedium,
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Expanded(
+                          child: RefreshIndicator(
+                            backgroundColor: context.color.darkGray,
+                            color: context.color.lightPurple,
+                            onRefresh: () async {
+                              final completer = Completer<void>();
+                              _commentController.text = "";
 
-                            final subscription = widget.commentBloc.stream
-                                .listen((state) {
-                                  if (state is CommentsLoaded ||
-                                      state is CommentsLoadingFailure) {
-                                    completer.complete();
-                                  }
-                                });
+                              final subscription = widget.commentBloc.stream
+                                  .listen((state) {
+                                    if (state is CommentsLoaded ||
+                                        state is CommentsLoadingFailure) {
+                                      completer.complete();
+                                    }
+                                  });
 
-                            _loadComments();
+                              _loadComments();
 
-                            await completer.future;
+                              await completer.future;
 
-                            await subscription.cancel();
-                          },
-                          child: CommentScrollViewWidget(
-                            state: state,
-                            current: _navigationStack.last,
-                            controller: scrollController,
-                            onReplyPressed: ({required Comment comment}) =>
-                                _navigateToAnswers(comment),
-                            commentBloc: widget.commentBloc,
-                            onAnswerPressed: ({required Comment comment}) =>
-                                onAnswerPressed(comment),
-                            onLikePressed: ({required Comment comment}) =>
-                                onLikePressed(comment),
+                              await subscription.cancel();
+                            },
+                            child: CommentScrollViewWidget(
+                              state: state,
+                              current: _navigationStack.last,
+                              controller: scrollController,
+                              onReplyPressed: ({required Comment comment}) =>
+                                  _navigateToAnswers(comment),
+                              commentBloc: widget.commentBloc,
+                              onAnswerPressed: ({required Comment comment}) =>
+                                  onAnswerPressed(comment),
+                              onLikePressed: ({required Comment comment}) =>
+                                  onLikePressed(comment),
+                            ),
                           ),
                         ),
-                      ),
                       SizedBox(height: 10),
                       CommentCreateWidget(
                         state: state,
@@ -284,6 +293,7 @@ class _CommentScreenState extends State<CommentScreen> {
                         controller: _commentController,
                         commentFocusNode: _commentFocusNode,
                         isAnswer: _isAnswer,
+                        rootComment: _rootComment,
                       ),
                     ],
                   );
@@ -297,23 +307,21 @@ class _CommentScreenState extends State<CommentScreen> {
     );
   }
 
-  void onSuccessCreate(CommentsLoaded state) {
+  void onCreate(CommentsLoaded state) {
+    clearAll();
+  }
+
+  void clearAll() {
     setState(() {
-      _commentController.text = "";
       _isAnswer = false;
       _replyingComment = null;
+      _commentController.text = "";
     });
-
     _commentFocusNode.unfocus();
   }
 
   void onCloseAnswerPressed() {
-    setState(() {
-      _isAnswer = false;
-      _replyingComment = null;
-      _commentController.text = "";
-    });
-    _commentFocusNode.unfocus();
+    clearAll();
   }
 
   void onLikePressed(Comment comment) {
@@ -337,10 +345,19 @@ class _CommentScreenState extends State<CommentScreen> {
   }
 
   void onAnswerPressed(Comment comment) {
-    setState(() {
-      _isAnswer = true;
-      _replyingComment = comment;
-    });
+    final current = _navigationStack.last;
+    if (current.type == NavigationType.comments) {
+      setState(() {
+        _rootComment = comment;
+        _isAnswer = true;
+      });
+    } else {
+      setState(() {
+        _replyingComment = comment;
+        _isAnswer = true;
+      });
+    }
+
     _commentController.text = "@${comment.author.username} ";
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _commentFocusNode.requestFocus();

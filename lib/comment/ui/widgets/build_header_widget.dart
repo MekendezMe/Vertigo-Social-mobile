@@ -18,6 +18,11 @@ Widget buildHeader(
       children: [
         if (canGoBack)
           IconButton(
+            style: IconButton.styleFrom(
+              splashFactory: NoSplash.splashFactory,
+              highlightColor: Colors.transparent,
+              overlayColor: Colors.transparent,
+            ),
             onPressed: () => onNavigateBack(),
             icon: const Icon(Icons.arrow_back),
             padding: EdgeInsets.zero,
@@ -35,6 +40,11 @@ Widget buildHeader(
         ),
 
         IconButton(
+          style: IconButton.styleFrom(
+            splashFactory: NoSplash.splashFactory,
+            highlightColor: Colors.transparent,
+            overlayColor: Colors.transparent,
+          ),
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.close),
           padding: EdgeInsets.zero,

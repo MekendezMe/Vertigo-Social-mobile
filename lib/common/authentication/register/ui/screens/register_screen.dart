@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/authentication/register/logic/bloc/register_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
@@ -63,6 +64,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: theme.textTheme.bodyMedium!,
                     errorText: _emailErrorText,
                     onChanged: _emailOnChanged,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                    ],
                   ),
                   SizedBox(height: 40),
                   mainTextField(
@@ -79,6 +83,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _obscureText = !_obscureText;
                       });
                     },
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                    ],
                   ),
                   SizedBox(height: 40),
                   mainTextField(
@@ -88,6 +95,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: theme.textTheme.bodyMedium!,
                     errorText: _usernameErrorText,
                     onChanged: _usernameOnChanged,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                    ],
                   ),
                   SizedBox(height: 40),
                   mainTextField(

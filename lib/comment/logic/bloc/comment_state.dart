@@ -111,16 +111,15 @@ class CommentsLoaded extends CommentState {
       answerCurrentPage: answerCurrentPage ?? this.answerCurrentPage,
       answerIsLoadingMore: answerIsLoadingMore ?? this.answerIsLoadingMore,
       parent: parent ?? this.parent,
-      answersError: answersError ?? this.answersError,
+      answersError: answersError,
       answersLoading: answersLoading ?? this.answersLoading,
-      isCreate: isCreate ?? this.isCreate,
-      createError: createError ?? this.createError,
+      isCreate: isCreate ?? false,
+      createError: createError,
       isCreateSuccess: isCreateSuccess ?? false,
-      isAnswersCreate: isAnswersCreate ?? this.isAnswersCreate,
+      isAnswersCreate: isAnswersCreate ?? false,
       isCreateAnswersSuccess: isCreateAnswersSuccess ?? false,
-      likeError: likeError ?? this.likeError,
-      isAnswerToRootComment:
-          isAnswerToRootComment ?? this.isAnswerToRootComment,
+      likeError: likeError,
+      isAnswerToRootComment: isAnswerToRootComment ?? false,
     );
   }
 }

@@ -56,6 +56,11 @@ Widget commentItemWidget({
             Text(createdDate, style: context.theme.textTheme.bodySmall),
             SizedBox(width: 6),
             IconButton(
+              style: IconButton.styleFrom(
+                splashFactory: NoSplash.splashFactory,
+                highlightColor: Colors.transparent,
+                overlayColor: Colors.transparent,
+              ),
               onPressed: () => onReplyPressed?.call(),
               icon: Row(
                 children: [

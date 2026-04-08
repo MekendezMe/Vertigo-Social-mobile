@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dart';
@@ -103,6 +104,11 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
               Row(
                 children: [
                   IconButton(
+                    style: IconButton.styleFrom(
+                      splashFactory: NoSplash.splashFactory,
+                      highlightColor: Colors.transparent,
+                      overlayColor: Colors.transparent,
+                    ),
                     iconSize: 25,
                     onPressed: () {
                       widget.feedBloc.add(PickImageFromCamera());
@@ -111,6 +117,11 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                     color: context.color.gray,
                   ),
                   IconButton(
+                    style: IconButton.styleFrom(
+                      splashFactory: NoSplash.splashFactory,
+                      highlightColor: Colors.transparent,
+                      overlayColor: Colors.transparent,
+                    ),
                     iconSize: 25,
                     onPressed: () {
                       widget.feedBloc.add(PickImagesFromGallery());
@@ -119,6 +130,11 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                     color: context.color.gray,
                   ),
                   IconButton(
+                    style: IconButton.styleFrom(
+                      splashFactory: NoSplash.splashFactory,
+                      highlightColor: Colors.transparent,
+                      overlayColor: Colors.transparent,
+                    ),
                     iconSize: 25,
                     onPressed: () {},
                     icon: Icon(Icons.emoji_emotions),
