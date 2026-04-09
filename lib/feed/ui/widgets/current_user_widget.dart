@@ -5,7 +5,7 @@ import 'package:social_network_flutter/helpers/date_parser.dart';
 import 'package:social_network_flutter/ui/widgets/avatar/build_avatar.dart';
 
 Widget currentUserWidget({required BuildContext context, required Post post}) {
-  DateTime createdAt = parseCustomDate(post.createdAt);
+  final convertDate = formatCreatedDate(post.createdAt);
   final avatarUrl = post.creator.avatar;
   return Container(
     padding: EdgeInsets.only(top: 10),
@@ -27,7 +27,7 @@ Widget currentUserWidget({required BuildContext context, required Post post}) {
                 ),
               ],
             ),
-            Text("сегодня в ${createdAt.hour}:${createdAt.minute}"),
+            Text(convertDate, style: context.theme.textTheme.bodyMedium),
           ],
         ),
       ],

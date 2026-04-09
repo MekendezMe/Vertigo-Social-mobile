@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/ui/widgets/show_posts_widget.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';

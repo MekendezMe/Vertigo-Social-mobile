@@ -29,9 +29,6 @@ class RegisterRepository {
         body: registerRequest.toJson(),
         fromJson: (json) => AuthResponse.fromJson(json),
       );
-      if (response == null) {
-        throw ApiException(message: "Пустой ответ сервера", code: -1);
-      }
       secureStorage.refreshToken = response.refreshToken;
       secureStorage.deviceId = response.deviceId;
       await secureStorage.save();

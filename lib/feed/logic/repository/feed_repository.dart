@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
@@ -24,12 +25,6 @@ class FeedRepository {
         fromJson: (json) => GetPostsResponse.fromJson(json),
         queryParams: request.queryParamsToJson(),
       );
-      if (response == null) {
-        throw ApiException(
-          message: "Пустой ответ сервера в методе ${request.method}",
-          code: -1,
-        );
-      }
       return response;
       // return GetPostsResponse(posts: List.from(_mockPosts), isLastPage: true);
     } catch (e) {
@@ -42,14 +37,7 @@ class FeedRepository {
       final response = await requestSender.send(
         request: request,
         fromJson: (json) => GetPostResponse.fromJson(json),
-        pathParams: request.paramsIntoPath(),
       );
-      if (response == null) {
-        throw ApiException(
-          message: "Пустой ответ сервера в методе ${request.method}",
-          code: -1,
-        );
-      }
       return response;
       // return GetPostsResponse(posts: List.from(_mockPosts));
     } catch (e) {
@@ -59,17 +47,16 @@ class FeedRepository {
 
   Future<CreatePostResponse> createPost(CreatePostRequest request) async {
     try {
+      FormData? formData;
+      if (request.images.isNotEmpty) {
+        formData = await request.getBodyWithPhotos();
+      }
       final response = await requestSender.send(
         request: request,
         fromJson: (json) => CreatePostResponse.fromJson(json),
+        formData: formData,
         body: request.toJson(),
       );
-      if (response == null) {
-        throw ApiException(
-          message: "Пустой ответ сервера в методе createPost",
-          code: -1,
-        );
-      }
       return response;
     } catch (e) {
       rethrow;
@@ -99,14 +86,7 @@ class FeedRepository {
     final response = await requestSender.send(
       request: request,
       fromJson: (json) => ReactionPostResponse.fromJson(json),
-      pathParams: request.paramsIntoPath(),
     );
-    if (response == null) {
-      throw ApiException(
-        message: "Пустой ответ сервера в методе ${request.method}",
-        code: -1,
-      );
-    }
     return response;
   }
 
@@ -114,14 +94,7 @@ class FeedRepository {
     final response = await requestSender.send(
       request: request,
       fromJson: (json) => ReactionPostResponse.fromJson(json),
-      pathParams: request.paramsIntoPath(),
     );
-    if (response == null) {
-      throw ApiException(
-        message: "Пустой ответ сервера в методе ${request.method}",
-        code: -1,
-      );
-    }
     return response;
   }
 }

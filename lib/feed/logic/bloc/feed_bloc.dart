@@ -45,6 +45,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
     on<PickImageFromCamera>(_onPickImageFromCamera);
     on<PickImagesFromGallery>(_onPickImagesFromGallery);
+    on<RemoveImageFromPost>(_onRemoveImageFromPost);
   }
 
   Future<void> _onLoadFeed(LoadFeed event, Emitter<FeedState> emit) async {
@@ -99,8 +100,9 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   Future<void> _onCreatePost(CreatePost event, Emitter<FeedState> emit) async {
     if (state is! FeedLoaded) return;
     final currentState = state as FeedLoaded;
+    if (currentState.isCreating) return;
     try {
-      emit(currentState.copyWith(isCreating: true));
+      emit(currentState.copyWith(isCreating: true, isCreateSuccess: null));
       final createdPost = await feedRepository.createPost(
         CreatePostRequest(text: event.text, images: event.images),
       );
@@ -110,6 +112,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
           isCreating: false,
           createError: null,
           images: null,
+          isCreateSuccess: true,
         ),
       );
       // final canSend = await permissionService.canSendNotifications();
@@ -120,7 +123,13 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       //   );
       // }
     } catch (e, st) {
-      emit(currentState.copyWith(isCreating: false, createError: e.toString()));
+      emit(
+        currentState.copyWith(
+          isCreating: false,
+          createError: e.toString(),
+          isCreateSuccess: false,
+        ),
+      );
       talker.handle(e, st);
       errorHandler.handle(e);
     }
@@ -234,13 +243,46 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
     try {
       final images = await mediaService.pickPhotosWithPermission();
-      if (images != null && images.isNotEmpty) {
-        emit(currentState.copyWith(images: images, isImageLoading: false));
-      } else {
+
+      if (images == null || images.isEmpty) {
         emit(currentState.copyWith(isImageLoading: false));
+        return;
       }
+
+      final currentImages = currentState.images ?? [];
+      final totalCount = currentImages.length + images.length;
+
+      if (totalCount > 10) {
+        errorHandler.handle("Можно выбрать максимум 10 фото");
+        emit(currentState.copyWith(isImageLoading: false));
+        return;
+      }
+
+      emit(
+        currentState.copyWith(
+          isImageLoading: false,
+          images: [...currentImages, ...images],
+        ),
+      );
     } catch (e, st) {
       emit(currentState.copyWith(isImageLoading: false));
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onRemoveImageFromPost(
+    RemoveImageFromPost event,
+    Emitter<FeedState> emit,
+  ) async {
+    if (state is! FeedLoaded) return;
+    final current = state as FeedLoaded;
+    try {
+      final currentImages = current.images ?? [];
+      final newImages = List<File>.from(currentImages)..removeAt(event.index);
+
+      emit(current.copyWith(images: newImages.isEmpty ? null : newImages));
+    } catch (e, st) {
       talker.handle(e, st);
       errorHandler.handle(e);
     }

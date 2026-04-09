@@ -50,6 +50,7 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget> {
             state: state,
             feedBloc: widget.feedBloc,
             onPostCreated: () {},
+            onShowGallery: widget.onShowGallery,
           ),
         ),
         SliverToBoxAdapter(child: SizedBox(height: 30)),
@@ -88,13 +89,13 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget> {
 
     final blocState = context.read<FeedBloc>().state;
 
-    if (blocState is! FeedLoaded || (blocState.isLoadingMore ?? false)) {
+    if (blocState is! FeedLoaded || (blocState.isLoadingMore)) {
       return;
     }
     final max = _scrollController.position.maxScrollExtent;
     final current = _scrollController.position.pixels;
 
-    if (current >= max - 200 && !(blocState.isLastPage ?? false)) {
+    if (current >= max - 200 && !(blocState.isLastPage)) {
       final nextPage = blocState.currentPage + 1;
       context.read<FeedBloc>().add(LoadMorePosts(pageNumber: nextPage));
     }

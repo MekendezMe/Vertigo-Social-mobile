@@ -1,5 +1,7 @@
 part of 'feed_bloc.dart';
 
+const Object _notSet = Object();
+
 abstract class FeedState extends Equatable {}
 
 class FeedInitial extends FeedState {
@@ -20,9 +22,10 @@ class FeedLoaded extends FeedState {
   final String? likeError;
   final List<File>? images;
   final int currentPage;
-  final bool? isImageLoading;
-  final bool? isLoadingMore;
-  final bool? isLastPage;
+  final bool isImageLoading;
+  final bool isLoadingMore;
+  final bool isLastPage;
+  final bool isCreateSuccess;
 
   FeedLoaded({
     required this.posts,
@@ -35,6 +38,7 @@ class FeedLoaded extends FeedState {
     this.isImageLoading = false,
     this.isLoadingMore = false,
     this.isLastPage = false,
+    this.isCreateSuccess = false,
   });
   @override
   List<Object?> get props => [
@@ -48,31 +52,38 @@ class FeedLoaded extends FeedState {
     isImageLoading,
     isLoadingMore,
     isLastPage,
+    isCreateSuccess,
   ];
 
   FeedLoaded copyWith({
     List<Post>? posts,
     User? user,
     bool? isCreating,
-    String? createError,
-    String? likeError,
-    List<File>? images,
+    Object? createError = _notSet,
+    Object? likeError = _notSet,
+    Object? images = _notSet,
     int? currentPage,
     bool? isImageLoading,
     bool? isLoadingMore,
     bool? isLastPage,
+    bool? isCreateSuccess,
   }) {
     return FeedLoaded(
       posts: posts ?? this.posts,
       user: user ?? this.user,
       isCreating: isCreating ?? this.isCreating,
-      createError: createError ?? this.createError,
-      likeError: likeError ?? this.likeError,
-      images: images ?? this.images,
+      createError: identical(createError, _notSet)
+          ? this.createError
+          : createError as String?,
+      likeError: identical(likeError, _notSet)
+          ? this.likeError
+          : likeError as String?,
+      images: identical(images, _notSet) ? this.images : images as List<File>?,
       currentPage: currentPage ?? this.currentPage,
       isImageLoading: isImageLoading ?? this.isImageLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       isLastPage: isLastPage ?? this.isLastPage,
+      isCreateSuccess: isCreateSuccess ?? false,
     );
   }
 }

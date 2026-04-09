@@ -9,11 +9,7 @@ class GetAnswersRequest extends IRequest {
   HttpMethod get httpMethod => HttpMethod.get;
 
   @override
-  String get method => "comments/{commentId}/answers";
-
-  Map<String, dynamic> paramsIntoPath() {
-    return {"commentId": commentId};
-  }
+  String get method => "comments/$commentId/answers";
 
   Map<String, dynamic> queryParamsToJson() {
     return {"page_number": pageNumber};

@@ -39,7 +39,10 @@ class CommentScrollViewWidget extends StatelessWidget {
       slivers: [
         if (isEmpty)
           SliverFillRemaining(
-            child: emptyCommentWidget("Нет комментариев", context),
+            child: Padding(
+              padding: EdgeInsets.all(10),
+              child: emptyCommentWidget("Нет комментариев", context),
+            ),
           )
         else
           SliverList(

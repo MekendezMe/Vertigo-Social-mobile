@@ -1,26 +1,26 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 
-class CreatePostRequest extends IRequest {
-  @override
-  String get method => "posts";
-  @override
-  HttpMethod get httpMethod => HttpMethod.post;
-
+class EditPostRequest extends IRequest {
+  final int postId;
   final String text;
+  final List<String> deletedUrls;
   final List<File> images;
 
-  CreatePostRequest({required this.text, required this.images});
-
-  Map<String, dynamic> toJson() {
-    return {"content": text};
-  }
+  EditPostRequest({
+    required this.postId,
+    required this.text,
+    required this.deletedUrls,
+    required this.images,
+  });
 
   Future<FormData> getBodyWithPhotos() async {
     final formData = FormData();
     formData.fields.add(MapEntry('content', text));
+    formData.fields.add(MapEntry('imageUrls', jsonEncode(deletedUrls)));
     for (int i = 0; i < images.length; i++) {
       final file = images[i];
       formData.files.add(
@@ -32,4 +32,9 @@ class CreatePostRequest extends IRequest {
     }
     return formData;
   }
+
+  @override
+  String get method => "posts/$postId";
+  @override
+  HttpMethod get httpMethod => HttpMethod.patch;
 }

@@ -5,7 +5,7 @@ import 'package:social_network_flutter/common/framework/storages/secure_storage.
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
-enum HttpMethod { post, get, delete }
+enum HttpMethod { post, get, delete, patch }
 
 extension HttpMethodExtension on HttpMethod {
   String get text {
@@ -16,6 +16,8 @@ extension HttpMethodExtension on HttpMethod {
         return "GET";
       case HttpMethod.delete:
         return "DELETE";
+      case HttpMethod.patch:
+        return "PATCH";
     }
   }
 }
@@ -47,12 +49,12 @@ class RequestSender {
   final ISecureStorage secureStorage;
   final Talker talker;
   final Dio dio;
-  Future<T?> send<T>({
+  Future<T> send<T>({
     required IRequest request,
     required T Function(Map<String, dynamic>) fromJson,
     Map<String, dynamic>? queryParams,
     Map<String, dynamic>? body,
-    Map<String, dynamic>? pathParams,
+    FormData? formData,
   }) async {
     try {
       await _checkConnectivity();
@@ -71,12 +73,6 @@ class RequestSender {
 
       String method = request.method;
 
-      if (pathParams != null && pathParams.isNotEmpty) {
-        pathParams.forEach((key, value) {
-          method = method.replaceAll('{$key}', value.toString());
-        });
-      }
-
       final response = await _sendRequest(
         request: request,
         method: method,
@@ -84,9 +80,8 @@ class RequestSender {
         queryParams: queryParams,
         dio: dio,
         headers: headers,
+        formData: formData,
       );
-
-      if (response == null) throw ApiException(message: "Ошибка сервера");
 
       final statusCode = response.statusCode ?? -1;
 
@@ -98,9 +93,6 @@ class RequestSender {
           message: response.data['error'] ?? "Ошибка сервера",
           code: statusCode,
         );
-      }
-      if (statusCode == 204) {
-        return null;
       }
 
       if (response.data == null) {
@@ -140,17 +132,19 @@ class RequestSender {
     }
   }
 
-  Future<Response?> _sendRequest<T, B>({
+  Future<Response> _sendRequest<T, B>({
     required IRequest request,
     required String method,
     Map<String, dynamic>? body,
     Map<String, dynamic>? queryParams,
+    FormData? formData,
     required Dio dio,
     required Map<String, String> headers,
   }) async {
     final response = await dio.request(
       method,
-      data: body,
+
+      data: formData ?? body,
       queryParameters: queryParams,
       options: Options(method: request.httpMethod.text, headers: headers),
     );

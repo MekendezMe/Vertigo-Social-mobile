@@ -31,8 +31,14 @@ class NavigationCoordinator {
     required BuildContext context,
     required Widget page,
   }) {
-    return Navigator.of(
-      context,
-    ).pushReplacement<T, TO>(MaterialPageRoute(builder: (_) => page));
+    return Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => page),
+      (route) => false,
+    );
+    //   return Navigator.of(
+    //     context,
+    //     // rootNavigator: true,
+    //   ).pushReplacement<T, TO>(MaterialPageRoute(builder: (_) => page));
+    // }
   }
 }

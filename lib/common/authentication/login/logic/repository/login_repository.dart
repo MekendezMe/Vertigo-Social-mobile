@@ -30,10 +30,6 @@ class LoginRepository {
         body: request.toJson(),
       );
 
-      if (response == null) {
-        throw ApiException(message: "Пустой ответ сервера");
-      }
-
       secureStorage.refreshToken = response.refreshToken;
       secureStorage.deviceId = response.deviceId;
       await secureStorage.save();

@@ -17,9 +17,6 @@ class UserRepository {
         request: request,
         fromJson: (json) => GetCurrentUserResponse.fromJson(json),
       );
-      if (response == null) {
-        throw ApiException(message: "Пустой ответ в методе ${request.method}");
-      }
       return response;
     } catch (e, st) {
       talker.handle(e, st);

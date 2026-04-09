@@ -5,12 +5,8 @@ class GetPostRequest extends IRequest {
 
   GetPostRequest({required this.postId});
 
-  Map<String, dynamic> paramsIntoPath() {
-    return {"postId": postId};
-  }
-
   @override
-  String get method => "posts/{postId}";
+  String get method => "posts/$postId";
   @override
   HttpMethod get httpMethod => HttpMethod.get;
 }

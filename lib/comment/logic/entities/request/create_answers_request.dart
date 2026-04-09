@@ -16,11 +16,7 @@ class CreateAnswersRequest extends IRequest {
   HttpMethod get httpMethod => HttpMethod.post;
 
   @override
-  String get method => "comments/{commentId}/answers";
-
-  Map<String, dynamic> paramsIntoPath() {
-    return {"commentId": commentId};
-  }
+  String get method => "comments/$commentId/answers";
 
   Map<String, dynamic> toJson() {
     return {"answer_user_id": userId, "content": content, "post_id": postId};

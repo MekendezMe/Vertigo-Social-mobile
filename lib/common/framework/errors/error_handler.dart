@@ -16,7 +16,7 @@ class ErrorHandler {
     } else if (error is AuthException) {
       _onAuthError(error.message);
     } else {
-      _onError();
+      _onError(error);
     }
   }
 
@@ -42,10 +42,19 @@ class ErrorHandler {
     logoutHandler.onLogout();
   }
 
-  void _onError() {
+  void _onError(dynamic error) {
+    String message;
+
+    if (error is String) {
+      message = error;
+    } else if (error is Exception) {
+      message = error.toString();
+    } else {
+      message = "Произошла ошибка. Попробуйте позже.";
+    }
     CustomToast.show(
-      CustomToastWidget(text: "Произошла ошибка. Попробуйте позже."),
-      dismissAfter: Duration(seconds: 1),
+      CustomToastWidget(text: message),
+      dismissAfter: Duration(seconds: 2),
     );
   }
 }

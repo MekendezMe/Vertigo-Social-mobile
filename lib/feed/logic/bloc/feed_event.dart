@@ -44,3 +44,12 @@ class PickImagesFromGallery extends FeedEvent {
   @override
   List<Object?> get props => [];
 }
+
+class RemoveImageFromPost extends FeedEvent {
+  final int index;
+
+  RemoveImageFromPost({required this.index});
+
+  @override
+  List<Object?> get props => [index];
+}

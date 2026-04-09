@@ -2,7 +2,7 @@ import 'package:social_network_flutter/common/framework/network/request_sender.d
 
 class LikePostRequest extends IRequest {
   @override
-  String get method => 'posts/{postId}/like';
+  String get method => 'posts/$postId/like';
   @override
   HttpMethod get httpMethod => HttpMethod.post;
 
@@ -12,9 +12,5 @@ class LikePostRequest extends IRequest {
 
   Map<String, dynamic> toJson() {
     return {"post_id": postId};
-  }
-
-  Map<String, dynamic> paramsIntoPath() {
-    return {"postId": postId};
   }
 }

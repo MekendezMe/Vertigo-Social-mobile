@@ -231,6 +231,7 @@ class _CommentScreenState extends State<CommentScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              const SizedBox(height: 16),
                               Icon(
                                 isComments
                                     ? Icons.chat_bubble_outline

@@ -16,7 +16,7 @@ Widget commentItemWidget({
   final avatarUrl = comment.author.avatar?.isNotEmpty == true
       ? comment.author.avatar
       : null;
-  final createdDate = formatDate(comment.createdAt);
+  final createdDate = formatCreatedDate(comment.createdAt);
   return Container(
     margin: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
     padding: EdgeInsets.only(bottom: 16, top: 14, right: 6, left: 10),
