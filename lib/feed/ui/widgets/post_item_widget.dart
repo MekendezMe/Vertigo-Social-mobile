@@ -43,8 +43,10 @@ Widget postItemWidget({
               ),
             ),
           ],
-          SizedBox(height: 20),
-          Text(post.text, style: context.theme.textTheme.bodyMedium),
+          if (post.text.isNotEmpty) ...[
+            SizedBox(height: 20),
+            Text(post.text, style: context.theme.textTheme.bodyMedium),
+          ],
           SizedBox(height: 20),
           Row(
             children: [

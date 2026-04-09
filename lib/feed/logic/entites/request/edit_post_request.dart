@@ -7,20 +7,20 @@ import 'package:social_network_flutter/common/framework/network/request_sender.d
 class EditPostRequest extends IRequest {
   final int postId;
   final String text;
-  final List<String> deletedUrls;
+  final List<String> deletedImages;
   final List<File> images;
 
   EditPostRequest({
     required this.postId,
     required this.text,
-    required this.deletedUrls,
+    required this.deletedImages,
     required this.images,
   });
 
   Future<FormData> getBodyWithPhotos() async {
     final formData = FormData();
     formData.fields.add(MapEntry('content', text));
-    formData.fields.add(MapEntry('imageUrls', jsonEncode(deletedUrls)));
+    formData.fields.add(MapEntry('deletedImages', jsonEncode(deletedImages)));
     for (int i = 0; i < images.length; i++) {
       final file = images[i];
       formData.files.add(

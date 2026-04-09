@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
+import 'package:social_network_flutter/feed/logic/entites/request/edit_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/create_post_response.dart';
+import 'package:social_network_flutter/feed/logic/entites/response/edit_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_posts_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/reaction_post_response.dart';
@@ -26,7 +27,6 @@ class FeedRepository {
         queryParams: request.queryParamsToJson(),
       );
       return response;
-      // return GetPostsResponse(posts: List.from(_mockPosts), isLastPage: true);
     } catch (e) {
       rethrow;
     }
@@ -39,7 +39,6 @@ class FeedRepository {
         fromJson: (json) => GetPostResponse.fromJson(json),
       );
       return response;
-      // return GetPostsResponse(posts: List.from(_mockPosts));
     } catch (e) {
       rethrow;
     }
@@ -61,25 +60,23 @@ class FeedRepository {
     } catch (e) {
       rethrow;
     }
+  }
 
-    // final User mockUser = User(
-    //   id: 1,
-    //   username: 'Mekendez',
-    //   avatar: 'https://randomuser.me/api/portraits/men/6.jpg',
-    // );
-
-    // final newPost = Post(
-    //   id: _mockPosts.length + 1,
-    //   creator: mockUser,
-    //   text: request.text,
-    //   images: request.images.map((image) => image.path).toList(),
-    //   likesCount: 0,
-    //   commentsCount: 0,
-    //   likedByUser: false,
-    //   createdAt: DateTime.now(),
-    // );
-    // _mockPosts.insert(0, newPost);
-    // return CreatePostResponse(post: newPost);
+  Future<EditPostResponse> editPost(EditPostRequest request) async {
+    try {
+      FormData? formData;
+      if (request.images.isNotEmpty) {
+        formData = await request.getBodyWithPhotos();
+      }
+      final response = await requestSender.send(
+        request: request,
+        fromJson: (json) => EditPostResponse.fromJson(json),
+        formData: formData,
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<ReactionPostResponse> likePost(LikePostRequest request) async {

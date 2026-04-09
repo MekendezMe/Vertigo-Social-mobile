@@ -27,6 +27,31 @@ class CreatePost extends FeedEvent {
   List<Object?> get props => [text, images];
 }
 
+class EditPost extends FeedEvent {
+  final int postId;
+  final String text;
+  final List<File> images;
+  final List<String> deletedImages;
+
+  EditPost({
+    required this.postId,
+    required this.text,
+    required this.images,
+    required this.deletedImages,
+  });
+
+  @override
+  List<Object?> get props => [postId, text, images, deletedImages];
+}
+
+class DeletePost extends FeedEvent {
+  final int postId;
+
+  DeletePost({required this.postId});
+  @override
+  List<Object?> get props => [postId];
+}
+
 class ToggleLike extends FeedEvent {
   final int postId;
 

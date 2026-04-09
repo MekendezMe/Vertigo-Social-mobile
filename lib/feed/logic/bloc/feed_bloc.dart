@@ -220,11 +220,25 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
     try {
       final image = await mediaService.takePhotoWithPermission();
-      if (image != null) {
-        emit(currentState.copyWith(images: [image], isImageLoading: false));
-      } else {
+      if (image == null) {
         emit(currentState.copyWith(isImageLoading: false));
+        return;
       }
+      final currentImages = currentState.images ?? [];
+      final totalCount = currentImages.length + 1;
+
+      if (totalCount > 10) {
+        errorHandler.handle("Можно выбрать максимум 10 фото");
+        emit(currentState.copyWith(isImageLoading: false));
+        return;
+      }
+
+      emit(
+        currentState.copyWith(
+          isImageLoading: false,
+          images: [image, ...currentImages],
+        ),
+      );
     } catch (e, st) {
       emit(currentState.copyWith(isImageLoading: false));
       talker.handle(e, st);
@@ -261,7 +275,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       emit(
         currentState.copyWith(
           isImageLoading: false,
-          images: [...currentImages, ...images],
+          images: [...images, ...currentImages],
         ),
       );
     } catch (e, st) {
