@@ -73,7 +73,8 @@ class AuthInterceptor extends Interceptor {
 
         tokenService.setToken(tokens.accessToken);
         secureStorage.refreshToken = tokens.refreshToken;
-        secureStorage.save();
+        await secureStorage.save();
+
         final deviceId = secureStorage.deviceId;
         if (deviceId == null || deviceId.isEmpty) {
           // logoutHandler.onLogout();

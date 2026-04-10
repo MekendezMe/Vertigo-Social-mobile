@@ -26,6 +26,10 @@ class FeedLoaded extends FeedState {
   final bool isLoadingMore;
   final bool isLastPage;
   final bool isCreateSuccess;
+  final bool isUpdating;
+  final bool isUpdateSuccess;
+  final bool isDeleting;
+  final bool isDeleteSuccess;
 
   FeedLoaded({
     required this.posts,
@@ -39,6 +43,10 @@ class FeedLoaded extends FeedState {
     this.isLoadingMore = false,
     this.isLastPage = false,
     this.isCreateSuccess = false,
+    this.isUpdating = false,
+    this.isUpdateSuccess = false,
+    this.isDeleting = false,
+    this.isDeleteSuccess = false,
   });
   @override
   List<Object?> get props => [
@@ -53,6 +61,10 @@ class FeedLoaded extends FeedState {
     isLoadingMore,
     isLastPage,
     isCreateSuccess,
+    isUpdating,
+    isUpdateSuccess,
+    isDeleteSuccess,
+    isDeleting,
   ];
 
   FeedLoaded copyWith({
@@ -67,6 +79,10 @@ class FeedLoaded extends FeedState {
     bool? isLoadingMore,
     bool? isLastPage,
     bool? isCreateSuccess,
+    bool? isUpdating,
+    bool? isUpdateSuccess,
+    bool? isDeleting,
+    bool? isDeleteSuccess,
   }) {
     return FeedLoaded(
       posts: posts ?? this.posts,
@@ -84,6 +100,10 @@ class FeedLoaded extends FeedState {
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       isLastPage: isLastPage ?? this.isLastPage,
       isCreateSuccess: isCreateSuccess ?? false,
+      isUpdating: isUpdating ?? false,
+      isUpdateSuccess: isUpdateSuccess ?? false,
+      isDeleting: isDeleting ?? false,
+      isDeleteSuccess: isDeleteSuccess ?? false,
     );
   }
 }

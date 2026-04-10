@@ -34,12 +34,12 @@ Widget commentItemWidget({
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             buildAvatar(context, comment.author.username, avatarUrl),
-            Text(
+            SelectableText(
               comment.author.username,
               style: context.theme.textTheme.bodyMedium,
             ),
             if (comment.answerToUser != null) ...[
-              Text(
+              SelectableText(
                 "@${comment.answerToUser!.username}",
                 style: context.theme.textTheme.bodyMedium!.modify(
                   color: context.color.veryDarkBlueGreen,
@@ -49,7 +49,7 @@ Widget commentItemWidget({
           ],
         ),
         SizedBox(height: 8),
-        Text(comment.text, style: context.theme.textTheme.bodyMedium),
+        SelectableText(comment.text, style: context.theme.textTheme.bodyMedium),
         SizedBox(height: 8),
         Row(
           children: [

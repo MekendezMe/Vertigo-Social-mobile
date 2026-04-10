@@ -35,7 +35,10 @@ Widget buildHeader(
 
         Expanded(
           child: Center(
-            child: Text(title, style: context.theme.textTheme.bodyLarge),
+            child: SelectableText(
+              title,
+              style: context.theme.textTheme.bodyLarge,
+            ),
           ),
         ),
 

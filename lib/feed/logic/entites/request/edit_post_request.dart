@@ -20,7 +20,7 @@ class EditPostRequest extends IRequest {
   Future<FormData> getBodyWithPhotos() async {
     final formData = FormData();
     formData.fields.add(MapEntry('content', text));
-    formData.fields.add(MapEntry('deletedImages', jsonEncode(deletedImages)));
+    formData.fields.add(MapEntry('deleted_images', jsonEncode(deletedImages)));
     for (int i = 0; i < images.length; i++) {
       final file = images[i];
       formData.files.add(

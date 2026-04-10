@@ -8,8 +8,11 @@ import 'package:social_network_flutter/common/framework/errors/exceptions/app_ex
 import 'package:social_network_flutter/common/framework/media/media_service.dart';
 import 'package:social_network_flutter/common/framework/notifications/notification_service.dart';
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
+import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
+import 'package:social_network_flutter/feed/logic/entites/request/delete_post_request.dart';
+import 'package:social_network_flutter/feed/logic/entites/request/edit_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';
@@ -27,6 +30,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final PermissionService permissionService;
   final INotificationService notificationService;
   final MediaService mediaService;
+  final ILogoutHandler logoutHandler;
   FeedBloc({
     required this.feedRepository,
     required this.talker,
@@ -35,17 +39,21 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     required this.permissionService,
     required this.notificationService,
     required this.mediaService,
+    required this.logoutHandler,
   }) : super(FeedInitial()) {
     on<LoadFeed>(_onLoadFeed);
     on<LoadMorePosts>(_onLoadMorePosts);
 
     on<CreatePost>(_onCreatePost);
+    on<EditPost>(_onUpdatePost);
+    on<DeletePost>(_onDeletePost);
 
     on<ToggleLike>(_onToggleLike);
 
     on<PickImageFromCamera>(_onPickImageFromCamera);
     on<PickImagesFromGallery>(_onPickImagesFromGallery);
     on<RemoveImageFromPost>(_onRemoveImageFromPost);
+    on<ClearImages>(_onClearImages);
   }
 
   Future<void> _onLoadFeed(LoadFeed event, Emitter<FeedState> emit) async {
@@ -130,6 +138,76 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
           isCreateSuccess: false,
         ),
       );
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onUpdatePost(EditPost event, Emitter<FeedState> emit) async {
+    if (state is! FeedLoaded) return;
+
+    final currentState = state as FeedLoaded;
+    if (currentState.isUpdating) return;
+    emit(currentState.copyWith(isUpdating: true, isUpdateSuccess: false));
+    try {
+      final response = await feedRepository.editPost(
+        EditPostRequest(
+          postId: event.postId,
+          text: event.text,
+          deletedImages: event.deletedImages,
+          images: event.images,
+        ),
+      );
+
+      final updatedPosts = currentState.posts
+          .where((post) => post.id != event.postId)
+          .toList();
+
+      emit(
+        currentState.copyWith(
+          posts: [response.post, ...updatedPosts],
+          isUpdateSuccess: true,
+          isUpdating: false,
+          images: null,
+        ),
+      );
+    } catch (e, st) {
+      emit(currentState.copyWith(isUpdateSuccess: false, isUpdating: false));
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onDeletePost(DeletePost event, Emitter<FeedState> emit) async {
+    if (state is! FeedLoaded) return;
+
+    final currentState = state as FeedLoaded;
+    if (currentState.isDeleting) return;
+    emit(currentState.copyWith(isDeleting: true, isDeleteSuccess: false));
+    try {
+      final response = await feedRepository.deletePost(
+        DeletePostRequest(postId: event.postId),
+      );
+
+      if (!response.success) {
+        throw ApiException(
+          message: "Ошибка при удалении поста. Попробуйте еще раз",
+        );
+      }
+
+      final updatedPosts = currentState.posts
+          .where((post) => post.id != event.postId)
+          .toList();
+
+      emit(
+        currentState.copyWith(
+          posts: updatedPosts,
+          isDeleteSuccess: true,
+          isDeleting: false,
+        ),
+      );
+    } catch (e, st) {
+      emit(currentState.copyWith(isDeleteSuccess: false, isDeleting: false));
       talker.handle(e, st);
       errorHandler.handle(e);
     }
@@ -299,6 +377,16 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     } catch (e, st) {
       talker.handle(e, st);
       errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onClearImages(
+    ClearImages event,
+    Emitter<FeedState> emit,
+  ) async {
+    if (state is FeedLoaded) {
+      final currentState = state as FeedLoaded;
+      emit(currentState.copyWith(images: null));
     }
   }
 }

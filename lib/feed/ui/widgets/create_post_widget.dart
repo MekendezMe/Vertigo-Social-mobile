@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
+import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dart';
 import 'package:social_network_flutter/ui/widgets/avatar/build_avatar.dart';
 import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
@@ -19,6 +21,9 @@ class CreatePostWidget extends StatefulWidget {
     required this.feedBloc,
     required this.onPostCreated,
     required this.onShowGallery,
+    this.post,
+    required this.onCancelEdit,
+    required this.onSuccessEdit,
   });
   final FeedBloc feedBloc;
   final VoidCallback onPostCreated;
@@ -29,6 +34,9 @@ class CreatePostWidget extends StatefulWidget {
     required int index,
   })
   onShowGallery;
+  final Post? post;
+  final Function() onCancelEdit;
+  final Function() onSuccessEdit;
 
   @override
   State<CreatePostWidget> createState() => _CreatePostWidgetState();
@@ -37,7 +45,10 @@ class CreatePostWidget extends StatefulWidget {
 class _CreatePostWidgetState extends State<CreatePostWidget> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  bool _showEmojiPicker = false;
   bool _isInputError = false;
+  List<String> _deletedUrlImages = [];
+  List<String> _urlImages = [];
   @override
   void dispose() {
     _controller.dispose();
@@ -51,7 +62,22 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
     });
   }
 
-  void _onCreatePost(int userId, List<File> images) {
+  void _onCreatePost(List<File> images) {
+    if (_controller.text.isEmpty && images.isEmpty) {
+      setState(() {
+        _isInputError = true;
+      });
+      return;
+    }
+    setState(() {
+      _isInputError = false;
+      _showEmojiPicker = false;
+    });
+
+    widget.feedBloc.add(CreatePost(text: _controller.text, images: images));
+  }
+
+  void _onUpdatePost(List<File> images, int postId) {
     if (_controller.text.isEmpty && images.isEmpty) {
       setState(() {
         _isInputError = true;
@@ -62,7 +88,14 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
       _isInputError = false;
     });
 
-    widget.feedBloc.add(CreatePost(text: _controller.text, images: images));
+    widget.feedBloc.add(
+      EditPost(
+        postId: postId,
+        text: _controller.text,
+        images: images,
+        deletedImages: _deletedUrlImages,
+      ),
+    );
   }
 
   void afterCreate() {
@@ -72,12 +105,40 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
     _focusNode.unfocus();
   }
 
+  void afterUpdate() {
+    setState(() {
+      _controller.clear();
+      _urlImages.clear();
+      _deletedUrlImages.clear();
+    });
+    _focusNode.unfocus();
+    widget.onSuccessEdit();
+  }
+
+  @override
+  void didUpdateWidget(covariant CreatePostWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.post != oldWidget.post && widget.post != null) {
+      widget.feedBloc.add(ClearImages());
+      setState(() {
+        _controller.text = widget.post!.text;
+        _urlImages = List.from(widget.post!.images);
+        _deletedUrlImages = [];
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool isEdit = widget.post != null;
     return BlocConsumer<FeedBloc, FeedState>(
       listenWhen: (previous, current) {
-        return (previous is FeedLoaded && current is FeedLoaded) &&
-            (previous.isCreating != current.isCreating);
+        if (previous is FeedLoaded && current is FeedLoaded) {
+          return (previous.isCreating != current.isCreating) ||
+              (previous.isUpdating != current.isUpdating);
+        }
+        return false;
       },
       buildWhen: (previous, current) {
         if (previous is FeedLoaded && current is FeedLoaded) {
@@ -92,31 +153,48 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
 
           return imagesChanged ||
               previous.isCreating != current.isCreating ||
-              previous.isCreateSuccess != current.isCreateSuccess;
+              previous.isCreateSuccess != current.isCreateSuccess ||
+              previous.isUpdating != current.isUpdating ||
+              previous.isUpdateSuccess != current.isUpdateSuccess;
         }
         return false;
       },
       bloc: widget.feedBloc,
       listener: (context, state) {
         if (state is FeedLoaded) {
-          if (state.isCreateSuccess) {
-            CustomToast.show(
-              CustomToastWidget(text: "Пост успешно создан!"),
-              dismissAfter: Duration(milliseconds: 1500),
-            );
-            afterCreate();
+          if (state.isCreating || state.isCreateSuccess) {
+            if (state.isCreateSuccess) {
+              CustomToast.show(
+                CustomToastWidget(text: "Пост успешно создан"),
+                dismissAfter: Duration(milliseconds: 1500),
+              );
+              afterCreate();
+            } else if (!state.isCreating) {
+              CustomToast.show(
+                CustomToastWidget(text: "Ошибка при создании поста"),
+                dismissAfter: Duration(milliseconds: 1500),
+              );
+              setState(() => _isInputError = false);
+              _focusNode.requestFocus();
+            }
+            return;
           }
-          if (!state.isCreating && !state.isCreateSuccess) {
-            CustomToast.show(
-              CustomToastWidget(
-                text: "Ошибка при создании поста. Попробуйте еще раз",
-              ),
-              dismissAfter: Duration(milliseconds: 1500),
-            );
-            setState(() {
-              _isInputError = false;
-            });
-            _focusNode.requestFocus();
+
+          if (state.isUpdating || state.isUpdateSuccess) {
+            if (state.isUpdateSuccess) {
+              CustomToast.show(
+                CustomToastWidget(text: "Пост успешно обновлен"),
+                dismissAfter: Duration(milliseconds: 1500),
+              );
+              afterUpdate();
+            } else if (!state.isUpdating) {
+              CustomToast.show(
+                CustomToastWidget(text: "Ошибка при обновлении поста"),
+                dismissAfter: Duration(milliseconds: 1500),
+              );
+              setState(() => _isInputError = false);
+              _focusNode.requestFocus();
+            }
           }
         }
       },
@@ -124,6 +202,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
         if (state is FeedLoaded) {
           final currentImages = state.images ?? [];
           final avatarUrl = state.user.avatar;
+          final buttonCreateText = isEdit ? "Обновить" : "Опубликовать";
           return baseContainerWidget(
             context: context,
             child: Column(
@@ -147,7 +226,8 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                       Expanded(
                         child: Column(
                           children: [
-                            SizedBox(
+                            Container(
+                              constraints: BoxConstraints(maxHeight: 120),
                               child: mainTextField(
                                 context: context,
                                 controller: _controller,
@@ -157,24 +237,67 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                                 onChanged: _onChanged,
                                 isInputError: _isInputError,
                                 focusNode: _focusNode,
+                                maxLines: null,
                               ),
                             ),
-                            SizedBox(height: 18),
-                            _buildImageGrid(currentImages),
                           ],
                         ),
+                      ),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        style: IconButton.styleFrom(
+                          splashFactory: NoSplash.splashFactory,
+                          highlightColor: Colors.transparent,
+                          overlayColor: Colors.transparent,
+                        ),
+                        iconSize: 25,
+                        onPressed: () {
+                          setState(() {
+                            _showEmojiPicker = !_showEmojiPicker;
+                          });
+                        },
+                        icon: Icon(Icons.emoji_emotions),
+                        color: context.color.gray,
                       ),
                     ],
                   ),
                 ),
+                if (_showEmojiPicker) ...[
+                  SizedBox(height: 20),
+                  SizedBox(
+                    child: EmojiPicker(
+                      onEmojiSelected: (emoji, category) {
+                        setState(() {
+                          _controller.text += category.emoji;
+                        });
+                      },
+                      onBackspacePressed: () => setState(() {
+                        final text = _controller.text;
+                        if (text.isNotEmpty) {
+                          final newText = text.characters
+                              .skipLast(1)
+                              .toString();
+                          _controller.text = newText;
+                          _controller.selection = TextSelection.fromPosition(
+                            TextPosition(offset: newText.length),
+                          );
+                        }
+                      }),
+                    ),
+                  ),
+                ],
+                SizedBox(height: 18),
+                _buildImageGrid(currentImages),
                 SizedBox(height: 14),
                 Divider(color: context.color.gray, thickness: 0.8),
                 SizedBox(height: 25),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         IconButton(
+                          padding: EdgeInsets.zero,
                           style: IconButton.styleFrom(
                             splashFactory: NoSplash.splashFactory,
                             highlightColor: Colors.transparent,
@@ -188,6 +311,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                           color: context.color.gray,
                         ),
                         IconButton(
+                          padding: EdgeInsets.zero,
                           style: IconButton.styleFrom(
                             splashFactory: NoSplash.splashFactory,
                             highlightColor: Colors.transparent,
@@ -200,44 +324,73 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                           icon: Icon(Icons.attach_file),
                           color: context.color.gray,
                         ),
-                        IconButton(
-                          style: IconButton.styleFrom(
-                            splashFactory: NoSplash.splashFactory,
-                            highlightColor: Colors.transparent,
-                            overlayColor: Colors.transparent,
-                          ),
-                          iconSize: 25,
-                          onPressed: () {},
-                          icon: Icon(Icons.emoji_emotions),
-                          color: context.color.gray,
-                        ),
                       ],
                     ),
                     Spacer(),
-                    AnimatedContainer(
-                      constraints: BoxConstraints(minWidth: 150),
-                      duration: Duration(milliseconds: 300),
-                      height: 55,
-                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                      child: mainButton(
-                        backgroundColor: context.color.dimPurple.withOpacity(
-                          0.8,
+                    Column(
+                      children: [
+                        AnimatedContainer(
+                          constraints: BoxConstraints(minWidth: 170),
+                          duration: Duration(milliseconds: 300),
+                          height: 55,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 4,
+                          ),
+                          child: mainButton(
+                            backgroundColor: context.color.dimPurple
+                                .withOpacity(0.8),
+                            context: context,
+                            child: state.isCreating
+                                ? Center(
+                                    child: customCircularProgressIndicator(
+                                      context: context,
+                                    ),
+                                  )
+                                : Text(
+                                    buttonCreateText,
+                                    style: context.theme.textTheme.bodySmall,
+                                  ),
+                            onTap: isEdit
+                                ? () => _onUpdatePost(
+                                    currentImages,
+                                    widget.post!.id,
+                                  )
+                                : () => _onCreatePost(currentImages),
+                            radius: 14,
+                          ),
                         ),
-                        context: context,
-                        child: state.isCreating
-                            ? Center(
-                                child: customCircularProgressIndicator(
-                                  context: context,
-                                ),
-                              )
-                            : Text(
-                                "Опубликовать",
-                                style: context.theme.textTheme.bodyMedium,
+                        if (isEdit) ...[
+                          SizedBox(height: 8),
+                          Container(
+                            constraints: BoxConstraints(minWidth: 170),
+                            height: 55,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 4,
+                            ),
+                            child: mainButton(
+                              backgroundColor: context.color.red.withOpacity(
+                                0.2,
                               ),
-                        onTap: () =>
-                            _onCreatePost(state.user.id, currentImages),
-                        radius: 14,
-                      ),
+                              context: context,
+                              onTap: () {
+                                setState(() {
+                                  _deletedUrlImages = [];
+                                  _urlImages = [];
+                                  _controller.text = "";
+                                });
+                                widget.onCancelEdit();
+                              },
+                              radius: 14,
+                              child: Text(
+                                "Отменить",
+                                style: context.theme.textTheme.bodySmall,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -251,8 +404,11 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
   }
 
   Widget _buildImageGrid(List<File> images) {
+    final totalCount = _urlImages.length + images.length;
+
+    if (totalCount == 0) return SizedBox.shrink();
     return GridView.builder(
-      key: ValueKey(images.length),
+      key: ValueKey(totalCount),
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -260,20 +416,30 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
       ),
-      itemCount: images.length,
+      itemCount: totalCount,
       itemBuilder: (context, index) {
+        final bool isExisting = index < _urlImages.length;
+        final imageUrl = isExisting ? _urlImages[index] : null;
+        final imageFile = !isExisting
+            ? images[index - _urlImages.length]
+            : null;
         return Stack(
           fit: StackFit.expand,
           children: [
             GestureDetector(
-              onTap: () => widget.onShowGallery(
-                context: context,
-                images: images.map((image) => image.path).toList(),
-                index: index,
-              ),
+              onTap: () {
+                final allPaths = [..._urlImages, ...images.map((f) => f.path)];
+                widget.onShowGallery(
+                  context: context,
+                  images: allPaths,
+                  index: index,
+                );
+              },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.file(images[index], fit: BoxFit.cover),
+                child: isExisting
+                    ? Image.network(imageUrl!, fit: BoxFit.cover)
+                    : Image.file(imageFile!, fit: BoxFit.cover),
               ),
             ),
             Positioned(
@@ -281,7 +447,14 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
               right: 4,
               child: GestureDetector(
                 onTap: () {
-                  widget.feedBloc.add(RemoveImageFromPost(index: index));
+                  if (!isExisting) {
+                    widget.feedBloc.add(RemoveImageFromPost(index: index));
+                  } else {
+                    setState(() {
+                      _deletedUrlImages.add(_urlImages[index]);
+                      _urlImages.removeAt(index);
+                    });
+                  }
                 },
                 child: Container(
                   decoration: BoxDecoration(

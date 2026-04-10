@@ -12,6 +12,7 @@ Widget mainTextField({
   Widget? prefixIcon,
   bool? obscureText,
   double? radius,
+  int? maxLines,
   bool? isInputError,
   VoidCallback? onSuffixIconPressed,
   void Function(String value)? onSubmitted,
@@ -34,6 +35,7 @@ Widget mainTextField({
     },
     inputFormatters: inputFormatters,
     focusNode: focusNode,
+    maxLines: (obscureText ?? false) ? 1 : maxLines,
     decoration: InputDecoration(
       labelStyle: style,
       hintStyle: style,

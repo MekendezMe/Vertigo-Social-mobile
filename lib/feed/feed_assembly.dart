@@ -6,6 +6,7 @@ import 'package:social_network_flutter/common/framework/media/media_service.dart
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/notifications/notification_service.dart';
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
+import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/logic/repository/feed_repository.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -29,6 +30,7 @@ class FeedAssembly extends DIAssembly {
         permissionService: container.resolve<PermissionService>(),
         notificationService: container.resolve<INotificationService>(),
         mediaService: container.resolve<MediaService>(),
+        logoutHandler: container.resolve<ILogoutHandler>(),
       ),
     );
   }

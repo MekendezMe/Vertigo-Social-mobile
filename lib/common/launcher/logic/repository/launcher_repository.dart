@@ -37,10 +37,6 @@ class LauncherRepository {
         body: request.toJson(),
       );
 
-      if (response == null) {
-        throw AuthException();
-      }
-
       return response;
     } catch (e, st) {
       talker.handle(e, st);

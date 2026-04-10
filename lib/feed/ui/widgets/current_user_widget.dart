@@ -21,13 +21,16 @@ Widget currentUserWidget({required BuildContext context, required Post post}) {
           children: [
             Row(
               children: [
-                Text(
+                SelectableText(
                   post.creator.username,
                   style: context.theme.textTheme.bodyMedium,
                 ),
               ],
             ),
-            Text(convertDate, style: context.theme.textTheme.bodyMedium),
+            SelectableText(
+              convertDate,
+              style: context.theme.textTheme.bodyMedium,
+            ),
           ],
         ),
       ],

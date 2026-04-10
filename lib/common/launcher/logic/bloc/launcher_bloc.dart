@@ -60,19 +60,19 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
   ) async {
     try {
       await secureStorage.load();
-      if (secureStorage.refreshToken == null) {
+      final String? deviceId = secureStorage.deviceId;
+      if (secureStorage.refreshToken == null || deviceId == null) {
         add(LogoutRequested());
         return;
       } else {
         await preferencesStorage.load();
         final tokens = await launcherRepository.getTokens();
-        final String? deviceId = secureStorage.deviceId;
-        if (!_hasAccess(deviceId, tokens.accessToken)) {
+        if (!_hasAccess(tokens.accessToken)) {
           add(LogoutRequested());
           return;
         }
         secureStorage.refreshToken = tokens.refreshToken;
-        secureStorage.save();
+        await secureStorage.save();
         tokenService.setToken(tokens.accessToken);
         add(LoginRequested());
       }
@@ -87,11 +87,8 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     emit(LauncherLoggedOut());
   }
 
-  bool _hasAccess(String? deviceId, String? accessToken) {
-    return accessToken != null &&
-        accessToken.isNotEmpty &&
-        deviceId != null &&
-        deviceId.isNotEmpty;
+  bool _hasAccess(String? accessToken) {
+    return accessToken != null && accessToken.isNotEmpty;
   }
 
   Future<void> _login(Emitter<LauncherState> emit) async {

@@ -1,12 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
+import 'package:social_network_flutter/feed/logic/entites/request/delete_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/edit_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/create_post_response.dart';
+import 'package:social_network_flutter/feed/logic/entites/response/delete_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/edit_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_posts_response.dart';
@@ -66,6 +68,18 @@ class FeedRepository {
         request: request,
         fromJson: (json) => EditPostResponse.fromJson(json),
         formData: formData,
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<DeletePostResponse> deletePost(DeletePostRequest request) async {
+    try {
+      final response = await requestSender.send(
+        request: request,
+        fromJson: (json) => DeletePostResponse.fromJson(json),
       );
       return response;
     } catch (e) {

@@ -78,3 +78,8 @@ class RemoveImageFromPost extends FeedEvent {
   @override
   List<Object?> get props => [index];
 }
+
+class ClearImages extends FeedEvent {
+  @override
+  List<Object?> get props => [];
+}
