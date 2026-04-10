@@ -133,6 +133,7 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
                               widget.rootComment!.id,
                               widget.state.post.id,
                               authorId,
+                              widget.replyingComment?.id,
                             );
                           },
                   ),
@@ -171,7 +172,12 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
     return content;
   }
 
-  void createAnswer(int commentId, int postId, int userId) {
+  void createAnswer(
+    int commentId,
+    int postId,
+    int userId,
+    int? replyingCommentId,
+  ) {
     if (!_isCorrectComment()) {
       return;
     }
@@ -182,6 +188,7 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
         content: content,
         postId: postId,
         userId: userId,
+        replyingCommentId: replyingCommentId,
       ),
     );
   }

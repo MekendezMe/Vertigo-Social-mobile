@@ -7,6 +7,5 @@ class DeletePostRequest extends IRequest {
   @override
   String get method => "posts/$postId";
   @override
-  // TODO: implement httpMethod
   HttpMethod get httpMethod => HttpMethod.delete;
 }

@@ -46,10 +46,7 @@ class FeedRepository {
 
   Future<CreatePostResponse> createPost(CreatePostRequest request) async {
     try {
-      FormData? formData;
-      if (request.images.isNotEmpty) {
-        formData = await request.getBodyWithPhotos();
-      }
+      final formData = await request.getBodyWithPhotos();
       final response = await requestSender.send(
         request: request,
         fromJson: (json) => CreatePostResponse.fromJson(json),
@@ -64,10 +61,7 @@ class FeedRepository {
 
   Future<EditPostResponse> editPost(EditPostRequest request) async {
     try {
-      FormData? formData;
-      if (request.images.isNotEmpty) {
-        formData = await request.getBodyWithPhotos();
-      }
+      final formData = await request.getBodyWithPhotos();
       final response = await requestSender.send(
         request: request,
         fromJson: (json) => EditPostResponse.fromJson(json),

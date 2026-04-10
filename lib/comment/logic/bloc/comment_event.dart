@@ -52,15 +52,23 @@ class CreateAnswer extends CommentEvent {
   final String content;
   final int commentId;
   final int userId;
+  final int? replyingCommentId;
 
   CreateAnswer({
     required this.postId,
     required this.content,
     required this.commentId,
     required this.userId,
+    this.replyingCommentId,
   });
   @override
-  List<Object?> get props => [postId, content, commentId, userId];
+  List<Object?> get props => [
+    postId,
+    content,
+    commentId,
+    userId,
+    replyingCommentId,
+  ];
 }
 
 class ToggleLike extends CommentEvent {

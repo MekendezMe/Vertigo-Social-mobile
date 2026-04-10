@@ -104,7 +104,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     }
     final current = state as CommentsLoaded;
     if (current.isCreate) return;
-    emit(current.copyWith(isCreate: true));
+    emit(current.copyWith(isCreate: true, isCreateSuccess: false));
     try {
       final response = await commentRepository.createComment(
         CreateCommentsRequest(postId: event.postId, content: event.content),
@@ -206,7 +206,9 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     }
     final current = state as CommentsLoaded;
     if (current.isAnswersCreate) return;
-    emit(current.copyWith(isAnswersCreate: true));
+    emit(
+      current.copyWith(isAnswersCreate: true, isCreateAnswersSuccess: false),
+    );
     try {
       final response = await commentRepository.createAnswer(
         CreateAnswersRequest(
@@ -218,7 +220,9 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       );
       final answers = List<Comment>.from(current.answers);
       final comments = List<Comment>.from(current.comments);
-      final index = answers.indexWhere((c) => c.id == event.commentId);
+      final index = answers.indexWhere(
+        (c) => c.id == (event.replyingCommentId ?? 0),
+      );
 
       bool isAnswerToRootComment = false;
 
@@ -230,15 +234,15 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       } else {
         answers.add(response.answer);
         isAnswerToRootComment = true;
-        final commentIndex = comments.indexWhere(
-          (c) => c.id == event.commentId,
-        );
-        if (commentIndex != -1) {
-          comments[commentIndex] = comments[commentIndex].copyWith(
-            answersCount: (comments[commentIndex].answersCount) + 1,
-          );
-        }
       }
+
+      final commentIndex = comments.indexWhere((c) => c.id == event.commentId);
+      final comment = comments[commentIndex];
+
+      comments[commentIndex] = comment.copyWith(
+        answersCount: (comment.answersCount) + 1,
+      );
+
       emit(
         current.copyWith(
           comments: comments,
