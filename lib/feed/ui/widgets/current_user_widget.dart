@@ -23,13 +23,20 @@ Widget currentUserWidget({required BuildContext context, required Post post}) {
               children: [
                 SelectableText(
                   post.creator.username,
-                  style: context.theme.textTheme.bodyMedium,
+                  style: context.theme.textTheme.bodyLarge!.modify(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ],
             ),
             SelectableText(
               convertDate,
-              style: context.theme.textTheme.bodyMedium,
+              style: context.theme.textTheme.bodyMedium!.modify(
+                color: context.theme.textTheme.bodyMedium!.color!.withOpacity(
+                  0.6,
+                ),
+              ),
             ),
           ],
         ),

@@ -6,7 +6,7 @@ Widget baseContainerWidget({
   required Widget child,
 }) {
   return Container(
-    margin: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+    margin: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     padding: EdgeInsets.only(bottom: 20, top: 14, right: 18, left: 14),
     decoration: BoxDecoration(
       color: context.color.lightGray.withOpacity(0.2),

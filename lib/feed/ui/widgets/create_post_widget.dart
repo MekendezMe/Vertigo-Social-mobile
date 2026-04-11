@@ -214,7 +214,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: EdgeInsets.only(left: 14, top: 10),
+                        padding: EdgeInsets.only(left: 6, top: 10),
                         decoration: BoxDecoration(shape: BoxShape.circle),
                         child: buildAvatar(
                           context,
@@ -222,7 +222,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                           avatarUrl,
                         ),
                       ),
-                      SizedBox(width: 20),
+                      SizedBox(width: 8),
                       Expanded(
                         child: Column(
                           children: [
@@ -232,7 +232,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                                 context: context,
                                 controller: _controller,
                                 style: context.theme.textTheme.bodyLarge!,
-                                hintText: "Что у вас нового?",
+                                hintText: "Поделитесь мыслью...",
                                 radius: 24,
                                 onChanged: _onChanged,
                                 isInputError: _isInputError,
@@ -288,9 +288,8 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                 ],
                 SizedBox(height: 18),
                 _buildImageGrid(currentImages),
-                SizedBox(height: 14),
                 Divider(color: context.color.gray, thickness: 0.8),
-                SizedBox(height: 25),
+                SizedBox(height: 6),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -338,8 +337,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                             vertical: 4,
                           ),
                           child: mainButton(
-                            backgroundColor: context.color.dimPurple
-                                .withOpacity(0.8),
+                            backgroundColor: context.color.dimPurple,
                             context: context,
                             child: state.isCreating
                                 ? Center(

@@ -50,13 +50,13 @@ class PostItemWidget extends StatelessWidget {
               children: [
                 currentUserWidget(context: context, post: post),
                 if (post.images.isNotEmpty) ...[
-                  SizedBox(height: 20),
+                  SizedBox(height: 10),
 
                   SizedBox(
-                    height: 150,
+                    height: 240,
                     child: imageList(
-                      width: 150,
-                      height: 150,
+                      width: 200,
+                      height: 200,
                       post: post,
                       onShowGallery: onShowGallery,
                     ),
@@ -66,10 +66,10 @@ class PostItemWidget extends StatelessWidget {
                   SizedBox(height: 20),
                   SelectableText(
                     post.text,
-                    style: context.theme.textTheme.bodyMedium,
+                    style: context.theme.textTheme.bodyLarge,
                   ),
                 ],
-                SizedBox(height: 20),
+                SizedBox(height: 14),
                 Row(
                   children: [
                     baseIconContainer(
@@ -83,7 +83,7 @@ class PostItemWidget extends StatelessWidget {
                         text: "${post.likesCount}",
                         color: post.likedByUser
                             ? context.color.skyBlue
-                            : context.color.darkGray,
+                            : context.color.veryDarkGray,
                       ),
                     ),
                     SizedBox(width: 10),
@@ -96,7 +96,7 @@ class PostItemWidget extends StatelessWidget {
                             onShowComments(context: context, postId: post.id),
                         icon: Icons.comment,
                         text: "${post.commentsCount}",
-                        color: context.color.darkGray,
+                        color: context.color.veryDarkGray,
                       ),
                     ),
                   ],
@@ -109,6 +109,13 @@ class PostItemWidget extends StatelessWidget {
           right: 18,
           top: 18,
           child: PopupMenuButton(
+            borderRadius: BorderRadius.circular(14),
+            position: PopupMenuPosition.over,
+            style: IconButton.styleFrom(
+              splashFactory: NoSplash.splashFactory,
+              highlightColor: Colors.transparent,
+              overlayColor: Colors.transparent,
+            ),
             icon: Icon(Icons.more_vert),
             color: context.color.darkGray,
             iconSize: 30,
@@ -124,6 +131,7 @@ class PostItemWidget extends StatelessWidget {
                 PopupMenuItem(value: "edit", child: Text("Редактировать")),
                 PopupMenuItem(value: "delete", child: Text("Удалить")),
               ],
+              PopupMenuItem(value: "copy", child: Text("Копировать")),
             ],
           ),
         ),
@@ -131,110 +139,3 @@ class PostItemWidget extends StatelessWidget {
     );
   }
 }
-
-// Widget postItemWidget({
-//   required BuildContext context,
-//   required Post post,
-//   required FeedBloc feedBloc,
-//   required VoidCallback onLikePressed,
-//   required void Function({
-//     required BuildContext context,
-//     required List<String> images,
-//     required int index,
-//   })
-//   onShowGallery,
-//   required Function({required BuildContext context, required int postId})
-//   onShowComments,
-//   required User user,
-//   required Function({required Post post}) onEdit,
-//   required Function({required Post post}) onDelete,
-// }) {
-//   return Stack(
-//     clipBehavior: Clip.none,
-//     children: [
-//       baseContainerWidget(
-//         context: context,
-//         child: Padding(
-//           padding: const EdgeInsets.only(left: 14.0),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               currentUserWidget(context: context, post: post),
-//               if (post.images.isNotEmpty) ...[
-//                 SizedBox(height: 20),
-
-//                 SizedBox(
-//                   height: 150,
-//                   child: imageList(
-//                     width: 150,
-//                     height: 150,
-//                     post: post,
-//                     onShowGallery: onShowGallery,
-//                   ),
-//                 ),
-//               ],
-//               if (post.text.isNotEmpty) ...[
-//                 SizedBox(height: 20),
-//                 Text(post.text, style: context.theme.textTheme.bodyMedium),
-//               ],
-//               SizedBox(height: 20),
-//               Row(
-//                 children: [
-//                   baseIconContainer(
-//                     context: context,
-//                     child: baseIconButton(
-//                       context: context,
-//                       post: post,
-//                       onPressed: onLikePressed,
-//                       iconSize: post.likedByUser ? 25 : 20,
-//                       icon: Icons.thumb_up,
-//                       text: "${post.likesCount}",
-//                       color: post.likedByUser
-//                           ? context.color.skyBlue
-//                           : context.color.darkGray,
-//                     ),
-//                   ),
-//                   SizedBox(width: 10),
-//                   baseIconContainer(
-//                     context: context,
-//                     child: baseIconButton(
-//                       context: context,
-//                       post: post,
-//                       onPressed: () =>
-//                           onShowComments(context: context, postId: post.id),
-//                       icon: Icons.comment,
-//                       text: "${post.commentsCount}",
-//                       color: context.color.darkGray,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//       Positioned(
-//         right: 18,
-//         top: 18,
-//         child: PopupMenuButton(
-//           icon: Icon(Icons.more_vert),
-//           color: context.color.darkGray,
-//           iconSize: 30,
-//           onSelected: (value) {
-//             if (value == "edit") {
-//               onEdit(post: post);
-//             } else if (value == "delete") {
-//               onDelete(post: post);
-//             }
-//           },
-//           itemBuilder: (context) => [
-//             if (user.id == post.creator.id) ...[
-//               PopupMenuItem(value: "edit", child: Text("Редактировать")),
-//               PopupMenuItem(value: "delete", child: Text("Удалить")),
-//             ],
-//           ],
-//         ),
-//       ),
-//     ],
-//   );
-// }

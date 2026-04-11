@@ -18,6 +18,14 @@ class LoadMorePosts extends FeedEvent {
   List<Object?> get props => [pageNumber];
 }
 
+class ChangeFeedType extends FeedEvent {
+  final PostType type;
+
+  ChangeFeedType({required this.type});
+  @override
+  List<Object?> get props => [type];
+}
+
 class CreatePost extends FeedEvent {
   final String text;
   final List<File> images;

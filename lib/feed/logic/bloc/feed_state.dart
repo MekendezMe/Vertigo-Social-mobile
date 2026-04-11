@@ -30,6 +30,7 @@ class FeedLoaded extends FeedState {
   final bool isUpdateSuccess;
   final bool isDeleting;
   final bool isDeleteSuccess;
+  final PostType currentType;
 
   FeedLoaded({
     required this.posts,
@@ -47,6 +48,7 @@ class FeedLoaded extends FeedState {
     this.isUpdateSuccess = false,
     this.isDeleting = false,
     this.isDeleteSuccess = false,
+    this.currentType = PostType.all,
   });
   @override
   List<Object?> get props => [
@@ -65,6 +67,7 @@ class FeedLoaded extends FeedState {
     isUpdateSuccess,
     isDeleteSuccess,
     isDeleting,
+    currentType,
   ];
 
   FeedLoaded copyWith({
@@ -83,6 +86,7 @@ class FeedLoaded extends FeedState {
     bool? isUpdateSuccess,
     bool? isDeleting,
     bool? isDeleteSuccess,
+    PostType? currentType,
   }) {
     return FeedLoaded(
       posts: posts ?? this.posts,
@@ -96,14 +100,15 @@ class FeedLoaded extends FeedState {
           : likeError as String?,
       images: identical(images, _notSet) ? this.images : images as List<File>?,
       currentPage: currentPage ?? this.currentPage,
-      isImageLoading: isImageLoading ?? this.isImageLoading,
-      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      isImageLoading: isImageLoading ?? false,
+      isLoadingMore: isLoadingMore ?? false,
       isLastPage: isLastPage ?? this.isLastPage,
       isCreateSuccess: isCreateSuccess ?? false,
       isUpdating: isUpdating ?? false,
       isUpdateSuccess: isUpdateSuccess ?? false,
       isDeleting: isDeleting ?? false,
       isDeleteSuccess: isDeleteSuccess ?? false,
+      currentType: currentType ?? this.currentType,
     );
   }
 }

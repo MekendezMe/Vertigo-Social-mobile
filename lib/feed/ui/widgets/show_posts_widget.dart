@@ -5,6 +5,7 @@ import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.da
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/feed/logic/entites/post_types.dart';
 import 'package:social_network_flutter/feed/ui/widgets/create_post_widget.dart';
 import 'package:social_network_flutter/feed/ui/widgets/post_item_widget.dart';
 
@@ -31,13 +32,31 @@ class ShowPostsWidget extends StatefulWidget {
   State<ShowPostsWidget> createState() => _ShowPostsWidgetState();
 }
 
-class _ShowPostsWidgetState extends State<ShowPostsWidget> {
+class _ShowPostsWidgetState extends State<ShowPostsWidget>
+    with SingleTickerProviderStateMixin {
   late final ScrollController _scrollController;
+  PostType _currentType = PostType.all;
+  late final TabController _tabController;
   Post? _editPost;
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController()..addListener(_onScroll);
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {
+          _currentType = PostType.values[_tabController.index];
+        });
+        widget.feedBloc.add(ChangeFeedType(type: _currentType));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -83,7 +102,71 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget> {
               onSuccessEdit: onSuccessEdit,
             ),
           ),
-          SliverToBoxAdapter(child: SizedBox(height: 30)),
+          SliverToBoxAdapter(child: SizedBox(height: 10)),
+          SliverToBoxAdapter(
+            child: DefaultTabController(
+              length: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  TabBar(
+                    controller: _tabController,
+                    dividerHeight: 0.4,
+                    dividerColor: Colors.grey[300],
+                    indicator: const BoxDecoration(),
+                    labelStyle: context.theme.textTheme.bodyLarge!.modify(
+                      fontWeight: FontWeight.bold,
+                      color: context.color.veryDarkGray,
+                    ),
+                    unselectedLabelStyle: context.theme.textTheme.bodyLarge,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    padding: EdgeInsets.all(4),
+                    splashFactory: NoSplash.splashFactory,
+                    overlayColor: WidgetStatePropertyAll(Colors.transparent),
+                    tabs: [
+                      Tab(
+                        child: Text(
+                          "Все",
+                          style: _currentType == PostType.all
+                              ? context.theme.textTheme.bodyLarge
+                              : context.theme.textTheme.bodyLarge!.modify(
+                                  color: context.color.veryDarkGray.withOpacity(
+                                    0.8,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      Tab(
+                        child: Text(
+                          "Рекомендованное",
+                          style: _currentType == PostType.recommended
+                              ? context.theme.textTheme.bodyLarge
+                              : context.theme.textTheme.bodyLarge!.modify(
+                                  color: context.color.veryDarkGray.withOpacity(
+                                    0.8,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      Tab(
+                        child: Text(
+                          "Подписки",
+                          style: _currentType == PostType.subscribe
+                              ? context.theme.textTheme.bodyLarge
+                              : context.theme.textTheme.bodyLarge!.modify(
+                                  color: context.color.veryDarkGray.withOpacity(
+                                    0.8,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
           if (state.posts.isEmpty)
             SliverFillRemaining(
               child: Align(
@@ -121,6 +204,7 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget> {
     setState(() {
       _editPost = post;
     });
+    _animateScroll(toStart: true);
   }
 
   void onSuccessEdit() {
@@ -139,12 +223,24 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget> {
     widget.feedBloc.add(DeletePost(postId: post.id));
   }
 
+  void _animateScroll({bool toStart = true}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          toStart ? 0 : _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
   void _onScroll() {
     if (!_scrollController.hasClients) return;
 
     final blocState = context.read<FeedBloc>().state;
 
-    if (blocState is! FeedLoaded || (blocState.isLoadingMore)) {
+    if (blocState is! FeedLoaded || blocState.isLoadingMore) {
       return;
     }
     final max = _scrollController.position.maxScrollExtent;

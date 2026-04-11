@@ -10,6 +10,7 @@ import 'package:social_network_flutter/common/framework/notifications/notificati
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
 import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/feed/logic/entites/post_types.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/delete_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/edit_post_request.dart';
@@ -43,7 +44,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   }) : super(FeedInitial()) {
     on<LoadFeed>(_onLoadFeed);
     on<LoadMorePosts>(_onLoadMorePosts);
-
+    on<ChangeFeedType>(_onChangeFeedType);
     on<CreatePost>(_onCreatePost);
     on<EditPost>(_onUpdatePost);
     on<DeletePost>(_onDeletePost);
@@ -99,7 +100,36 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         ),
       );
     } catch (e, st) {
-      emit(current.copyWith(isLoadingMore: false));
+      emit(current.copyWith(isLoadingMore: false, isLastPage: true));
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onChangeFeedType(
+    ChangeFeedType event,
+    Emitter<FeedState> emit,
+  ) async {
+    if (state is! FeedLoaded) return;
+    final currentState = state as FeedLoaded;
+    if (currentState.currentType == event.type) {
+      return;
+    }
+    final currentPage = 1;
+    try {
+      final response = await feedRepository.getPosts(
+        GetPostsRequest(pageNumber: currentPage, type: event.type),
+      );
+      emit(
+        currentState.copyWith(
+          posts: [...response.posts],
+          currentPage: currentPage,
+          isLastPage: response.isLastPage,
+          currentType: event.type,
+        ),
+      );
+    } catch (e, st) {
+      emit(currentState.copyWith(currentPage: currentPage, isLastPage: true));
       talker.handle(e, st);
       errorHandler.handle(e);
     }
