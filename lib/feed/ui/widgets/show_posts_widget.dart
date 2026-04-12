@@ -106,64 +106,63 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget>
           SliverToBoxAdapter(
             child: DefaultTabController(
               length: 3,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TabBar(
-                    controller: _tabController,
-                    dividerHeight: 0.4,
-                    dividerColor: Colors.grey[300],
-                    indicator: const BoxDecoration(),
-                    labelStyle: context.theme.textTheme.bodyLarge!.modify(
-                      fontWeight: FontWeight.bold,
-                      color: context.color.veryDarkGray,
+              child: Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TabBar(
+                      controller: _tabController,
+                      dividerHeight: 0.4,
+                      dividerColor: Colors.grey[300],
+                      indicator: const BoxDecoration(),
+                      labelStyle: context.theme.textTheme.bodyLarge!.modify(
+                        fontWeight: FontWeight.bold,
+                        color: context.color.veryDarkGray,
+                      ),
+                      unselectedLabelStyle: context.theme.textTheme.bodyLarge,
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.center,
+                      padding: EdgeInsets.all(4),
+                      splashFactory: NoSplash.splashFactory,
+                      overlayColor: WidgetStatePropertyAll(Colors.transparent),
+                      tabs: [
+                        Tab(
+                          child: Text(
+                            "Все",
+                            style: _currentType == PostType.all
+                                ? context.theme.textTheme.bodyLarge
+                                : context.theme.textTheme.bodyLarge!.modify(
+                                    color: context.color.veryDarkGray
+                                        .withOpacity(0.8),
+                                  ),
+                          ),
+                        ),
+                        Tab(
+                          child: Text(
+                            "Рекомендованное",
+                            style: _currentType == PostType.recommended
+                                ? context.theme.textTheme.bodyLarge
+                                : context.theme.textTheme.bodyLarge!.modify(
+                                    color: context.color.veryDarkGray
+                                        .withOpacity(0.8),
+                                  ),
+                          ),
+                        ),
+                        Tab(
+                          child: Text(
+                            "Подписки",
+                            style: _currentType == PostType.subscribe
+                                ? context.theme.textTheme.bodyLarge
+                                : context.theme.textTheme.bodyLarge!.modify(
+                                    color: context.color.veryDarkGray
+                                        .withOpacity(0.8),
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
-                    unselectedLabelStyle: context.theme.textTheme.bodyLarge,
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    padding: EdgeInsets.all(4),
-                    splashFactory: NoSplash.splashFactory,
-                    overlayColor: WidgetStatePropertyAll(Colors.transparent),
-                    tabs: [
-                      Tab(
-                        child: Text(
-                          "Все",
-                          style: _currentType == PostType.all
-                              ? context.theme.textTheme.bodyLarge
-                              : context.theme.textTheme.bodyLarge!.modify(
-                                  color: context.color.veryDarkGray.withOpacity(
-                                    0.8,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      Tab(
-                        child: Text(
-                          "Рекомендованное",
-                          style: _currentType == PostType.recommended
-                              ? context.theme.textTheme.bodyLarge
-                              : context.theme.textTheme.bodyLarge!.modify(
-                                  color: context.color.veryDarkGray.withOpacity(
-                                    0.8,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      Tab(
-                        child: Text(
-                          "Подписки",
-                          style: _currentType == PostType.subscribe
-                              ? context.theme.textTheme.bodyLarge
-                              : context.theme.textTheme.bodyLarge!.modify(
-                                  color: context.color.veryDarkGray.withOpacity(
-                                    0.8,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
