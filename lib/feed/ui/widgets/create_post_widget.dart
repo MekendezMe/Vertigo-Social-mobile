@@ -8,6 +8,7 @@ import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.da
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/feed/logic/helpers/extension_file_checker.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dart';
 import 'package:social_network_flutter/ui/widgets/avatar/build_avatar.dart';
 import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
@@ -30,7 +31,7 @@ class CreatePostWidget extends StatefulWidget {
   final FeedLoaded state;
   final void Function({
     required BuildContext context,
-    required List<String> images,
+    required List<String> media,
     required int index,
   })
   onShowGallery;
@@ -47,8 +48,8 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
   final FocusNode _focusNode = FocusNode();
   bool _showEmojiPicker = false;
   bool _isInputError = false;
-  List<String> _deletedUrlImages = [];
-  List<String> _urlImages = [];
+  List<String> _deletedUrlMedia = [];
+  List<String> _urlMedia = [];
   @override
   void dispose() {
     _controller.dispose();
@@ -62,8 +63,8 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
     });
   }
 
-  void _onCreatePost(List<File> images) {
-    if (_controller.text.isEmpty && images.isEmpty) {
+  void _onCreatePost(List<File> media) {
+    if (_controller.text.isEmpty && media.isEmpty) {
       setState(() {
         _isInputError = true;
       });
@@ -74,11 +75,11 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
       _showEmojiPicker = false;
     });
 
-    widget.feedBloc.add(CreatePost(text: _controller.text, images: images));
+    widget.feedBloc.add(CreatePost(text: _controller.text, media: media));
   }
 
-  void _onUpdatePost(List<File> images, int postId) {
-    if (_controller.text.isEmpty && images.isEmpty) {
+  void _onUpdatePost(List<File> media, int postId) {
+    if (_controller.text.isEmpty && media.isEmpty) {
       setState(() {
         _isInputError = true;
       });
@@ -92,8 +93,8 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
       EditPost(
         postId: postId,
         text: _controller.text,
-        images: images,
-        deletedImages: _deletedUrlImages,
+        media: media,
+        deletedImages: _deletedUrlMedia,
       ),
     );
   }
@@ -108,8 +109,8 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
   void afterUpdate() {
     setState(() {
       _controller.clear();
-      _urlImages.clear();
-      _deletedUrlImages.clear();
+      _urlMedia.clear();
+      _deletedUrlMedia.clear();
     });
     _focusNode.unfocus();
     widget.onSuccessEdit();
@@ -120,11 +121,11 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.post != oldWidget.post && widget.post != null) {
-      widget.feedBloc.add(ClearImages());
+      widget.feedBloc.add(ClearMedia());
       setState(() {
         _controller.text = widget.post!.text;
-        _urlImages = List.from(widget.post!.images);
-        _deletedUrlImages = [];
+        _urlMedia = List.from(widget.post!.media);
+        _deletedUrlMedia = [];
       });
     }
   }
@@ -142,16 +143,14 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
       },
       buildWhen: (previous, current) {
         if (previous is FeedLoaded && current is FeedLoaded) {
-          final previousPaths = previous.images
+          final previousPaths = previous.media
               ?.map((file) => file.path)
               .toList();
-          final currentPaths = current.images
-              ?.map((file) => file.path)
-              .toList();
-          final imagesChanged =
+          final currentPaths = current.media?.map((file) => file.path).toList();
+          final mediaChanged =
               previousPaths.toString() != currentPaths.toString();
 
-          return imagesChanged ||
+          return mediaChanged ||
               previous.isCreating != current.isCreating ||
               previous.isCreateSuccess != current.isCreateSuccess ||
               previous.isUpdating != current.isUpdating ||
@@ -200,7 +199,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
       },
       builder: (context, state) {
         if (state is FeedLoaded) {
-          final currentImages = state.images ?? [];
+          final currentMedia = state.media ?? [];
           final avatarUrl = state.user.avatar;
           final buttonCreateText = isEdit ? "Обновить" : "Опубликовать";
           return baseContainerWidget(
@@ -287,7 +286,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                   ),
                 ],
                 SizedBox(height: 18),
-                _buildImageGrid(currentImages),
+                _buildMediaGrid(currentMedia),
                 Divider(color: context.color.gray, thickness: 0.8),
                 SizedBox(height: 6),
                 Row(
@@ -318,7 +317,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                           ),
                           iconSize: 25,
                           onPressed: () {
-                            widget.feedBloc.add(PickImagesFromGallery());
+                            widget.feedBloc.add(PickMediaFromGallery());
                           },
                           icon: Icon(Icons.attach_file),
                           color: context.color.gray,
@@ -351,10 +350,10 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                                   ),
                             onTap: isEdit
                                 ? () => _onUpdatePost(
-                                    currentImages,
+                                    currentMedia,
                                     widget.post!.id,
                                   )
-                                : () => _onCreatePost(currentImages),
+                                : () => _onCreatePost(currentMedia),
                             radius: 14,
                           ),
                         ),
@@ -374,8 +373,8 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                               context: context,
                               onTap: () {
                                 setState(() {
-                                  _deletedUrlImages = [];
-                                  _urlImages = [];
+                                  _deletedUrlMedia = [];
+                                  _urlMedia = [];
                                   _controller.text = "";
                                 });
                                 widget.onCancelEdit();
@@ -401,43 +400,122 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
     );
   }
 
-  Widget _buildImageGrid(List<File> images) {
-    final totalCount = _urlImages.length + images.length;
+  //   Widget _buildImageGrid(List<File> images) {
+  //     final totalCount = _urlMedia.length + images.length;
 
-    if (totalCount == 0) return SizedBox.shrink();
+  //     if (totalCount == 0) return SizedBox.shrink();
+  //     return GridView.builder(
+  //       key: ValueKey(totalCount),
+  //       shrinkWrap: true,
+  //       physics: NeverScrollableScrollPhysics(),
+  //       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+  //         crossAxisCount: 3,
+  //         crossAxisSpacing: 8,
+  //         mainAxisSpacing: 8,
+  //       ),
+  //       itemCount: totalCount,
+  //       itemBuilder: (context, index) {
+  //         final bool isExisting = index < _urlMedia.length;
+  //         final imageUrl = isExisting ? _urlMedia[index] : null;
+  //         final imageFile = !isExisting ? images[index - _urlMedia.length] : null;
+  //         return Stack(
+  //           fit: StackFit.expand,
+  //           children: [
+  //             GestureDetector(
+  //               onTap: () {
+  //                 final allPaths = [..._urlMedia, ...images.map((f) => f.path)];
+  //                 widget.onShowGallery(
+  //                   context: context,
+  //                   images: allPaths,
+  //                   index: index,
+  //                 );
+  //               },
+  //               child: ClipRRect(
+  //                 borderRadius: BorderRadius.circular(8),
+  //                 child: isExisting
+  //                     ? Image.network(imageUrl!, fit: BoxFit.cover)
+  //                     : Image.file(imageFile!, fit: BoxFit.cover),
+  //               ),
+  //             ),
+  //             Positioned(
+  //               top: 4,
+  //               right: 4,
+  //               child: GestureDetector(
+  //                 onTap: () {
+  //                   if (!isExisting) {
+  //                     widget.feedBloc.add(RemoveMediaFromPost(index: index));
+  //                   } else {
+  //                     setState(() {
+  //                       _deletedUrlMedia.add(_urlMedia[index]);
+  //                       _urlMedia.removeAt(index);
+  //                     });
+  //                   }
+  //                 },
+  //                 child: Container(
+  //                   decoration: BoxDecoration(
+  //                     color: Colors.black.withOpacity(0.6),
+  //                     shape: BoxShape.circle,
+  //                   ),
+  //                   child: Icon(Icons.close, size: 20, color: Colors.white),
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         );
+  //       },
+  //     );
+  //   }
+  // }
+
+  Widget _buildMediaGrid(List<File> mediaFiles) {
+    final totalCount = _urlMedia.length + mediaFiles.length;
+
+    if (totalCount == 0) return const SizedBox.shrink();
+
     return GridView.builder(
       key: ValueKey(totalCount),
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
       ),
       itemCount: totalCount,
       itemBuilder: (context, index) {
-        final bool isExisting = index < _urlImages.length;
-        final imageUrl = isExisting ? _urlImages[index] : null;
-        final imageFile = !isExisting
-            ? images[index - _urlImages.length]
+        final bool isExisting = index < _urlMedia.length;
+        final mediaUrl = isExisting ? _urlMedia[index] : null;
+        final mediaFile = !isExisting
+            ? mediaFiles[index - _urlMedia.length]
             : null;
+
+        final bool isVideo = isExisting
+            ? isVideoByUrl(mediaUrl!)
+            : isVideoByFile(mediaFile!);
+
         return Stack(
           fit: StackFit.expand,
           children: [
             GestureDetector(
               onTap: () {
-                final allPaths = [..._urlImages, ...images.map((f) => f.path)];
+                final allPaths = [
+                  ..._urlMedia,
+                  ...mediaFiles.map((f) => f.path),
+                ];
                 widget.onShowGallery(
                   context: context,
-                  images: allPaths,
+                  media: allPaths,
                   index: index,
                 );
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: isExisting
-                    ? Image.network(imageUrl!, fit: BoxFit.cover)
-                    : Image.file(imageFile!, fit: BoxFit.cover),
+                child: _buildMediaItem(
+                  isExisting: isExisting,
+                  mediaUrl: mediaUrl,
+                  mediaFile: mediaFile,
+                  isVideo: isVideo,
+                ),
               ),
             ),
             Positioned(
@@ -446,11 +524,11 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
               child: GestureDetector(
                 onTap: () {
                   if (!isExisting) {
-                    widget.feedBloc.add(RemoveImageFromPost(index: index));
+                    widget.feedBloc.add(RemoveMediaFromPost(index: index));
                   } else {
                     setState(() {
-                      _deletedUrlImages.add(_urlImages[index]);
-                      _urlImages.removeAt(index);
+                      _deletedUrlMedia.add(_urlMedia[index]);
+                      _urlMedia.removeAt(index);
                     });
                   }
                 },
@@ -459,13 +537,71 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                     color: Colors.black.withOpacity(0.6),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.close, size: 20, color: Colors.white),
+                  child: const Icon(Icons.close, size: 20, color: Colors.white),
                 ),
               ),
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildMediaItem({
+    required bool isExisting,
+    String? mediaUrl,
+    File? mediaFile,
+    required bool isVideo,
+  }) {
+    if (isVideo) {
+      return _buildVideoThumbnail(
+        isExisting: isExisting,
+        mediaUrl: mediaUrl,
+        mediaFile: mediaFile,
+      );
+    }
+
+    if (isExisting) {
+      return Image.network(
+        mediaUrl!,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey[300],
+          child: const Icon(Icons.broken_image, color: Colors.grey),
+        ),
+      );
+    } else {
+      return Image.file(
+        mediaFile!,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey[300],
+          child: const Icon(Icons.broken_image, color: Colors.grey),
+        ),
+      );
+    }
+  }
+
+  Widget _buildVideoThumbnail({
+    required bool isExisting,
+    String? mediaUrl,
+    File? mediaFile,
+  }) {
+    return Stack(
+      fit: StackFit.expand,
+      alignment: Alignment.center,
+      children: [
+        Container(
+          color: Colors.black,
+          child: const Center(
+            child: Icon(
+              Icons.play_circle_outline,
+              size: 40,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

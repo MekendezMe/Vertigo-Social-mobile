@@ -1,12 +1,12 @@
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 
-class UnlikePostRequest extends IRequest {
+class UnsubscribeRequest extends IRequest {
+  final int userId;
+
+  UnsubscribeRequest({required this.userId});
   @override
-  String get method => 'posts/$postId/like';
+  String get method => "users/$userId/subscribe";
+
   @override
   HttpMethod get httpMethod => HttpMethod.delete;
-
-  final int postId;
-
-  UnlikePostRequest({required this.postId});
 }

@@ -17,6 +17,7 @@ import 'package:social_network_flutter/feed/logic/entites/request/edit_post_requ
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';
+import 'package:social_network_flutter/feed/logic/entites/request/user/subscribe_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:social_network_flutter/feed/logic/repository/feed_repository.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -52,9 +53,10 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<ToggleLike>(_onToggleLike);
 
     on<PickImageFromCamera>(_onPickImageFromCamera);
-    on<PickImagesFromGallery>(_onPickImagesFromGallery);
-    on<RemoveImageFromPost>(_onRemoveImageFromPost);
-    on<ClearImages>(_onClearImages);
+    on<PickMediaFromGallery>(_onPickMediaFromGallery);
+    on<RemoveMediaFromPost>(_onRemoveMediaFromPost);
+    on<ClearMedia>(_onClearMedia);
+    on<Subscribe>(_onSubscribe);
   }
 
   Future<void> _onLoadFeed(LoadFeed event, Emitter<FeedState> emit) async {
@@ -89,7 +91,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     try {
       emit(current.copyWith(isLoadingMore: true));
       final response = await feedRepository.getPosts(
-        GetPostsRequest(pageNumber: event.pageNumber),
+        GetPostsRequest(pageNumber: event.pageNumber, type: event.type),
       );
       emit(
         current.copyWith(
@@ -142,24 +144,17 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     try {
       emit(currentState.copyWith(isCreating: true, isCreateSuccess: null));
       final createdPost = await feedRepository.createPost(
-        CreatePostRequest(text: event.text, images: event.images),
+        CreatePostRequest(text: event.text, media: event.media),
       );
       emit(
         currentState.copyWith(
           posts: [createdPost.post, ...currentState.posts],
           isCreating: false,
           createError: null,
-          images: null,
+          media: null,
           isCreateSuccess: true,
         ),
       );
-      // final canSend = await permissionService.canSendNotifications();
-      // if (canSend) {
-      //   await notificationService.showNotification(
-      //     title: 'Добро пожаловать!',
-      //     body: 'Вы успешно вошли в приложение',
-      //   );
-      // }
     } catch (e, st) {
       emit(
         currentState.copyWith(
@@ -184,8 +179,8 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         EditPostRequest(
           postId: event.postId,
           text: event.text,
-          deletedImages: event.deletedImages,
-          images: event.images,
+          deletedMedia: event.deletedImages,
+          media: event.media,
         ),
       );
 
@@ -198,7 +193,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
           posts: [response.post, ...updatedPosts],
           isUpdateSuccess: true,
           isUpdating: false,
-          images: null,
+          media: null,
         ),
       );
     } catch (e, st) {
@@ -324,99 +319,124 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     if (state is! FeedLoaded) return;
     final currentState = state as FeedLoaded;
 
-    emit(currentState.copyWith(isImageLoading: true));
+    emit(currentState.copyWith(isMediaLoading: true));
 
     try {
       final image = await mediaService.takePhotoWithPermission();
       if (image == null) {
-        emit(currentState.copyWith(isImageLoading: false));
+        emit(currentState.copyWith(isMediaLoading: false));
         return;
       }
-      final currentImages = currentState.images ?? [];
-      final totalCount = currentImages.length + 1;
+      final currentMedia = currentState.media ?? [];
+      final totalCount = currentMedia.length + 1;
 
       if (totalCount > 10) {
-        errorHandler.handle("Можно выбрать максимум 10 фото");
-        emit(currentState.copyWith(isImageLoading: false));
+        errorHandler.handle("Можно выбрать максимум 10 файлов");
+        emit(currentState.copyWith(isMediaLoading: false));
         return;
       }
 
       emit(
         currentState.copyWith(
-          isImageLoading: false,
-          images: [image, ...currentImages],
+          isMediaLoading: false,
+          media: [image, ...currentMedia],
         ),
       );
     } catch (e, st) {
-      emit(currentState.copyWith(isImageLoading: false));
+      emit(currentState.copyWith(isMediaLoading: false));
       talker.handle(e, st);
       errorHandler.handle(e);
     }
   }
 
-  Future<void> _onPickImagesFromGallery(
-    PickImagesFromGallery event,
+  Future<void> _onPickMediaFromGallery(
+    PickMediaFromGallery event,
     Emitter<FeedState> emit,
   ) async {
     if (state is! FeedLoaded) return;
     final currentState = state as FeedLoaded;
 
-    emit(currentState.copyWith(isImageLoading: true));
+    emit(currentState.copyWith(isMediaLoading: true));
 
     try {
-      final images = await mediaService.pickPhotosWithPermission();
+      final media = await mediaService.pickMultipleMedia();
 
-      if (images == null || images.isEmpty) {
-        emit(currentState.copyWith(isImageLoading: false));
+      if (media.isEmpty) {
+        emit(currentState.copyWith(isMediaLoading: false));
         return;
       }
 
-      final currentImages = currentState.images ?? [];
-      final totalCount = currentImages.length + images.length;
+      final currentMedia = currentState.media ?? [];
+      final totalCount = currentMedia.length + media.length;
 
       if (totalCount > 10) {
-        errorHandler.handle("Можно выбрать максимум 10 фото");
-        emit(currentState.copyWith(isImageLoading: false));
+        errorHandler.handle("Можно выбрать максимум 10 файлов");
+        emit(currentState.copyWith(isMediaLoading: false));
         return;
       }
 
       emit(
         currentState.copyWith(
-          isImageLoading: false,
-          images: [...images, ...currentImages],
+          isMediaLoading: false,
+          media: [...media, ...currentMedia],
         ),
       );
     } catch (e, st) {
-      emit(currentState.copyWith(isImageLoading: false));
+      emit(currentState.copyWith(isMediaLoading: false));
       talker.handle(e, st);
       errorHandler.handle(e);
     }
   }
 
-  Future<void> _onRemoveImageFromPost(
-    RemoveImageFromPost event,
+  Future<void> _onRemoveMediaFromPost(
+    RemoveMediaFromPost event,
     Emitter<FeedState> emit,
   ) async {
     if (state is! FeedLoaded) return;
     final current = state as FeedLoaded;
     try {
-      final currentImages = current.images ?? [];
-      final newImages = List<File>.from(currentImages)..removeAt(event.index);
+      final currentMedia = current.media ?? [];
+      final newMedia = List<File>.from(currentMedia)..removeAt(event.index);
 
-      emit(current.copyWith(images: newImages.isEmpty ? null : newImages));
+      emit(current.copyWith(media: newMedia.isEmpty ? null : newMedia));
     } catch (e, st) {
       talker.handle(e, st);
       errorHandler.handle(e);
     }
   }
 
-  Future<void> _onClearImages(
-    ClearImages event,
-    Emitter<FeedState> emit,
-  ) async {
+  Future<void> _onClearMedia(ClearMedia event, Emitter<FeedState> emit) async {
     if (state is FeedLoaded) {
       final currentState = state as FeedLoaded;
-      emit(currentState.copyWith(images: null));
+      emit(currentState.copyWith(media: null));
+    }
+  }
+
+  Future<void> _onSubscribe(Subscribe event, Emitter<FeedState> emit) async {
+    if (state is! FeedLoaded) return;
+    final current = state as FeedLoaded;
+    try {
+      final response = await feedRepository.subscribeToUser(
+        SubscribeRequest(userId: event.userId),
+      );
+
+      if (!response.success) {
+        errorHandler.handle("Не удалось оформить подписку. Попробуйте снова");
+      }
+
+      final posts = current.posts
+          .map(
+            (post) => post.creator.id == event.userId
+                ? post.copyWith(subscribedByUser: true)
+                : post,
+          )
+          .toList();
+
+      emit(current.copyWith(posts: posts, isSuccessSubscribed: true));
+    } catch (e, st) {
+      emit(current.copyWith(isSuccessSubscribed: false));
+      talker.handle(e, st);
+      errorHandler.handle(e);
     }
   }
 }

@@ -12,10 +12,11 @@ class LoadFeed extends FeedEvent {
 
 class LoadMorePosts extends FeedEvent {
   final int pageNumber;
+  final PostType type;
 
-  LoadMorePosts({required this.pageNumber});
+  LoadMorePosts({required this.pageNumber, required this.type});
   @override
-  List<Object?> get props => [pageNumber];
+  List<Object?> get props => [pageNumber, type];
 }
 
 class ChangeFeedType extends FeedEvent {
@@ -28,28 +29,28 @@ class ChangeFeedType extends FeedEvent {
 
 class CreatePost extends FeedEvent {
   final String text;
-  final List<File> images;
+  final List<File> media;
 
-  CreatePost({required this.text, required this.images});
+  CreatePost({required this.text, required this.media});
   @override
-  List<Object?> get props => [text, images];
+  List<Object?> get props => [text, media];
 }
 
 class EditPost extends FeedEvent {
   final int postId;
   final String text;
-  final List<File> images;
+  final List<File> media;
   final List<String> deletedImages;
 
   EditPost({
     required this.postId,
     required this.text,
-    required this.images,
+    required this.media,
     required this.deletedImages,
   });
 
   @override
-  List<Object?> get props => [postId, text, images, deletedImages];
+  List<Object?> get props => [postId, text, media, deletedImages];
 }
 
 class DeletePost extends FeedEvent {
@@ -73,21 +74,29 @@ class PickImageFromCamera extends FeedEvent {
   List<Object?> get props => [];
 }
 
-class PickImagesFromGallery extends FeedEvent {
+class PickMediaFromGallery extends FeedEvent {
   @override
   List<Object?> get props => [];
 }
 
-class RemoveImageFromPost extends FeedEvent {
+class RemoveMediaFromPost extends FeedEvent {
   final int index;
 
-  RemoveImageFromPost({required this.index});
+  RemoveMediaFromPost({required this.index});
 
   @override
   List<Object?> get props => [index];
 }
 
-class ClearImages extends FeedEvent {
+class ClearMedia extends FeedEvent {
+  @override
+  List<Object?> get props => [];
+}
+
+class Subscribe extends FeedEvent {
+  final int userId;
+
+  Subscribe({required this.userId});
   @override
   List<Object?> get props => [];
 }

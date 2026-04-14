@@ -21,7 +21,7 @@ class ShowPostsWidget extends StatefulWidget {
   final FeedLoaded state;
   final void Function({
     required BuildContext context,
-    required List<String> images,
+    required List<String> media,
     required int index,
   })
   onShowGallery;
@@ -66,16 +66,25 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget>
       bloc: widget.feedBloc,
       listenWhen: (previous, current) =>
           (previous is FeedLoaded && current is FeedLoaded) &&
-          previous.isDeleting != current.isDeleting,
+          ((previous.isDeleting != current.isDeleting) ||
+              current.isSuccessSubscribed),
       listener: (context, state) {
         if (state is FeedLoaded) {
+          if (state.isSuccessSubscribed) {
+            CustomToast.show(
+              CustomToastWidget(text: "Успешная подписка"),
+              dismissAfter: Duration(milliseconds: 1500),
+            );
+          }
           if (state.isDeleteSuccess) {
             CustomToast.show(
               CustomToastWidget(text: "Пост успешно удален"),
               dismissAfter: Duration(milliseconds: 1500),
             );
           }
-          if (!state.isDeleting && !state.isDeleteSuccess) {
+          if (!state.isDeleting &&
+              !state.isDeleteSuccess &&
+              !state.isSuccessSubscribed) {
             CustomToast.show(
               CustomToastWidget(
                 text: "Ошибка при удалении поста. Попробуйте еще раз",
@@ -168,11 +177,14 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget>
           ),
           if (state.posts.isEmpty)
             SliverFillRemaining(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Text(
-                  'Нет постов',
-                  style: context.theme.textTheme.bodyLarge,
+              child: Container(
+                padding: EdgeInsets.only(top: 14),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Text(
+                    'Нет постов',
+                    style: context.theme.textTheme.headlineLarge,
+                  ),
                 ),
               ),
             )
@@ -191,6 +203,7 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget>
                   user: state.user,
                   onEdit: ({required Post post}) => onEdit(post),
                   onDelete: ({required Post post}) => onDelete(post),
+                  onSubscribe: ({required Post post}) => onSubscribe(post),
                 );
               }, childCount: state.posts.length),
             ),
@@ -222,6 +235,10 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget>
     widget.feedBloc.add(DeletePost(postId: post.id));
   }
 
+  void onSubscribe(Post post) {
+    widget.feedBloc.add(Subscribe(userId: post.creator.id));
+  }
+
   void _animateScroll({bool toStart = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -247,7 +264,9 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget>
 
     if (current >= max - 200 && !(blocState.isLastPage)) {
       final nextPage = blocState.currentPage + 1;
-      context.read<FeedBloc>().add(LoadMorePosts(pageNumber: nextPage));
+      context.read<FeedBloc>().add(
+        LoadMorePosts(pageNumber: nextPage, type: _currentType),
+      );
     }
   }
 }

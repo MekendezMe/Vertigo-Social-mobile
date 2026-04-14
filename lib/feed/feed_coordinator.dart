@@ -47,21 +47,21 @@ class FeedCoordinator extends NavigationCoordinator {
       onShowGallery:
           ({
             required BuildContext context,
-            required List<String> images,
+            required List<String> media,
             required int index,
-          }) => _showGallery(context, images, index),
+          }) => _showGallery(context, media, index),
     );
   }
 
   void _showGallery(
     BuildContext context,
-    List<String> images,
+    List<String> media,
     int initialIndex,
   ) {
     showDialog(
       context: context,
       builder: (context) =>
-          ModalGallery(images: images, initialIndex: initialIndex),
+          ModalGallery(media: media, initialIndex: initialIndex),
     );
   }
 }

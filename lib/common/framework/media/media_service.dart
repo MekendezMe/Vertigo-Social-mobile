@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
@@ -58,6 +59,27 @@ class MediaService {
     }
   }
 
+  Future<List<File>> pickMultipleMedia({
+    bool allowImage = true,
+    bool allowVideos = true,
+  }) async {
+    try {
+      final medias = await _picker.pickMultipleMedia();
+
+      return medias.map((media) => File(media.path)).toList();
+
+      // FilePickerResult? result = await FilePicker.pickFiles(
+      //   type: FileType.media,
+      //   allowMultiple: true,
+      // );
+      // if (result == null) return [];
+      // return result.paths.map((path) => File(path!)).toList();
+    } catch (e) {
+      debugPrint('Ошибка выбора медиа: $e');
+      return [];
+    }
+  }
+
   Future<File?> pickVideoFromGallery() async {
     try {
       final XFile? video = await _picker.pickVideo(
@@ -80,6 +102,20 @@ class MediaService {
     return await pickImageFromCamera();
   }
 
+  Future<List<File>?> pickMediaWithPermission() async {
+    final hasPermission = await permissionService.requestPhotosIfNeeded();
+    if (!hasPermission) {
+      debugPrint('Нет разрешения на галерею');
+      return null;
+    }
+    final hasVideoPermission = await permissionService.requestVideosIfNeeded();
+    if (!hasVideoPermission) {
+      debugPrint('Нет разрешения на галерею');
+      return null;
+    }
+    return await pickMultipleMedia();
+  }
+
   Future<File?> pickPhotoWithPermission() async {
     final hasPermission = await permissionService.requestPhotosIfNeeded();
     if (!hasPermission) {
@@ -97,4 +133,21 @@ class MediaService {
     }
     return await pickMultiImageFromGallery();
   }
+}
+
+class MediaFile {
+  final String path;
+  final String mimeType;
+  final bool isImage;
+  final bool isVideo;
+
+  MediaFile({required this.path, required this.mimeType})
+    : isImage = mimeType.startsWith('image/'),
+      isVideo = mimeType.startsWith('video/');
+
+  factory MediaFile.fromXFile(XFile file) {
+    return MediaFile(path: file.path, mimeType: file.mimeType ?? 'unknown');
+  }
+
+  File get file => File(path);
 }

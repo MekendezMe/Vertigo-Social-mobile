@@ -20,9 +20,9 @@ class FeedLoaded extends FeedState {
   final bool isCreating;
   final String? createError;
   final String? likeError;
-  final List<File>? images;
+  final List<File>? media;
   final int currentPage;
-  final bool isImageLoading;
+  final bool isMediaLoading;
   final bool isLoadingMore;
   final bool isLastPage;
   final bool isCreateSuccess;
@@ -31,6 +31,7 @@ class FeedLoaded extends FeedState {
   final bool isDeleting;
   final bool isDeleteSuccess;
   final PostType currentType;
+  final bool isSuccessSubscribed;
 
   FeedLoaded({
     required this.posts,
@@ -38,9 +39,9 @@ class FeedLoaded extends FeedState {
     this.createError,
     this.isCreating = false,
     this.likeError,
-    this.images,
+    this.media,
     this.currentPage = 1,
-    this.isImageLoading = false,
+    this.isMediaLoading = false,
     this.isLoadingMore = false,
     this.isLastPage = false,
     this.isCreateSuccess = false,
@@ -48,6 +49,7 @@ class FeedLoaded extends FeedState {
     this.isUpdateSuccess = false,
     this.isDeleting = false,
     this.isDeleteSuccess = false,
+    this.isSuccessSubscribed = false,
     this.currentType = PostType.all,
   });
   @override
@@ -57,9 +59,9 @@ class FeedLoaded extends FeedState {
     createError,
     isCreating,
     likeError,
-    images,
+    media,
     currentPage,
-    isImageLoading,
+    isMediaLoading,
     isLoadingMore,
     isLastPage,
     isCreateSuccess,
@@ -67,6 +69,7 @@ class FeedLoaded extends FeedState {
     isUpdateSuccess,
     isDeleteSuccess,
     isDeleting,
+    isSuccessSubscribed,
     currentType,
   ];
 
@@ -76,9 +79,9 @@ class FeedLoaded extends FeedState {
     bool? isCreating,
     Object? createError = _notSet,
     Object? likeError = _notSet,
-    Object? images = _notSet,
+    Object? media = _notSet,
     int? currentPage,
-    bool? isImageLoading,
+    bool? isMediaLoading,
     bool? isLoadingMore,
     bool? isLastPage,
     bool? isCreateSuccess,
@@ -87,6 +90,7 @@ class FeedLoaded extends FeedState {
     bool? isDeleting,
     bool? isDeleteSuccess,
     PostType? currentType,
+    bool? isSuccessSubscribed,
   }) {
     return FeedLoaded(
       posts: posts ?? this.posts,
@@ -98,9 +102,9 @@ class FeedLoaded extends FeedState {
       likeError: identical(likeError, _notSet)
           ? this.likeError
           : likeError as String?,
-      images: identical(images, _notSet) ? this.images : images as List<File>?,
+      media: identical(media, _notSet) ? this.media : media as List<File>?,
       currentPage: currentPage ?? this.currentPage,
-      isImageLoading: isImageLoading ?? false,
+      isMediaLoading: isMediaLoading ?? false,
       isLoadingMore: isLoadingMore ?? false,
       isLastPage: isLastPage ?? this.isLastPage,
       isCreateSuccess: isCreateSuccess ?? false,
@@ -108,6 +112,7 @@ class FeedLoaded extends FeedState {
       isUpdateSuccess: isUpdateSuccess ?? false,
       isDeleting: isDeleting ?? false,
       isDeleteSuccess: isDeleteSuccess ?? false,
+      isSuccessSubscribed: isSuccessSubscribed ?? false,
       currentType: currentType ?? this.currentType,
     );
   }

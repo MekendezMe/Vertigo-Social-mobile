@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/delete_post_request.dart';
@@ -7,12 +6,14 @@ import 'package:social_network_flutter/feed/logic/entites/request/get_post_reque
 import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';
+import 'package:social_network_flutter/feed/logic/entites/request/user/subscribe_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/create_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/delete_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/edit_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_post_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/get_posts_response.dart';
 import 'package:social_network_flutter/feed/logic/entites/response/reaction_post_response.dart';
+import 'package:social_network_flutter/feed/logic/entites/response/user/subscribe_response.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 class FeedRepository {
@@ -48,7 +49,7 @@ class FeedRepository {
 
   Future<CreatePostResponse> createPost(CreatePostRequest request) async {
     try {
-      final formData = await request.getBodyWithPhotos();
+      final formData = await request.getBodyWithMedia();
       final response = await requestSender.send(
         request: request,
         fromJson: (json) => CreatePostResponse.fromJson(json),
@@ -63,7 +64,7 @@ class FeedRepository {
 
   Future<EditPostResponse> editPost(EditPostRequest request) async {
     try {
-      final formData = await request.getBodyWithPhotos();
+      final formData = await request.getBodyWithMedia();
       final response = await requestSender.send(
         request: request,
         fromJson: (json) => EditPostResponse.fromJson(json),
@@ -99,6 +100,14 @@ class FeedRepository {
     final response = await requestSender.send(
       request: request,
       fromJson: (json) => ReactionPostResponse.fromJson(json),
+    );
+    return response;
+  }
+
+  Future<SubscribeResponse> subscribeToUser(SubscribeRequest request) async {
+    final response = await requestSender.send(
+      request: request,
+      fromJson: (json) => SubscribeResponse.fromJson(json),
     );
     return response;
   }

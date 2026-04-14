@@ -26,7 +26,7 @@ class FeedScreen extends StatefulWidget {
   onShowComments;
   final Function({
     required BuildContext context,
-    required List<String> images,
+    required List<String> media,
     required int index,
   })
   onShowGallery;

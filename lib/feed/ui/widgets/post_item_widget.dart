@@ -7,7 +7,7 @@ import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dar
 import 'package:social_network_flutter/feed/ui/widgets/base_icon_button.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_icon_container.dart';
 import 'package:social_network_flutter/feed/ui/widgets/current_user_widget.dart';
-import 'package:social_network_flutter/feed/ui/widgets/image_list.dart';
+import 'package:social_network_flutter/feed/ui/widgets/media_list.dart';
 
 class PostItemWidget extends StatelessWidget {
   const PostItemWidget({
@@ -20,13 +20,14 @@ class PostItemWidget extends StatelessWidget {
     required this.user,
     required this.onEdit,
     required this.onDelete,
+    required this.onSubscribe,
   });
   final Post post;
   final FeedBloc feedBloc;
   final VoidCallback onLikePressed;
   final void Function({
     required BuildContext context,
-    required List<String> images,
+    required List<String> media,
     required int index,
   })
   onShowGallery;
@@ -35,7 +36,7 @@ class PostItemWidget extends StatelessWidget {
   final User user;
   final Function({required Post post}) onEdit;
   final Function({required Post post}) onDelete;
-
+  final Function({required Post post}) onSubscribe;
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -48,13 +49,18 @@ class PostItemWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                currentUserWidget(context: context, post: post),
-                if (post.images.isNotEmpty) ...[
+                currentUserWidget(
+                  context: context,
+                  post: post,
+                  onSubscribe: onSubscribe,
+                  user: user,
+                ),
+                if (post.media.isNotEmpty) ...[
                   SizedBox(height: 10),
 
                   SizedBox(
                     height: 240,
-                    child: imageList(
+                    child: mediaList(
                       width: 200,
                       height: 200,
                       post: post,
