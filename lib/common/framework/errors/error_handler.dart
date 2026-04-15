@@ -23,14 +23,14 @@ class ErrorHandler {
   void _onNoInternet() {
     CustomToast.show(
       CustomToastWidget(text: "Отсутствует подключение к интернету"),
-      dismissAfter: Duration(seconds: 1),
+      dismissAfter: Duration(seconds: 2),
     );
   }
 
   void _onApiError(String message) {
     CustomToast.show(
       CustomToastWidget(text: message),
-      dismissAfter: Duration(seconds: 1),
+      dismissAfter: Duration(seconds: 2),
     );
   }
 
@@ -54,7 +54,7 @@ class ErrorHandler {
     }
     CustomToast.show(
       CustomToastWidget(text: message),
-      dismissAfter: Duration(seconds: 2),
+      dismissAfter: Duration(seconds: 3),
     );
   }
 }

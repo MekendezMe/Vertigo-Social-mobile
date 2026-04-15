@@ -38,11 +38,17 @@ class _ModalGalleryState extends State<ModalGallery> {
     _initializeVideos();
   }
 
-  void _initializeVideos() async {
+  void _initializeVideos() {
     for (var controller in _videoControllers) {
-      await controller.initialize();
+      controller
+          .initialize()
+          .then((_) {
+            if (mounted) setState(() {});
+          })
+          .catchError((error) {
+            debugPrint('Ошибка инициализации видео: $error');
+          });
     }
-    setState(() {});
   }
 
   @override

@@ -375,10 +375,26 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         return;
       }
 
+      final filteredMedia = <File>[];
+      for (final m in media) {
+        final size = await m.length();
+        if (getFileSizeInMB(size) < 10) {
+          filteredMedia.add(m);
+        }
+      }
+
+      if (filteredMedia.length != media.length) {
+        errorHandler.handle(
+          "Не удалось прикрепить файл. Размер каждого файла должен быть не больше 10 МБ",
+        );
+        emit(currentState.copyWith(isMediaLoading: false));
+        return;
+      }
+
       emit(
         currentState.copyWith(
           isMediaLoading: false,
-          media: [...media, ...currentMedia],
+          media: [...filteredMedia, ...currentMedia],
         ),
       );
     } catch (e, st) {
@@ -386,6 +402,11 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       talker.handle(e, st);
       errorHandler.handle(e);
     }
+  }
+
+  double getFileSizeInMB(int bytes, {int fractionDigits = 2}) {
+    final mb = bytes / (1024 * 1024);
+    return double.parse(mb.toStringAsFixed(fractionDigits));
   }
 
   Future<void> _onRemoveMediaFromPost(
