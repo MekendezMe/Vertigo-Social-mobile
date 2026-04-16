@@ -173,32 +173,34 @@ class _CommentScreenState extends State<CommentScreen> {
             child: BlocConsumer<CommentBloc, CommentState>(
               bloc: widget.commentBloc,
               listener: (context, state) {
-                if (state is CommentCreated) {
-                  CustomToast.show(
-                    CustomToastWidget(text: "Комментарий создан"),
-                    dismissAfter: const Duration(milliseconds: 1500),
-                  );
-                  onCreate();
-                  _animateScroll(toStart: false);
-                }
-
-                if (state is AnswerCreated &&
-                    current.type == NavigationType.comments &&
-                    _rootComment != null) {
-                  _navigateToAnswers(_replyingComment ?? _rootComment!);
-                  onCreate();
-                  _animateScroll(toStart: false);
-                }
-
-                if (state is AnswerCreated &&
-                    current.type == NavigationType.answers) {
-                  CustomToast.show(
-                    CustomToastWidget(text: "Ответ создан"),
-                    dismissAfter: const Duration(milliseconds: 1500),
-                  );
-                  onCreate();
-                  if (state.isAnswerToRootComment) {
+                if (state is CommentsLoaded) {
+                  if (state.isCreateSuccess) {
+                    CustomToast.show(
+                      CustomToastWidget(text: "Комментарий создан"),
+                      dismissAfter: const Duration(milliseconds: 1500),
+                    );
+                    onCreate();
                     _animateScroll(toStart: false);
+                  }
+
+                  if (current.type == NavigationType.comments &&
+                      state.isCreateAnswersSuccess &&
+                      _rootComment != null) {
+                    _navigateToAnswers(_replyingComment ?? _rootComment!);
+                    onCreate();
+                    _animateScroll(toStart: false);
+                  }
+
+                  if (current.type == NavigationType.answers &&
+                      state.isCreateAnswersSuccess) {
+                    CustomToast.show(
+                      CustomToastWidget(text: "Ответ создан"),
+                      dismissAfter: const Duration(milliseconds: 1500),
+                    );
+                    onCreate();
+                    if (state.isAnswerToRootComment) {
+                      _animateScroll(toStart: false);
+                    }
                   }
                 }
               },
@@ -210,16 +212,10 @@ class _CommentScreenState extends State<CommentScreen> {
                   return _buildLoadingFailure();
                 }
 
-                if (state is AnswerCreatingFailure &&
-                    current.type == NavigationType.answers) {
-                  return _buildLoadingFailure();
-                }
-
-                if (state is AnswersLoading) {
-                  return _buildLoading(context);
-                }
-
                 if (state is CommentsLoaded) {
+                  bool isAnswersError =
+                      current.type == NavigationType.answers &&
+                      state.answersError != null;
                   final isComments = current.type == NavigationType.comments;
                   final scrollController = _getScrollController(
                     getCurrentId(current),
@@ -228,6 +224,12 @@ class _CommentScreenState extends State<CommentScreen> {
                   final isEmpty = isComments
                       ? state.comments.isEmpty
                       : state.answers.isEmpty;
+                  if (state.answersLoading) {
+                    return _buildLoading(context);
+                  }
+                  if (isAnswersError) {
+                    return _buildLoadingFailure(error: state.answersError);
+                  }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

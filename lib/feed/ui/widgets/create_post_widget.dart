@@ -134,41 +134,46 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
     bool isEdit = widget.post != null;
     return BlocConsumer<FeedBloc, FeedState>(
       listenWhen: (previous, current) {
-        return current is PostCreated ||
-            current is PostCreatingFailure ||
-            current is PostUpdated ||
-            current is PostUpdatingFailure;
+        if (previous is! FeedLoaded || current is! FeedLoaded) return false;
+
+        return previous.isCreateSuccess != current.isCreateSuccess ||
+            previous.isUpdateSuccess != current.isUpdateSuccess ||
+            previous.createError != current.createError ||
+            previous.updateError != current.updateError;
       },
       bloc: widget.feedBloc,
       listener: (context, state) {
-        if (state is PostCreated) {
+        if (state is! FeedLoaded) return;
+        if (state.isCreateSuccess) {
           CustomToast.show(
             CustomToastWidget(text: "Пост успешно создан"),
-            dismissAfter: Duration(milliseconds: 1500),
+            dismissAfter: const Duration(milliseconds: 1500),
           );
           afterCreate();
         }
-        if (state is PostCreatingFailure) {
+        if (state.createError != null) {
           CustomToast.show(
-            CustomToastWidget(text: "Ошибка ${state.error} при создании поста"),
-            dismissAfter: Duration(milliseconds: 1500),
+            CustomToastWidget(
+              text: "Ошибка ${state.createError} при создании поста",
+            ),
+            dismissAfter: const Duration(milliseconds: 1500),
           );
           setState(() => _isInputError = false);
           _focusNode.requestFocus();
         }
 
-        if (state is PostUpdated) {
+        if (state.isUpdateSuccess) {
           CustomToast.show(
             CustomToastWidget(text: "Пост успешно обновлен"),
-            dismissAfter: Duration(milliseconds: 1500),
+            dismissAfter: const Duration(milliseconds: 1500),
           );
           afterUpdate();
         }
 
-        if (state is PostUpdatingFailure) {
+        if (state.updateError != null) {
           CustomToast.show(
             CustomToastWidget(
-              text: "Ошибка ${state.error} при обновлении поста",
+              text: "Ошибка ${state.updateError} при обновлении поста",
             ),
             dismissAfter: Duration(milliseconds: 1500),
           );
@@ -181,8 +186,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
           final currentMedia = state.media ?? [];
           final avatarUrl = state.user.avatar;
           final buttonCreateText = isEdit ? "Обновить" : "Опубликовать";
-          return baseContainerWidget(
-            context: context,
+          return BaseContainerWidget(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -296,7 +300,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
                           child: mainButton(
                             backgroundColor: context.color.dimPurple,
                             context: context,
-                            child: state is PostCreating
+                            child: state.isCreating
                                 ? Center(
                                     child: customCircularProgressIndicator(
                                       context: context,

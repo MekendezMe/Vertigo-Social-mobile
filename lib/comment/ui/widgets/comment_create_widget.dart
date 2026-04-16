@@ -46,7 +46,9 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
   @override
   Widget build(BuildContext context) {
     bool isComments = widget.current.type == NavigationType.comments;
-    bool isCreate = false;
+    bool isCreate = isComments
+        ? widget.state.isCreate
+        : widget.state.isAnswersCreate;
     final answerText = widget.isAnswer && widget.replyingComment != null
         ? "Ответ @${widget.replyingComment!.author.username} "
         : "";
@@ -55,14 +57,7 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
         : "Ответить";
     return BlocConsumer<CommentBloc, CommentState>(
       bloc: widget.commentBloc,
-      listener: (context, state) {
-        if (state is CommentCreating && isComments) {
-          isCreate = true;
-        }
-        if (state is AnswerCreating && !isComments) {
-          isCreate = true;
-        }
-      },
+      listener: (context, state) {},
       builder: (context, state) {
         return LayoutBuilder(
           builder: (context, constraints) {

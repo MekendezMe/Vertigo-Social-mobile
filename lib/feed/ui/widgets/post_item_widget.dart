@@ -42,8 +42,7 @@ class PostItemWidget extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        baseContainerWidget(
-          context: context,
+        BaseContainerWidget(
           child: Padding(
             padding: const EdgeInsets.only(left: 14.0),
             child: Column(

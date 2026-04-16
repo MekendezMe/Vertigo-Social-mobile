@@ -138,33 +138,42 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   }
 
   Future<void> _onCreatePost(CreatePost event, Emitter<FeedState> emit) async {
-    if (state is! FeedLoaded || state is PostCreating) return;
+    if (state is! FeedLoaded) return;
     final currentState = state as FeedLoaded;
+    if (currentState.isCreating) return;
     try {
-      emit(PostCreating());
+      emit(currentState.copyWith(isCreating: true, isCreateSuccess: false));
       final createdPost = await feedRepository.createPost(
         CreatePostRequest(text: event.text, media: event.media),
       );
-      emit(PostCreated());
       emit(
         currentState.copyWith(
           posts: [createdPost.post, ...currentState.posts],
+          isCreating: false,
+          createError: null,
           media: null,
+          isCreateSuccess: true,
         ),
       );
     } catch (e, st) {
-      emit(PostCreatingFailure(error: e));
-      emit(currentState);
+      emit(
+        currentState.copyWith(
+          isCreating: false,
+          createError: e.toString(),
+          isCreateSuccess: false,
+        ),
+      );
       talker.handle(e, st);
       errorHandler.handle(e);
     }
   }
 
   Future<void> _onUpdatePost(EditPost event, Emitter<FeedState> emit) async {
-    if (state is! FeedLoaded || state is PostUpdating) return;
+    if (state is! FeedLoaded) return;
 
     final currentState = state as FeedLoaded;
-    emit(PostUpdating());
+    if (currentState.isUpdating) return;
+    emit(currentState.copyWith(isUpdating: true, isUpdateSuccess: false));
     try {
       final response = await feedRepository.editPost(
         EditPostRequest(
@@ -179,27 +188,34 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
           .where((post) => post.id != event.postId)
           .toList();
 
-      emit(PostUpdated());
-
       emit(
         currentState.copyWith(
           posts: [response.post, ...updatedPosts],
+          isUpdateSuccess: true,
+          isUpdating: false,
+          updateError: null,
           media: null,
         ),
       );
     } catch (e, st) {
-      emit(PostUpdatingFailure(error: e));
-      emit(currentState);
+      emit(
+        currentState.copyWith(
+          isUpdateSuccess: false,
+          isUpdating: false,
+          updateError: e.toString(),
+        ),
+      );
       talker.handle(e, st);
       errorHandler.handle(e);
     }
   }
 
   Future<void> _onDeletePost(DeletePost event, Emitter<FeedState> emit) async {
-    if (state is! FeedLoaded || state is PostDeleting) return;
+    if (state is! FeedLoaded) return;
 
     final currentState = state as FeedLoaded;
-    emit(PostDeleting());
+    if (currentState.isDeleting) return;
+    emit(currentState.copyWith(isDeleting: true, isDeleteSuccess: false));
     try {
       final response = await feedRepository.deletePost(
         DeletePostRequest(postId: event.postId),
@@ -215,19 +231,28 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
           .where((post) => post.id != event.postId)
           .toList();
 
-      emit(PostDeleted());
-
-      emit(currentState.copyWith(posts: updatedPosts));
+      emit(
+        currentState.copyWith(
+          posts: updatedPosts,
+          isDeleteSuccess: true,
+          isDeleting: false,
+        ),
+      );
     } catch (e, st) {
-      emit(PostDeletingFailure(error: e));
-      emit(currentState);
+      emit(
+        currentState.copyWith(
+          isDeleteSuccess: false,
+          isDeleting: false,
+          deleteError: e.toString(),
+        ),
+      );
       talker.handle(e, st);
       errorHandler.handle(e);
     }
   }
 
   Future<void> _onToggleLike(ToggleLike event, Emitter<FeedState> emit) async {
-    if (state is! FeedLoaded || state is PostLiking) return;
+    if (state is! FeedLoaded) return;
     final currentState = state as FeedLoaded;
 
     final targetPost = currentState.posts.firstWhere(
@@ -250,7 +275,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       return post;
     }).toList();
 
-    emit(PostLiking());
+    emit(currentState.copyWith(posts: optimisticPosts, likeError: null));
 
     try {
       final response = willLike
@@ -265,17 +290,23 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
           originalPost: originalPost,
           currentState: currentState,
         );
-        emit(currentState.copyWith(posts: rolledBackPosts));
+        emit(
+          currentState.copyWith(
+            posts: rolledBackPosts,
+            likeError: errorMessage,
+          ),
+        );
         throw ApiException(message: errorMessage);
       }
     } catch (e, st) {
-      emit(PostLikingFailure(error: e));
       final rolledBackPosts = _getRolledBackPosts(
         postId: event.postId,
         originalPost: originalPost,
         currentState: currentState,
       );
-      emit(currentState.copyWith(posts: rolledBackPosts));
+      emit(
+        currentState.copyWith(posts: rolledBackPosts, likeError: errorMessage),
+      );
       talker.handle(e, st);
       errorHandler.handle(e);
     }
@@ -298,13 +329,13 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     PickImageFromCamera event,
     Emitter<FeedState> emit,
   ) async {
-    if (state is! FeedLoaded || state is MediaLoading) return;
+    if (state is! FeedLoaded) return;
     final currentState = state as FeedLoaded;
-    emit(MediaLoading());
+    emit(currentState.copyWith(isMediaLoading: true));
     try {
       final image = await mediaService.takePhotoWithPermission();
       if (image == null) {
-        emit(currentState);
+        emit(currentState.copyWith(isMediaLoading: false));
         return;
       }
       final currentMedia = currentState.media ?? [];
@@ -312,13 +343,18 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
       if (totalCount > 10) {
         errorHandler.handle("Можно выбрать максимум 10 файлов");
-        emit(currentState);
+        emit(currentState.copyWith(isMediaLoading: false));
         return;
       }
 
-      emit(currentState.copyWith(media: [image, ...currentMedia]));
+      emit(
+        currentState.copyWith(
+          isMediaLoading: false,
+          media: [image, ...currentMedia],
+        ),
+      );
     } catch (e, st) {
-      emit(currentState);
+      emit(currentState.copyWith(isMediaLoading: false));
       talker.handle(e, st);
       errorHandler.handle(e);
     }
@@ -328,16 +364,16 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     PickMediaFromGallery event,
     Emitter<FeedState> emit,
   ) async {
-    if (state is! FeedLoaded || state is MediaLoading) return;
+    if (state is! FeedLoaded) return;
     final currentState = state as FeedLoaded;
 
-    emit(MediaLoading());
+    emit(currentState.copyWith(isMediaLoading: true));
 
     try {
       final media = await mediaService.pickMultipleMedia();
 
       if (media.isEmpty) {
-        emit(currentState);
+        emit(currentState.copyWith(isMediaLoading: false));
         return;
       }
 
@@ -346,7 +382,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
       if (totalCount > 10) {
         errorHandler.handle("Можно выбрать максимум 10 файлов");
-        emit(currentState);
+        emit(currentState.copyWith(isMediaLoading: false));
         return;
       }
 
@@ -362,13 +398,18 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         errorHandler.handle(
           "Не удалось прикрепить файл. Размер каждого файла должен быть не больше 10 МБ",
         );
-        emit(currentState);
+        emit(currentState.copyWith(isMediaLoading: false));
         return;
       }
 
-      emit(currentState.copyWith(media: [...filteredMedia, ...currentMedia]));
+      emit(
+        currentState.copyWith(
+          isMediaLoading: false,
+          media: [...filteredMedia, ...currentMedia],
+        ),
+      );
     } catch (e, st) {
-      emit(currentState);
+      emit(currentState.copyWith(isMediaLoading: false));
       talker.handle(e, st);
       errorHandler.handle(e);
     }
@@ -423,12 +464,11 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
           )
           .toList();
 
-      emit(UserSubscribed());
+      emit(current.copyWith(posts: posts, isSuccessSubscribed: true));
 
       emit(current.copyWith(posts: posts));
     } catch (e, st) {
-      emit(UserSubscribingFailure(error: e));
-      emit(current);
+      emit(current.copyWith(isSuccessSubscribed: false));
       talker.handle(e, st);
       errorHandler.handle(e);
     }
