@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
 import 'package:social_network_flutter/comment/logic/entities/comment.dart';
 import 'package:social_network_flutter/comment/logic/helpers/navigation_type_helper.dart';
@@ -45,102 +46,116 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
   @override
   Widget build(BuildContext context) {
     bool isComments = widget.current.type == NavigationType.comments;
-    bool isCreate = isComments
-        ? widget.state.isCreate
-        : widget.state.isAnswersCreate;
+    bool isCreate = false;
     final answerText = widget.isAnswer && widget.replyingComment != null
         ? "Ответ @${widget.replyingComment!.author.username} "
         : "";
     String buttonText = isComments && !widget.isAnswer
         ? "Комментировать"
         : "Ответить";
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 14,
-            right: 14,
-            top: 14,
-            bottom: keyboardHeight + 14,
-          ),
-          child: Column(
-            children: [
-              Divider(color: context.color.darkGray, height: 1, thickness: 0.5),
-              if (widget.isAnswer && widget.replyingComment != null)
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        widget.onCloseAnswerPressed();
-                      },
-                      style: IconButton.styleFrom(
-                        splashFactory: NoSplash.splashFactory,
-                        highlightColor: Colors.transparent,
-                        overlayColor: Colors.transparent,
-                      ),
-                      icon: Row(
-                        children: [
-                          Text(
-                            answerText,
-                            style: context.theme.textTheme.bodyMedium!.modify(
-                              color: Colors.blue,
-                            ),
+    return BlocConsumer<CommentBloc, CommentState>(
+      bloc: widget.commentBloc,
+      listener: (context, state) {
+        if (state is CommentCreating && isComments) {
+          isCreate = true;
+        }
+        if (state is AnswerCreating && !isComments) {
+          isCreate = true;
+        }
+      },
+      builder: (context, state) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 14,
+                right: 14,
+                top: 14,
+                bottom: keyboardHeight + 14,
+              ),
+              child: Column(
+                children: [
+                  Divider(
+                    color: context.color.darkGray,
+                    height: 1,
+                    thickness: 0.5,
+                  ),
+                  if (widget.isAnswer && widget.replyingComment != null)
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            widget.onCloseAnswerPressed();
+                          },
+                          style: IconButton.styleFrom(
+                            splashFactory: NoSplash.splashFactory,
+                            highlightColor: Colors.transparent,
+                            overlayColor: Colors.transparent,
                           ),
-                          SizedBox(width: 4),
-                          Icon(
-                            Icons.close,
-                            size: 20,
-                            color: context.color.darkGray,
+                          icon: Row(
+                            children: [
+                              Text(
+                                answerText,
+                                style: context.theme.textTheme.bodyMedium!
+                                    .modify(color: Colors.blue),
+                              ),
+                              SizedBox(width: 4),
+                              Icon(
+                                Icons.close,
+                                size: 20,
+                                color: context.color.darkGray,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  if (!widget.isAnswer) SizedBox(height: 20),
+                  mainTextField(
+                    context: context,
+                    controller: widget.controller,
+                    style: context.theme.textTheme.bodyMedium!,
+                    focusNode: widget.commentFocusNode,
+                    onChanged: _commentOnChanged,
+                    isInputError: _isCommentError,
+                  ),
+                  SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: SizedBox(
+                      width: 200,
+                      child: mainButton(
+                        context: context,
+                        child: isCreate
+                            ? Padding(
+                                padding: EdgeInsets.all(6),
+                                child: customCircularProgressIndicator(
+                                  context: context,
+                                ),
+                              )
+                            : Text(buttonText),
+                        onTap: isComments && !widget.isAnswer
+                            ? () => createComment(widget.state.post.id)
+                            : () {
+                                if (widget.rootComment == null) return;
+                                int authorId = widget.replyingComment != null
+                                    ? widget.replyingComment!.author.id
+                                    : widget.rootComment!.author.id;
+                                createAnswer(
+                                  widget.rootComment!.id,
+                                  widget.state.post.id,
+                                  authorId,
+                                  widget.replyingComment?.id,
+                                );
+                              },
                       ),
                     ),
-                  ],
-                ),
-              if (!widget.isAnswer) SizedBox(height: 20),
-              mainTextField(
-                context: context,
-                controller: widget.controller,
-                style: context.theme.textTheme.bodyMedium!,
-                focusNode: widget.commentFocusNode,
-                onChanged: _commentOnChanged,
-                isInputError: _isCommentError,
-              ),
-              SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: SizedBox(
-                  width: 200,
-                  child: mainButton(
-                    context: context,
-                    child: isCreate
-                        ? Padding(
-                            padding: EdgeInsets.all(6),
-                            child: customCircularProgressIndicator(
-                              context: context,
-                            ),
-                          )
-                        : Text(buttonText),
-                    onTap: isComments && !widget.isAnswer
-                        ? () => createComment(widget.state.post.id)
-                        : () {
-                            if (widget.rootComment == null) return;
-                            int authorId = widget.replyingComment != null
-                                ? widget.replyingComment!.author.id
-                                : widget.rootComment!.author.id;
-                            createAnswer(
-                              widget.rootComment!.id,
-                              widget.state.post.id,
-                              authorId,
-                              widget.replyingComment?.id,
-                            );
-                          },
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

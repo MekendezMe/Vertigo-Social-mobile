@@ -4,8 +4,8 @@ import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/logic/entites/post.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dart';
-import 'package:social_network_flutter/feed/ui/widgets/base_icon_button.dart';
-import 'package:social_network_flutter/feed/ui/widgets/base_icon_container.dart';
+import 'package:social_network_flutter/feed/ui/widgets/base_icon_button_widget.dart';
+import 'package:social_network_flutter/feed/ui/widgets/base_icon_container_widget.dart';
 import 'package:social_network_flutter/feed/ui/widgets/current_user_widget.dart';
 import 'package:social_network_flutter/feed/ui/widgets/media_list.dart';
 
@@ -49,8 +49,7 @@ class PostItemWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                currentUserWidget(
-                  context: context,
+                CurrentUserWidget(
                   post: post,
                   onSubscribe: onSubscribe,
                   user: user,
@@ -60,7 +59,7 @@ class PostItemWidget extends StatelessWidget {
 
                   SizedBox(
                     height: 240,
-                    child: mediaList(
+                    child: MediaListWidget(
                       width: 200,
                       height: 200,
                       post: post,
@@ -78,10 +77,8 @@ class PostItemWidget extends StatelessWidget {
                 SizedBox(height: 14),
                 Row(
                   children: [
-                    baseIconContainer(
-                      context: context,
-                      child: baseIconButton(
-                        context: context,
+                    BaseIconContainerWidget(
+                      child: BaseIconButtonWidget(
                         post: post,
                         onPressed: onLikePressed,
                         iconSize: post.likedByUser ? 25 : 20,
@@ -93,10 +90,8 @@ class PostItemWidget extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 10),
-                    baseIconContainer(
-                      context: context,
-                      child: baseIconButton(
-                        context: context,
+                    BaseIconContainerWidget(
+                      child: BaseIconButtonWidget(
                         post: post,
                         onPressed: () =>
                             onShowComments(context: context, postId: post.id),

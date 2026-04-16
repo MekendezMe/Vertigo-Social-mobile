@@ -99,32 +99,21 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     CreateComment event,
     Emitter<CommentState> emit,
   ) async {
-    if (state is! CommentsLoaded) {
+    if (state is! CommentsLoaded || state is CommentCreating) {
       return;
     }
     final current = state as CommentsLoaded;
-    if (current.isCreate) return;
-    emit(current.copyWith(isCreate: true, isCreateSuccess: false));
+
+    emit(CommentCreating());
     try {
       final response = await commentRepository.createComment(
         CreateCommentsRequest(postId: event.postId, content: event.content),
       );
-      emit(
-        current.copyWith(
-          comments: [...current.comments, response.comment],
-          isCreate: false,
-          createError: null,
-          isCreateSuccess: true,
-        ),
-      );
+      emit(CommentCreated());
+      emit(current.copyWith(comments: [...current.comments, response.comment]));
     } catch (e, st) {
-      emit(
-        current.copyWith(
-          createError: e.toString(),
-          isCreate: false,
-          isCreateSuccess: false,
-        ),
-      );
+      emit(CommentCreatingFailure(error: e));
+      emit(current);
       talker.handle(e, st);
       errorHandler.handle(e);
     }
@@ -138,7 +127,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       return;
     }
     final current = state as CommentsLoaded;
-    emit(current.copyWith(answersLoading: true));
+    emit(AnswersLoaded());
     try {
       final response = await commentRepository.getAnswersByComment(
         GetAnswersRequest(
@@ -146,18 +135,18 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
           pageNumber: event.pageNumber ?? 1,
         ),
       );
+      emit(AnswersLoaded());
 
       emit(
         current.copyWith(
           parent: response.parent,
           answers: response.answers,
           answerIsLastPage: response.lastPage,
-          answersError: null,
-          answersLoading: false,
         ),
       );
     } catch (e, st) {
-      emit(current.copyWith(answersError: e.toString(), answersLoading: false));
+      emit(AnswersLoadingFailure(error: e));
+      emit(current);
       talker.handle(e, st);
       errorHandler.handle(e);
     }
@@ -187,11 +176,11 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
           answerIsLastPage: response.answers.isEmpty ? true : response.lastPage,
           answerIsLoadingMore: false,
           answerCurrentPage: event.pageNumber,
-          answersError: null,
         ),
       );
     } catch (e, st) {
-      emit(current.copyWith(answersError: e.toString()));
+      emit(AnswersLoadingFailure(error: e));
+      emit(current);
       talker.handle(e, st);
       errorHandler.handle(e);
     }
@@ -201,14 +190,11 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     CreateAnswer event,
     Emitter<CommentState> emit,
   ) async {
-    if (state is! CommentsLoaded) {
+    if (state is! CommentsLoaded || state is AnswerCreating) {
       return;
     }
     final current = state as CommentsLoaded;
-    if (current.isAnswersCreate) return;
-    emit(
-      current.copyWith(isAnswersCreate: true, isCreateAnswersSuccess: false),
-    );
+    emit(AnswerCreating());
     try {
       final response = await commentRepository.createAnswer(
         CreateAnswersRequest(
@@ -243,19 +229,12 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
         answersCount: (comment.answersCount) + 1,
       );
 
-      emit(
-        current.copyWith(
-          comments: comments,
-          answers: answers,
-          isAnswersCreate: false,
-          isCreateAnswersSuccess: true,
-          isAnswerToRootComment: isAnswerToRootComment,
-        ),
-      );
+      emit(AnswerCreated(isAnswerToRootComment: isAnswerToRootComment));
+
+      emit(current.copyWith(comments: comments, answers: answers));
     } catch (e, st) {
-      emit(
-        current.copyWith(isAnswersCreate: false, isCreateAnswersSuccess: false),
-      );
+      emit(AnswerCreatingFailure(error: e));
+      emit(current);
       talker.handle(e, st);
       errorHandler.handle(e);
     }
@@ -294,11 +273,9 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     }).toList();
 
     if (isComments) {
-      emit(
-        currentState.copyWith(comments: optimisticComments, likeError: null),
-      );
+      emit(currentState.copyWith(comments: optimisticComments));
     } else {
-      emit(currentState.copyWith(answers: optimisticComments, likeError: null));
+      emit(currentState.copyWith(answers: optimisticComments));
     }
     try {
       final response = willLike
@@ -315,20 +292,11 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
           originalComment: originalComment,
           currentState: currentState,
         );
+        emit(LikingFailure(error: errorMessage));
         if (isComments) {
-          emit(
-            currentState.copyWith(
-              comments: rolledBackComments,
-              likeError: errorMessage,
-            ),
-          );
+          emit(currentState.copyWith(comments: rolledBackComments));
         } else {
-          emit(
-            currentState.copyWith(
-              answers: rolledBackComments,
-              likeError: errorMessage,
-            ),
-          );
+          emit(currentState.copyWith(answers: rolledBackComments));
         }
 
         throw ApiException(message: errorMessage);
@@ -339,20 +307,11 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
         originalComment: originalComment,
         currentState: currentState,
       );
+      emit(LikingFailure(error: errorMessage));
       if (isComments) {
-        emit(
-          currentState.copyWith(
-            comments: rolledBackComments,
-            likeError: errorMessage,
-          ),
-        );
+        emit(currentState.copyWith(comments: rolledBackComments));
       } else {
-        emit(
-          currentState.copyWith(
-            answers: rolledBackComments,
-            likeError: errorMessage,
-          ),
-        );
+        emit(currentState.copyWith(answers: rolledBackComments));
       }
 
       talker.handle(e, st);

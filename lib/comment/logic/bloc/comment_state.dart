@@ -12,6 +12,71 @@ class CommentsLoading extends CommentState {
   List<Object?> get props => [];
 }
 
+class CommentCreating extends CommentState {
+  @override
+  List<Object?> get props => [];
+}
+
+class CommentCreated extends CommentState {
+  @override
+  List<Object?> get props => [];
+}
+
+class CommentCreatingFailure extends CommentState {
+  final Object? error;
+
+  CommentCreatingFailure({this.error});
+  @override
+  List<Object?> get props => [error];
+}
+
+class AnswerCreating extends CommentState {
+  @override
+  List<Object?> get props => [];
+}
+
+class AnswerCreated extends CommentState {
+  final bool isAnswerToRootComment;
+
+  AnswerCreated({required this.isAnswerToRootComment});
+  @override
+  List<Object?> get props => [isAnswerToRootComment];
+}
+
+class AnswerCreatingFailure extends CommentState {
+  final Object? error;
+
+  AnswerCreatingFailure({this.error});
+  @override
+  List<Object?> get props => [error];
+}
+
+class AnswersLoading extends CommentState {
+  @override
+  List<Object?> get props => [];
+}
+
+class AnswersLoaded extends CommentState {
+  @override
+  List<Object?> get props => [];
+}
+
+class AnswersLoadingFailure extends CommentState {
+  final Object? error;
+
+  AnswersLoadingFailure({this.error});
+  @override
+  List<Object?> get props => [error];
+}
+
+class LikingFailure extends CommentState {
+  final Object? error;
+
+  LikingFailure({this.error});
+  @override
+  List<Object?> get props => [error];
+}
+
 class CommentsLoaded extends CommentState {
   final Post post;
   final List<Comment> comments;
@@ -19,21 +84,11 @@ class CommentsLoaded extends CommentState {
   final bool isLastPage;
   final int currentPage;
   final bool isLoadingMore;
-  final bool isCreate;
-  final String? createError;
-  final bool isCreateSuccess;
 
   final List<Comment> answers;
   final bool answerIsLastPage;
   final int answerCurrentPage;
-  final bool answersLoading;
   final bool answerIsLoadingMore;
-  final String? answersError;
-  final bool isAnswersCreate;
-  final bool isCreateAnswersSuccess;
-  final bool isAnswerToRootComment;
-
-  final String? likeError;
 
   CommentsLoaded({
     required this.comments,
@@ -42,19 +97,10 @@ class CommentsLoaded extends CommentState {
     this.parent,
     this.currentPage = 1,
     this.isLoadingMore = false,
-    this.isCreate = false,
-    this.createError,
-    this.isCreateSuccess = false,
     this.answers = const [],
     this.answerIsLastPage = false,
     this.answerCurrentPage = 1,
-    this.answersLoading = false,
     this.answerIsLoadingMore = false,
-    this.answersError,
-    this.isAnswersCreate = false,
-    this.isCreateAnswersSuccess = false,
-    this.likeError,
-    this.isAnswerToRootComment = false,
   });
   @override
   List<Object?> get props => [
@@ -63,20 +109,11 @@ class CommentsLoaded extends CommentState {
     post,
     currentPage,
     isLoadingMore,
-    isCreate,
-    createError,
     answers,
     answerIsLastPage,
     answerCurrentPage,
     answerIsLoadingMore,
     parent,
-    answersError,
-    answersLoading,
-    isCreateSuccess,
-    isAnswersCreate,
-    isCreateAnswersSuccess,
-    isAnswerToRootComment,
-    likeError,
   ];
 
   CommentsLoaded copyWith({
@@ -90,15 +127,6 @@ class CommentsLoaded extends CommentState {
     int? answerCurrentPage,
     bool? answerIsLoadingMore,
     Comment? parent,
-    String? answersError,
-    bool? answersLoading,
-    bool? isCreate,
-    String? createError,
-    bool? isCreateSuccess,
-    bool? isAnswersCreate,
-    bool? isCreateAnswersSuccess,
-    String? likeError,
-    bool? isAnswerToRootComment,
   }) {
     return CommentsLoaded(
       comments: comments ?? this.comments,
@@ -111,15 +139,6 @@ class CommentsLoaded extends CommentState {
       answerCurrentPage: answerCurrentPage ?? this.answerCurrentPage,
       answerIsLoadingMore: answerIsLoadingMore ?? this.answerIsLoadingMore,
       parent: parent ?? this.parent,
-      answersError: answersError,
-      answersLoading: answersLoading ?? this.answersLoading,
-      isCreate: isCreate ?? false,
-      createError: createError,
-      isCreateSuccess: isCreateSuccess ?? false,
-      isAnswersCreate: isAnswersCreate ?? false,
-      isCreateAnswersSuccess: isCreateAnswersSuccess ?? false,
-      likeError: likeError,
-      isAnswerToRootComment: isAnswerToRootComment ?? false,
     );
   }
 }

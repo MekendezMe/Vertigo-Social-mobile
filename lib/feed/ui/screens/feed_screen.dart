@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
+import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/feed/ui/widgets/create_post_widget.dart';
 import 'package:social_network_flutter/feed/ui/widgets/show_posts_widget.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
 import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
@@ -36,6 +40,7 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
+  Post? _editPost;
   @override
   void initState() {
     super.initState();
@@ -80,7 +85,30 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
       body: BlocConsumer<FeedBloc, FeedState>(
         bloc: widget.feedBloc,
-        listener: (context, state) {},
+        listener: (context, state) {
+          if (state is UserSubscribed) {
+            CustomToast.show(
+              CustomToastWidget(text: "Успешная подписка"),
+              dismissAfter: Duration(milliseconds: 1500),
+            );
+          }
+          if (state is PostDeleted) {
+            CustomToast.show(
+              CustomToastWidget(text: "Пост успешно удален"),
+              dismissAfter: Duration(milliseconds: 1500),
+            );
+          }
+
+          if (state is PostDeletingFailure) {
+            CustomToast.show(
+              CustomToastWidget(
+                text:
+                    "Ошибка ${state.error} при удалении поста. Попробуйте еще раз",
+              ),
+              dismissAfter: Duration(milliseconds: 1500),
+            );
+          }
+        },
         builder: (context, state) {
           if (state is FeedLoading) {
             return Center(
@@ -91,35 +119,77 @@ class _FeedScreenState extends State<FeedScreen> {
             return _buildLoadingFailure(error: state.error?.toString());
           }
           if (state is FeedLoaded) {
-            return RefreshIndicator(
-              backgroundColor: context.color.darkGray,
-              color: context.color.lightPurple,
-              onRefresh: () async {
-                final completer = Completer<void>();
+            return Column(
+              children: [
+                CreatePostWidget(
+                  state: state,
+                  feedBloc: widget.feedBloc,
+                  onShowGallery: widget.onShowGallery,
+                  post: _editPost,
+                  onCancelEdit: onCancelEdit,
+                  onSuccessEdit: onSuccessEdit,
+                ),
+                SizedBox(height: 10),
+                RefreshIndicator(
+                  backgroundColor: context.color.darkGray,
+                  color: context.color.lightPurple,
+                  onRefresh: () async {
+                    final completer = Completer<void>();
 
-                final subscription = widget.feedBloc.stream.listen((state) {
-                  if (state is FeedLoaded || state is FeedLoadingFailure) {
-                    completer.complete();
-                  }
-                });
+                    final subscription = widget.feedBloc.stream.listen((state) {
+                      if (state is FeedLoaded || state is FeedLoadingFailure) {
+                        completer.complete();
+                      }
+                    });
 
-                widget.feedBloc.add(LoadFeed());
+                    widget.feedBloc.add(LoadFeed());
 
-                await completer.future;
+                    await completer.future;
 
-                await subscription.cancel();
-              },
-              child: ShowPostsWidget(
-                state: state,
-                feedBloc: widget.feedBloc,
-                onShowGallery: widget.onShowGallery,
-                onShowComments: widget.onShowComments,
-              ),
+                    await subscription.cancel();
+                  },
+                  child: ShowPostsWidget(
+                    state: state,
+                    feedBloc: widget.feedBloc,
+                    onShowGallery: widget.onShowGallery,
+                    onShowComments: widget.onShowComments,
+                    onEdit: ({required Post post}) => onEdit(post),
+                    onDelete: ({required Post post}) => onDelete(post),
+                    onSubscribe: ({required Post post}) => onSubscribe(post),
+                  ),
+                ),
+              ],
             );
           }
           return SizedBox.shrink();
         },
       ),
     );
+  }
+
+  void onEdit(Post post) {
+    setState(() {
+      _editPost = post;
+    });
+  }
+
+  void onSuccessEdit() {
+    setState(() {
+      _editPost = null;
+    });
+  }
+
+  void onCancelEdit() {
+    setState(() {
+      _editPost = null;
+    });
+  }
+
+  void onDelete(Post post) {
+    widget.feedBloc.add(DeletePost(postId: post.id));
+  }
+
+  void onSubscribe(Post post) {
+    widget.feedBloc.add(Subscribe(userId: post.creator.id));
   }
 }

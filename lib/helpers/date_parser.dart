@@ -18,7 +18,6 @@ String formatCreatedDate(String date) {
   try {
     final parsedDate = parseCustomDate(date);
     final now = DateTime.now();
-    // final difference = now.difference(parsedDate);
 
     if (parsedDate.day == now.day &&
         parsedDate.month == now.month &&

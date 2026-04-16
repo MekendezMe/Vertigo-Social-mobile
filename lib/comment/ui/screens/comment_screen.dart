@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/comment/logic/entities/comment.dart';
 import 'package:social_network_flutter/comment/logic/helpers/navigation_type_helper.dart';
-import 'package:social_network_flutter/comment/ui/widgets/build_drag_handle_widget.dart';
-import 'package:social_network_flutter/comment/ui/widgets/build_header_widget.dart';
+import 'package:social_network_flutter/comment/ui/widgets/drag_handle_widget.dart';
+import 'package:social_network_flutter/comment/ui/widgets/header_widget.dart';
 import 'package:social_network_flutter/comment/ui/widgets/comment_create_widget.dart';
 import 'package:social_network_flutter/comment/ui/widgets/comment_scroll_view_widget.dart';
 import 'package:social_network_flutter/comment/ui/widgets/empty_comment_widget.dart';
@@ -133,7 +133,7 @@ class _CommentScreenState extends State<CommentScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          emptyCommentWidget(error ?? "Ошибка при загрузке", context),
+          EmptyCommentWidget(text: error ?? "Ошибка при загрузке"),
           SizedBox(height: 8),
           mainButton(
             context: context,
@@ -162,39 +162,43 @@ class _CommentScreenState extends State<CommentScreen> {
       ),
       child: Column(
         children: [
-          buildDragHandle(context),
-          buildHeader(context, current, _canGoBack, _navigateBack),
+          DragHandleWidget(),
+          HeaderWidget(
+            current: current,
+            canGoBack: _canGoBack,
+            onNavigateBack: _navigateBack,
+          ),
           Divider(color: context.color.darkGray, height: 1, thickness: 0.5),
           Expanded(
             child: BlocConsumer<CommentBloc, CommentState>(
               bloc: widget.commentBloc,
               listener: (context, state) {
-                if (state is CommentsLoaded) {
-                  if (state.isCreateSuccess) {
-                    CustomToast.show(
-                      CustomToastWidget(text: "Комментарий создан"),
-                      dismissAfter: const Duration(milliseconds: 1500),
-                    );
-                    onCreate(state);
+                if (state is CommentCreated) {
+                  CustomToast.show(
+                    CustomToastWidget(text: "Комментарий создан"),
+                    dismissAfter: const Duration(milliseconds: 1500),
+                  );
+                  onCreate();
+                  _animateScroll(toStart: false);
+                }
+
+                if (state is AnswerCreated &&
+                    current.type == NavigationType.comments &&
+                    _rootComment != null) {
+                  _navigateToAnswers(_replyingComment ?? _rootComment!);
+                  onCreate();
+                  _animateScroll(toStart: false);
+                }
+
+                if (state is AnswerCreated &&
+                    current.type == NavigationType.answers) {
+                  CustomToast.show(
+                    CustomToastWidget(text: "Ответ создан"),
+                    dismissAfter: const Duration(milliseconds: 1500),
+                  );
+                  onCreate();
+                  if (state.isAnswerToRootComment) {
                     _animateScroll(toStart: false);
-                  }
-                  if (current.type == NavigationType.comments &&
-                      state.isCreateAnswersSuccess &&
-                      _rootComment != null) {
-                    _navigateToAnswers(_replyingComment ?? _rootComment!);
-                    onCreate(state);
-                    _animateScroll(toStart: false);
-                  }
-                  if (current.type == NavigationType.answers &&
-                      state.isCreateAnswersSuccess) {
-                    CustomToast.show(
-                      CustomToastWidget(text: "Ответ создан"),
-                      dismissAfter: const Duration(milliseconds: 1500),
-                    );
-                    onCreate(state);
-                    if (state.isAnswerToRootComment) {
-                      _animateScroll(toStart: false);
-                    }
                   }
                 }
               },
@@ -205,10 +209,17 @@ class _CommentScreenState extends State<CommentScreen> {
                 if (state is CommentsLoadingFailure) {
                   return _buildLoadingFailure();
                 }
+
+                if (state is AnswerCreatingFailure &&
+                    current.type == NavigationType.answers) {
+                  return _buildLoadingFailure();
+                }
+
+                if (state is AnswersLoading) {
+                  return _buildLoading(context);
+                }
+
                 if (state is CommentsLoaded) {
-                  bool isAnswersError =
-                      current.type == NavigationType.answers &&
-                      state.answersError != null;
                   final isComments = current.type == NavigationType.comments;
                   final scrollController = _getScrollController(
                     getCurrentId(current),
@@ -217,12 +228,6 @@ class _CommentScreenState extends State<CommentScreen> {
                   final isEmpty = isComments
                       ? state.comments.isEmpty
                       : state.answers.isEmpty;
-                  if (state.answersLoading) {
-                    return _buildLoading(context);
-                  }
-                  if (isAnswersError) {
-                    return _buildLoadingFailure(error: state.answersError);
-                  }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -308,7 +313,7 @@ class _CommentScreenState extends State<CommentScreen> {
     );
   }
 
-  void onCreate(CommentsLoaded state) {
+  void onCreate() {
     clearAll();
   }
 

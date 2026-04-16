@@ -20,24 +20,6 @@ class FeedCoordinator extends NavigationCoordinator {
     required this.onShowComments,
   });
 
-  // void onShowMain({required BuildContext context}) {
-  //   pushReplacement(
-  //     context: context,
-  //     page: FeedScreen(
-  //       feedBloc: diContainer.resolve<FeedBloc>(),
-  //       logoutHandler: diContainer.resolve<ILogoutHandler>(),
-  //       onShowProfile: onShowProfile,
-  //       onShowSettings: onShowSettings,
-  //       onShowGallery:
-  //           ({
-  //             required BuildContext context,
-  //             required List<String> images,
-  //             required int index,
-  //           }) => _showGallery(context, images, index),
-  //     ),
-  //   );
-  // }
-
   Widget showMain() {
     return FeedScreen(
       feedBloc: diContainer.resolve<FeedBloc>(),

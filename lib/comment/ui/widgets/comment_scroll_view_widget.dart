@@ -41,7 +41,7 @@ class CommentScrollViewWidget extends StatelessWidget {
           SliverFillRemaining(
             child: Padding(
               padding: EdgeInsets.all(10),
-              child: emptyCommentWidget("Нет комментариев", context),
+              child: EmptyCommentWidget(text: "Нет комментариев"),
             ),
           )
         else
@@ -51,13 +51,11 @@ class CommentScrollViewWidget extends StatelessWidget {
                 final comment = isComment
                     ? state.comments[index]
                     : state.answers[index];
-                return commentItemWidget(
+                return CommentItemWidget(
                   comment: comment,
                   onReplyPressed: isComment
                       ? () => onReplyPressed(comment: comment)
                       : null,
-                  commentBloc: commentBloc,
-                  context: context,
                   onAnswerPressed: onAnswerPressed,
                   onLikePressed: onLikePressed,
                 );
