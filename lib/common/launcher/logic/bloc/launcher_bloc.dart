@@ -4,12 +4,14 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
+import 'package:social_network_flutter/common/framework/notifications/notification_service.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
 import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/logout_service.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
+import 'package:social_network_flutter/main.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 part 'launcher_event.dart';
@@ -25,6 +27,7 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
   final UserService userService;
   final ErrorHandler errorHandler;
   final PermissionService permissionService;
+  final NotificationService notificationService;
 
   late final StreamSubscription _logoutSub;
 
@@ -38,6 +41,7 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     required this.userService,
     required this.errorHandler,
     required this.permissionService,
+    required this.notificationService,
   }) : super(LauncherInitial()) {
     on<Initialize>(_onInitialize);
     on<LoginRequested>(_onLogin);
@@ -101,8 +105,12 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
   ) async {
     try {
       await userService.loadCurrentUser();
+      final String? pendingPayload = await notificationService
+          .getPendingNotification();
+      if (pendingPayload != null) {
+        handleNotificationNavigation(pendingPayload);
+      }
       _login(emit);
-      final status = await permissionService.requestNotificationIfNeeded();
     } catch (e, st) {
       talker.handle(e, st);
       errorHandler.handle(e);

@@ -30,7 +30,6 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final ErrorHandler errorHandler;
   final UserService userService;
   final PermissionService permissionService;
-  final INotificationService notificationService;
   final MediaService mediaService;
   final ILogoutHandler logoutHandler;
   FeedBloc({
@@ -39,7 +38,6 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     required this.errorHandler,
     required this.userService,
     required this.permissionService,
-    required this.notificationService,
     required this.mediaService,
     required this.logoutHandler,
   }) : super(FeedInitial()) {
@@ -68,6 +66,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       if (userService.currentUser == null) {
         throw AuthException();
       }
+      final status = await permissionService.requestNotificationIfNeeded();
       emit(
         FeedLoaded(
           posts: response.posts,

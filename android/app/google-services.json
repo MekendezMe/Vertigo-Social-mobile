@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "180565796746",
+    "project_id": "vertigo-3faec",
+    "storage_bucket": "vertigo-3faec.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180565796746:android:44def319a0f10e65664a73",
+        "android_client_info": {
+          "package_name": "com.example.social_network_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIUV0BCAxNDjvu7CHUeEPzcyscoNkb-eM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

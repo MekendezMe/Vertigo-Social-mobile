@@ -29,14 +29,17 @@ class FrameworkAssembly extends DIAssembly {
         preferencesStorage: container.resolve<IPreferencesStorage>(),
       ),
     );
-    container.registerSingleton<INotificationService>(
-      (container) => NotificationService(),
-    );
     container.registerSingleton(
       (container) => MediaService(
         permissionService: container.resolve<PermissionService>(),
       ),
     );
+    container.registerSingleton<NotificationService>(
+      (container) => NotificationService(
+        preferencesStorage: container.resolve<IPreferencesStorage>(),
+      ),
+    );
+
     container.registerSingleton<Dio>(
       (container) => getDio(
         talker: container.resolve<Talker>(),

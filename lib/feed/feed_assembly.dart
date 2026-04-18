@@ -28,7 +28,6 @@ class FeedAssembly extends DIAssembly {
         errorHandler: container.resolve<ErrorHandler>(),
         userService: container.resolve<UserService>(),
         permissionService: container.resolve<PermissionService>(),
-        notificationService: container.resolve<INotificationService>(),
         mediaService: container.resolve<MediaService>(),
         logoutHandler: container.resolve<ILogoutHandler>(),
       ),

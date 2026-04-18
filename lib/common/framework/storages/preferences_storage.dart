@@ -4,7 +4,7 @@ import 'package:social_network_flutter/common/framework/permissions/permission_s
 
 abstract class IPreferencesStorage {
   bool? requestNotificationPermissions;
-  bool? requestCameraPermissions;
+  String? pendingNotification;
   Future<void> clear();
   Future<void> load();
   Future<void> save();
@@ -16,16 +16,21 @@ class PreferencesStorage extends IPreferencesStorage {
     androidKey: notificationRequestedKey,
     iosKey: notificationRequestedKey,
   );
-  // final _requestCameraPermissionKey = StorageKey(
-  //   androidKey: cameraRequestedKey,
-  //   iosKey: cameraRequestedKey,
-  // );
+  final _pendingNotificationKey = StorageKey(
+    androidKey: pendingNotificationKey,
+    iosKey: pendingNotificationKey,
+  );
 
   @override
   Future<void> clear() async {
     final sharedPreferences = await SharedPreferences.getInstance();
     // Удаление не работает на Android, сбрасываем к значениям по умолчанию
     // await sharedPreferences.setInt(_test.key, 0);
+    await sharedPreferences.setBool(
+      _requestNotificationPermissionKey.key,
+      false,
+    );
+    await sharedPreferences.setString(_pendingNotificationKey.key, "");
     await load();
   }
 
@@ -36,8 +41,9 @@ class PreferencesStorage extends IPreferencesStorage {
     requestNotificationPermissions =
         sharedPreferences.getBool(_requestNotificationPermissionKey.key) ??
         false;
-    // requestCameraPermissions =
-    //     sharedPreferences.getBool(_requestCameraPermissionKey.key) ?? false;
+    pendingNotification = sharedPreferences.getString(
+      _pendingNotificationKey.key,
+    );
     _isLoaded = true;
   }
 
@@ -52,14 +58,15 @@ class PreferencesStorage extends IPreferencesStorage {
       key: _requestNotificationPermissionKey.key,
       value: requestNotificationPermissions,
     );
+    await _write(key: _pendingNotificationKey.key, value: pendingNotification);
   }
 
-  Future<void> _write({required String key, required bool? value}) async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    if (value == null) {
-      await sharedPreferences.setBool(key, false);
-    } else {
-      await sharedPreferences.setBool(key, value);
+  Future<void> _write<T>({required String key, required T? value}) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (value is bool) {
+      await prefs.setBool(key, value);
+    } else if (value is String) {
+      await prefs.setString(key, value);
     }
   }
 }
