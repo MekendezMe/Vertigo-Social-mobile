@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/authentication/login/logic/entities/login_request.dart';
 import 'package:social_network_flutter/common/authentication/login/logic/repository/login_repository.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
+import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
+import 'package:social_network_flutter/common/launcher/logic/entities/request/save_token_request.dart';
+import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 part 'login_event.dart';
@@ -13,6 +16,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     required this.loginRepository,
     required this.talker,
     required this.errorHandler,
+    required this.launcherRepository,
+    required this.preferencesStorage,
   }) : super(LoginInitial()) {
     on<Login>(_onLogin);
   }
@@ -20,18 +25,29 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginRepository loginRepository;
   final Talker talker;
   final ErrorHandler errorHandler;
+  final LauncherRepository launcherRepository;
+  final IPreferencesStorage preferencesStorage;
 
   Future<void> _onLogin(Login event, Emitter<LoginState> emit) async {
     try {
       emit(Logining());
-      final response = await loginRepository.login(
+      await loginRepository.login(
         LoginRequest(email: event.email, password: event.password),
       );
+      await _saveFcmToken();
       emit(LoginSuccess());
     } catch (e, st) {
       emit(LoginFailure(error: e));
       errorHandler.handle(e);
       talker.handle(e, st);
     }
+  }
+
+  Future<void> _saveFcmToken() async {
+    final token = preferencesStorage.fcmToken;
+    if (token == null) {
+      return;
+    }
+    await launcherRepository.saveToken(SaveTokenRequest(fcmToken: token));
   }
 }

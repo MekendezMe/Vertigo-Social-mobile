@@ -7,7 +7,7 @@ class TokenRequest extends IRequest {
   TokenRequest({required this.refreshToken, required this.deviceId});
 
   Map<String, dynamic> toJson() {
-    return {'refresh_token': refreshToken, 'device_id': deviceId};
+    return {'refresh_token': refreshToken, "device_id": deviceId};
   }
 
   @override

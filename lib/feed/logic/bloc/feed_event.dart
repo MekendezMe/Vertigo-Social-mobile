@@ -100,23 +100,3 @@ class Subscribe extends FeedEvent {
   @override
   List<Object?> get props => [];
 }
-
-class ClearCreateStatus extends FeedEvent {
-  @override
-  List<Object?> get props => [];
-}
-
-class ClearSubscribeStatus extends FeedEvent {
-  @override
-  List<Object?> get props => [];
-}
-
-class ClearDeleteStatus extends FeedEvent {
-  @override
-  List<Object?> get props => [];
-}
-
-class ClearUpdateStatus extends FeedEvent {
-  @override
-  List<Object?> get props => [];
-}

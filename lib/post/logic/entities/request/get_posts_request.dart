@@ -1,5 +1,5 @@
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
-import 'package:social_network_flutter/feed/logic/entites/post_types.dart';
+import 'package:social_network_flutter/post/logic/entities/post_types.dart';
 
 class GetPostsRequest extends IRequest {
   final int pageNumber;

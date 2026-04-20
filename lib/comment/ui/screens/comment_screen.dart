@@ -15,6 +15,7 @@ import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.da
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
 import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
+import 'package:social_network_flutter/ui/widgets/loading/build_loading_failure.dart';
 
 class CommentScreen extends StatefulWidget {
   const CommentScreen({
@@ -100,8 +101,12 @@ class _CommentScreenState extends State<CommentScreen> {
   }
 
   void clearRootComment() {
-    setState(() {
-      _rootComment = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _rootComment = null;
+        });
+      }
     });
   }
 
@@ -127,25 +132,6 @@ class _CommentScreenState extends State<CommentScreen> {
   }
 
   bool get _canGoBack => _navigationStack.length > 1;
-
-  Widget _buildLoadingFailure({String? error}) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          EmptyCommentWidget(text: error ?? "Ошибка при загрузке"),
-          SizedBox(height: 8),
-          mainButton(
-            context: context,
-            child: Text("Повторить"),
-            onTap: () {
-              _loadComments();
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildLoading(BuildContext context) {
     return Center(child: customCircularProgressIndicator(context: context));
@@ -209,7 +195,11 @@ class _CommentScreenState extends State<CommentScreen> {
                   return _buildLoading(context);
                 }
                 if (state is CommentsLoadingFailure) {
-                  return _buildLoadingFailure();
+                  return buildLoadingFailure(
+                    context: context,
+                    error: state.error.toString(),
+                    onTap: () => _loadComments(),
+                  );
                 }
 
                 if (state is CommentsLoaded) {
@@ -228,7 +218,11 @@ class _CommentScreenState extends State<CommentScreen> {
                     return _buildLoading(context);
                   }
                   if (isAnswersError) {
-                    return _buildLoadingFailure(error: state.answersError);
+                    return buildLoadingFailure(
+                      error: state.answersError,
+                      context: context,
+                      onTap: () => _loadComments(),
+                    );
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,7 +277,6 @@ class _CommentScreenState extends State<CommentScreen> {
                               controller: scrollController,
                               onReplyPressed: ({required Comment comment}) =>
                                   _navigateToAnswers(comment),
-                              commentBloc: widget.commentBloc,
                               onAnswerPressed: ({required Comment comment}) =>
                                   onAnswerPressed(comment),
                               onLikePressed: ({required Comment comment}) =>

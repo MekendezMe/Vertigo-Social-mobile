@@ -11,7 +11,7 @@ import 'package:social_network_flutter/comment/logic/entities/comment.dart';
 import 'package:social_network_flutter/comment/logic/entities/request/get_comments_request.dart';
 import 'package:social_network_flutter/comment/logic/repository/comment_repository.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
-import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/post/logic/entities/post.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 part 'comment_event.dart';

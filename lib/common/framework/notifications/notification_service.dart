@@ -176,21 +176,22 @@ class NotificationService {
   Future<void> _handleToken() async {
     final token = await _fcm.getToken();
 
-    await _sendTokenToServer(token);
+    await _saveTokenToStorage(token);
 
     _fcm.onTokenRefresh.listen((newToken) {
-      _sendTokenToServer(newToken);
+      _saveTokenToStorage(newToken);
     });
   }
 
-  Future<void> _sendTokenToServer(String? token) async {
+  Future<void> _saveTokenToStorage(String? token) async {
     if (token == null) return;
-    // TODO: Отправить токен на твой бэкенд
-    // await api.registerToken(token);
+    await preferencesStorage.load();
+    preferencesStorage.fcmToken = token;
+    await preferencesStorage.save();
   }
 
   Future<void> _savePendingNotification(String? payload) async {
-    if (payload == null || payload == "") return;
+    if (payload == null || payload.isEmpty) return;
     await preferencesStorage.load();
     preferencesStorage.pendingNotification = payload;
     await preferencesStorage.save();
@@ -198,7 +199,10 @@ class NotificationService {
 
   Future<String?> getPendingNotification() async {
     await preferencesStorage.load();
-    String? pending = preferencesStorage.pendingNotification;
+    final pending = preferencesStorage.pendingNotification;
+    if (pending == null || pending.isEmpty) {
+      return null;
+    }
     preferencesStorage.pendingNotification = null;
     await preferencesStorage.save();
     return pending;

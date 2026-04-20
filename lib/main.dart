@@ -33,6 +33,9 @@ import 'package:social_network_flutter/feed/feed_coordinator.dart';
 import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/firebase_options.dart';
+import 'package:social_network_flutter/post/logic/bloc/post_bloc.dart';
+import 'package:social_network_flutter/post/post_assembly.dart';
+import 'package:social_network_flutter/post/post_coordinator.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger_observer.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -62,72 +65,41 @@ void main() async {
 }
 
 void handleNotificationNavigation(String payload) {
-  try {
-    final context = NavigationService.navigatorKey.currentContext;
-    if (context == null) return;
-    final userService = diContainer.resolve<UserService>();
-    if (userService.currentUser == null) return;
+  final trimmed = payload.trim();
+  if (trimmed.isEmpty) return;
 
-    final parts = payload.split(':');
-    final type = parts[0];
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    try {
+      final context = NavigationService.navigatorKey.currentContext;
+      if (context == null) return;
+      final userService = diContainer.resolve<UserService>();
+      if (userService.currentUser == null) return;
 
-    switch (type) {
-      // case 'post':
-      //   break;
+      final parts = trimmed.split(':');
+      final type = parts[0];
 
-      case 'comment':
-        final postId = int.parse(parts[1]);
-        commentCoordinator.onShowCommentScreen(
-          context: context,
-          postId: postId,
-        );
-        break;
+      switch (type) {
+        // case 'post':
+        //   break;
 
-      // case 'profile':
-      //   final userId = int.parse(parts[1]);
-      //   diContainer.resolve<ProfileCoordinator>().showProfile(context, userId);
-      //   break;
+        case 'comment':
+          final postId = int.parse(parts[1]);
+          commentCoordinator.onShowCommentScreen(
+            context: context,
+            postId: postId,
+          );
+          break;
+
+        // case 'profile':
+        //   final userId = int.parse(parts[1]);
+        //   diContainer.resolve<ProfileCoordinator>().showProfile(context, userId);
+        //   break;
+      }
+    } catch (e) {
+      return;
     }
-  } catch (e) {
-    return;
-  }
+  });
 }
-
-// void _handleNotificationNavigation(String payload) {
-//   try {
-//     _retryNavigation(payload, 0);
-//   } catch (e) {
-//     return;
-//   }
-// }
-
-// void _retryNavigation(String payload, int attempt) {
-//   if (attempt > 500) {
-//     return;
-//   }
-
-//   Future.delayed(Duration(milliseconds: 100), () {
-//     final context = NavigationService.navigatorKey.currentContext;
-//     final userService = diContainer.resolve<UserService>();
-
-//     if (context != null && userService.currentUser != null) {
-//       final parts = payload.split(':');
-//       final type = parts[0];
-
-//       switch (type) {
-//         case 'comment':
-//           final postId = int.parse(parts[1]);
-//           commentCoordinator.onShowCommentScreen(
-//             context: context,
-//             postId: postId,
-//           );
-//           break;
-//       }
-//     } else {
-//       _retryNavigation(payload, attempt + 1);
-//     }
-//   });
-// }
 
 final mainCoordinator = FeedCoordinator(
   diContainer: diContainer,
@@ -135,6 +107,8 @@ final mainCoordinator = FeedCoordinator(
   onShowSettings: ({required BuildContext context}) => {"qwe": "qq"},
   onShowComments: ({required BuildContext context, required int postId}) =>
       commentCoordinator.onShowCommentScreen(context: context, postId: postId),
+  onShowPost: ({required BuildContext context, required int postId}) =>
+      postCoordinator.onShowPostScreen(context: context, postId: postId),
 );
 
 final commentCoordinator = CommentCoordinator(diContainer: diContainer);
@@ -164,6 +138,8 @@ final launcherCoordinator = LauncherCoordinator(
   onLoggedOutWidget: authCoordinator.getAuthScreen,
 );
 
+final postCoordinator = PostCoordinator(diContainer: diContainer);
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -177,6 +153,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => diContainer.resolve<RegisterBloc>()),
         BlocProvider(create: (context) => diContainer.resolve<FeedBloc>()),
         BlocProvider(create: (context) => diContainer.resolve<CommentBloc>()),
+        BlocProvider(create: (context) => diContainer.resolve<PostBloc>()),
       ],
       child: MaterialApp(
         navigatorKey: NavigationService.navigatorKey,
@@ -201,6 +178,7 @@ void _registerAssemblies() {
     AuthAssembly(),
     LoginAssembly(),
     RegisterAssembly(),
+    PostAssembly(),
     FeedAssembly(),
     AuthInterceptorAssembly(),
     CommentAssembly(),

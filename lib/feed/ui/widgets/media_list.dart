@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/post/logic/entities/post.dart';
 import 'package:social_network_flutter/feed/logic/helpers/extension_file_checker.dart';
 import 'package:social_network_flutter/feed/ui/widgets/image_item.dart';
 import 'package:social_network_flutter/feed/ui/widgets/video_list_item.dart';

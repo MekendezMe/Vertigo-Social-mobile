@@ -12,7 +12,6 @@ class CommentScrollViewWidget extends StatelessWidget {
     required this.current,
     required this.controller,
     required this.onReplyPressed,
-    required this.commentBloc,
     required this.onAnswerPressed,
     required this.onLikePressed,
   });
@@ -20,7 +19,6 @@ class CommentScrollViewWidget extends StatelessWidget {
   final NavigationItem current;
   final ScrollController controller;
   final Function({required Comment comment}) onReplyPressed;
-  final CommentBloc commentBloc;
   final Function({required Comment comment}) onAnswerPressed;
   final Function({required Comment comment}) onLikePressed;
 

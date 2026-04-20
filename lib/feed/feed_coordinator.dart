@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/navigation/navigation_coordinator.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/ui/screens/feed_screen.dart';
-import 'package:social_network_flutter/feed/ui/widgets/modal_gallery_widget.dart';
+import 'package:social_network_flutter/helpers/post/media_gallery/show_gallery.dart';
 
 class FeedCoordinator extends NavigationCoordinator {
   final DIContainer diContainer;
@@ -12,12 +11,15 @@ class FeedCoordinator extends NavigationCoordinator {
   final Function({required BuildContext context}) onShowSettings;
   final Function({required BuildContext context, required int postId})
   onShowComments;
+  final Function({required BuildContext context, required int postId})
+  onShowPost;
 
   FeedCoordinator({
     required this.diContainer,
     required this.onShowProfile,
     required this.onShowSettings,
     required this.onShowComments,
+    required this.onShowPost,
   });
 
   Widget showMain() {
@@ -26,24 +28,13 @@ class FeedCoordinator extends NavigationCoordinator {
       onShowProfile: onShowProfile,
       onShowSettings: onShowSettings,
       onShowComments: onShowComments,
+      onShowPost: onShowPost,
       onShowGallery:
           ({
             required BuildContext context,
             required List<String> media,
             required int index,
-          }) => _showGallery(context, media, index),
-    );
-  }
-
-  void _showGallery(
-    BuildContext context,
-    List<String> media,
-    int initialIndex,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) =>
-          ModalGallery(media: media, initialIndex: initialIndex),
+          }) => showGallery(context, media, index),
     );
   }
 }

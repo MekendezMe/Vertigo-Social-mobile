@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
-import 'package:social_network_flutter/feed/logic/entites/post.dart';
-import 'package:social_network_flutter/feed/logic/entites/post_types.dart';
+import 'package:social_network_flutter/post/logic/entities/post.dart';
+import 'package:social_network_flutter/post/logic/entities/post_types.dart';
 import 'package:social_network_flutter/feed/ui/widgets/build_tabs.dart';
-import 'package:social_network_flutter/feed/ui/widgets/post_item_widget.dart';
+import 'package:social_network_flutter/ui/widgets/post/post_item_widget.dart';
 
 class ShowPostsWidget extends StatefulWidget {
   const ShowPostsWidget({
@@ -17,6 +17,7 @@ class ShowPostsWidget extends StatefulWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onSubscribe,
+    required this.onShowPost,
   });
   final FeedBloc feedBloc;
   final FeedLoaded state;
@@ -28,6 +29,8 @@ class ShowPostsWidget extends StatefulWidget {
   onShowGallery;
   final Function({required BuildContext context, required int postId})
   onShowComments;
+  final Function({required BuildContext context, required int postId})
+  onShowPost;
 
   final Function({required Post post}) onEdit;
   final Function({required Post post}) onDelete;
@@ -118,18 +121,21 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget>
           SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final post = state.posts[index];
-              return PostItemWidget(
-                post: post,
-                feedBloc: widget.feedBloc,
-                onLikePressed: () {
-                  widget.feedBloc.add(ToggleLike(postId: post.id));
-                },
-                onShowGallery: widget.onShowGallery,
-                onShowComments: widget.onShowComments,
-                user: state.user,
-                onEdit: ({required Post post}) => onEdit(post),
-                onDelete: widget.onDelete,
-                onSubscribe: widget.onSubscribe,
+              return GestureDetector(
+                onTap: () =>
+                    widget.onShowPost(context: context, postId: post.id),
+                child: PostItemWidget(
+                  post: post,
+                  onLikePressed: () {
+                    widget.feedBloc.add(ToggleLike(postId: post.id));
+                  },
+                  onShowGallery: widget.onShowGallery,
+                  onShowComments: widget.onShowComments,
+                  user: state.user,
+                  onEdit: ({required Post post}) => onEdit(post),
+                  onDelete: widget.onDelete,
+                  onSubscribe: widget.onSubscribe,
+                ),
               );
             }, childCount: state.posts.length),
           ),

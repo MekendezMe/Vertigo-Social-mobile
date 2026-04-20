@@ -6,13 +6,17 @@ class NavigationCoordinator {
   Future<T?> push<T extends Object?>({
     required BuildContext context,
     required Widget page,
+    bool rootNavigator = false,
   }) {
     return Navigator.of(
       context,
     ).push<T>(MaterialPageRoute(builder: (_) => page));
   }
 
-  void pop<T extends Object?>({required BuildContext context}) {
+  void pop<T extends Object?>({
+    required BuildContext context,
+    bool rootNavigator = false,
+  }) {
     return Navigator.of(context).pop<T>();
   }
 
@@ -23,7 +27,7 @@ class NavigationCoordinator {
     Navigator.of(context).popUntil(predicate);
   }
 
-  void popToRoot({required BuildContext context}) {
+  void popToRoot({required BuildContext context, bool rootNavigator = false}) {
     return popUntil((route) => route.isFirst, context: context);
   }
 

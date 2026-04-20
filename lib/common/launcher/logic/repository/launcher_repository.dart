@@ -1,10 +1,12 @@
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
-import 'package:social_network_flutter/common/launcher/logic/entities/logout_request.dart';
-import 'package:social_network_flutter/common/launcher/logic/entities/logout_response.dart';
-import 'package:social_network_flutter/common/launcher/logic/entities/token_request.dart';
-import 'package:social_network_flutter/common/launcher/logic/entities/token_response.dart';
+import 'package:social_network_flutter/common/launcher/logic/entities/request/logout_request.dart';
+import 'package:social_network_flutter/common/launcher/logic/entities/request/save_token_request.dart';
+import 'package:social_network_flutter/common/launcher/logic/entities/response/logout_response.dart';
+import 'package:social_network_flutter/common/launcher/logic/entities/request/token_request.dart';
+import 'package:social_network_flutter/common/launcher/logic/entities/response/save_token_response.dart';
+import 'package:social_network_flutter/common/launcher/logic/entities/response/token_response.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 class LauncherRepository {
@@ -44,6 +46,19 @@ class LauncherRepository {
     }
   }
 
+  Future<SaveTokenResponse> saveToken(SaveTokenRequest request) async {
+    try {
+      final response = await requestSender.send<SaveTokenResponse>(
+        request: request,
+        fromJson: (json) => SaveTokenResponse.fromJson(json),
+      );
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<LogoutResponse> logout() async {
     try {
       final request = LogoutRequest();
@@ -52,10 +67,6 @@ class LauncherRepository {
         request: request,
         fromJson: (json) => LogoutResponse.fromJson(json),
       );
-
-      if (response == null) {
-        throw ApiException(message: "Response in logout = null");
-      }
 
       return response;
     } catch (e) {

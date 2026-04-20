@@ -7,6 +7,7 @@ import 'package:social_network_flutter/common/framework/errors/error_handler.dar
 import 'package:social_network_flutter/common/framework/notifications/notification_service.dart';
 import 'package:social_network_flutter/common/framework/storages/preferences_storage.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
+import 'package:social_network_flutter/common/launcher/logic/entities/request/save_token_request.dart';
 import 'package:social_network_flutter/common/launcher/logic/repository/launcher_repository.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/logout_service.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';
@@ -105,9 +106,10 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
   ) async {
     try {
       await userService.loadCurrentUser();
+      // await _saveFcmToken();
       final String? pendingPayload = await notificationService
           .getPendingNotification();
-      if (pendingPayload != null) {
+      if (pendingPayload != null && pendingPayload.isNotEmpty) {
         handleNotificationNavigation(pendingPayload);
       }
       _login(emit);
@@ -116,6 +118,16 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
       errorHandler.handle(e);
       add(LogoutRequested());
     }
+  }
+
+  // TODO: РАСКОММЕНТИРОВАТЬ _SAVE
+
+  Future<void> _saveFcmToken() async {
+    final token = preferencesStorage.fcmToken;
+    if (token == null) {
+      return;
+    }
+    await launcherRepository.saveToken(SaveTokenRequest(fcmToken: token));
   }
 
   Future<void> _onLogout(

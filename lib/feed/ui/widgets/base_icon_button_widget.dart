@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
-import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/post/logic/entities/post.dart';
 
 class BaseIconButtonWidget extends StatelessWidget {
   const BaseIconButtonWidget({

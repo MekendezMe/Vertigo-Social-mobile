@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
-import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
-import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/post/logic/entities/post.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_icon_button_widget.dart';
@@ -13,7 +12,6 @@ class PostItemWidget extends StatelessWidget {
   const PostItemWidget({
     super.key,
     required this.post,
-    required this.feedBloc,
     required this.onLikePressed,
     required this.onShowGallery,
     required this.onShowComments,
@@ -23,7 +21,6 @@ class PostItemWidget extends StatelessWidget {
     required this.onSubscribe,
   });
   final Post post;
-  final FeedBloc feedBloc;
   final VoidCallback onLikePressed;
   final void Function({
     required BuildContext context,
@@ -31,7 +28,7 @@ class PostItemWidget extends StatelessWidget {
     required int index,
   })
   onShowGallery;
-  final Function({required BuildContext context, required int postId})
+  final Function({required BuildContext context, required int postId})?
   onShowComments;
   final User user;
   final Function({required Post post}) onEdit;
@@ -89,16 +86,20 @@ class PostItemWidget extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 10),
-                    BaseIconContainerWidget(
-                      child: BaseIconButtonWidget(
-                        post: post,
-                        onPressed: () =>
-                            onShowComments(context: context, postId: post.id),
-                        icon: Icons.comment,
-                        text: "${post.commentsCount}",
-                        color: context.color.veryDarkGray,
+                    if (onShowComments != null) ...[
+                      BaseIconContainerWidget(
+                        child: BaseIconButtonWidget(
+                          post: post,
+                          onPressed: () => onShowComments!(
+                            context: context,
+                            postId: post.id,
+                          ),
+                          icon: Icons.comment,
+                          text: "${post.commentsCount}",
+                          color: context.color.veryDarkGray,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ],

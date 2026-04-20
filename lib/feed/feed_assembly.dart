@@ -4,11 +4,11 @@ import 'package:social_network_flutter/common/framework/di/di_container.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/common/framework/media/media_service.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
-import 'package:social_network_flutter/common/framework/notifications/notification_service.dart';
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
 import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/logic/repository/feed_repository.dart';
+import 'package:social_network_flutter/post/logic/repository/post_repository.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 class FeedAssembly extends DIAssembly {
@@ -24,6 +24,7 @@ class FeedAssembly extends DIAssembly {
     container.registerSingleton(
       (container) => FeedBloc(
         feedRepository: container.resolve<FeedRepository>(),
+        postRepository: container.resolve<PostRepository>(),
         talker: container.resolve<Talker>(),
         errorHandler: container.resolve<ErrorHandler>(),
         userService: container.resolve<UserService>(),

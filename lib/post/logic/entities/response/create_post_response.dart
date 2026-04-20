@@ -1,4 +1,4 @@
-import 'package:social_network_flutter/feed/logic/entites/post.dart';
+import 'package:social_network_flutter/post/logic/entities/post.dart';
 
 class CreatePostResponse {
   final Post post;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
-import 'package:social_network_flutter/feed/logic/entites/post_types.dart';
+import 'package:social_network_flutter/post/logic/entities/post_types.dart';
 
 List<Tab> buildTabs(BuildContext context, PostType currentType) {
   return [

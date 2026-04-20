@@ -6,26 +6,27 @@ import 'package:social_network_flutter/common/authentication/user/service/user_s
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/media/media_service.dart';
-import 'package:social_network_flutter/common/framework/notifications/notification_service.dart';
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
 import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
-import 'package:social_network_flutter/feed/logic/entites/post.dart';
-import 'package:social_network_flutter/feed/logic/entites/post_types.dart';
-import 'package:social_network_flutter/feed/logic/entites/request/create_post_request.dart';
-import 'package:social_network_flutter/feed/logic/entites/request/delete_post_request.dart';
-import 'package:social_network_flutter/feed/logic/entites/request/edit_post_request.dart';
-import 'package:social_network_flutter/feed/logic/entites/request/get_posts_request.dart';
-import 'package:social_network_flutter/feed/logic/entites/request/like_post_request.dart';
-import 'package:social_network_flutter/feed/logic/entites/request/unlike_post_request.dart';
+import 'package:social_network_flutter/post/logic/entities/post.dart';
+import 'package:social_network_flutter/post/logic/entities/post_types.dart';
 import 'package:social_network_flutter/feed/logic/entites/request/user/subscribe_request.dart';
+import 'package:social_network_flutter/post/logic/entities/request/create_post_request.dart';
+import 'package:social_network_flutter/post/logic/entities/request/delete_post_request.dart';
+import 'package:social_network_flutter/post/logic/entities/request/edit_post_request.dart';
+import 'package:social_network_flutter/post/logic/entities/request/like_post_request.dart';
+import 'package:social_network_flutter/post/logic/entities/request/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:social_network_flutter/feed/logic/repository/feed_repository.dart';
+import 'package:social_network_flutter/post/logic/entities/request/unlike_post_request.dart';
+import 'package:social_network_flutter/post/logic/repository/post_repository.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 part 'feed_event.dart';
 part 'feed_state.dart';
 
 class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final FeedRepository feedRepository;
+  final PostRepository postRepository;
   final Talker talker;
   final ErrorHandler errorHandler;
   final UserService userService;
@@ -40,6 +41,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     required this.permissionService,
     required this.mediaService,
     required this.logoutHandler,
+    required this.postRepository,
   }) : super(FeedInitial()) {
     on<LoadFeed>(_onLoadFeed);
     on<LoadMorePosts>(_onLoadMorePosts);
@@ -60,13 +62,13 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   Future<void> _onLoadFeed(LoadFeed event, Emitter<FeedState> emit) async {
     try {
       emit(FeedLoading());
-      final response = await feedRepository.getPosts(
+      final response = await postRepository.getPosts(
         GetPostsRequest(pageNumber: event.pageNumber ?? 1),
       );
       if (userService.currentUser == null) {
         throw AuthException();
       }
-      final status = await permissionService.requestNotificationIfNeeded();
+      await permissionService.requestNotificationIfNeeded();
       emit(
         FeedLoaded(
           posts: response.posts,
@@ -89,7 +91,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     final current = state as FeedLoaded;
     try {
       emit(current.copyWith(isLoadingMore: true));
-      final response = await feedRepository.getPosts(
+      final response = await postRepository.getPosts(
         GetPostsRequest(pageNumber: event.pageNumber, type: event.type),
       );
       emit(
@@ -118,7 +120,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     }
     final currentPage = 1;
     try {
-      final response = await feedRepository.getPosts(
+      final response = await postRepository.getPosts(
         GetPostsRequest(pageNumber: currentPage, type: event.type),
       );
       emit(
@@ -142,7 +144,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     if (currentState.isCreating) return;
     try {
       emit(currentState.copyWith(isCreating: true, isCreateSuccess: false));
-      final createdPost = await feedRepository.createPost(
+      final createdPost = await postRepository.createPost(
         CreatePostRequest(text: event.text, media: event.media),
       );
       emit(
@@ -174,7 +176,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     if (currentState.isUpdating) return;
     emit(currentState.copyWith(isUpdating: true, isUpdateSuccess: false));
     try {
-      final response = await feedRepository.editPost(
+      final response = await postRepository.editPost(
         EditPostRequest(
           postId: event.postId,
           text: event.text,
@@ -216,7 +218,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     if (currentState.isDeleting) return;
     emit(currentState.copyWith(isDeleting: true, isDeleteSuccess: false));
     try {
-      final response = await feedRepository.deletePost(
+      final response = await postRepository.deletePost(
         DeletePostRequest(postId: event.postId),
       );
 
@@ -278,8 +280,8 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
     try {
       final response = willLike
-          ? await feedRepository.likePost(LikePostRequest(postId: event.postId))
-          : await feedRepository.unlikePost(
+          ? await postRepository.likePost(LikePostRequest(postId: event.postId))
+          : await postRepository.unlikePost(
               UnlikePostRequest(postId: event.postId),
             );
 
