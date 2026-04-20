@@ -4,6 +4,7 @@ import 'package:social_network_flutter/common/framework/navigation/navigation_co
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/feed/ui/screens/feed_screen.dart';
 import 'package:social_network_flutter/helpers/post/media_gallery/show_gallery.dart';
+import 'package:social_network_flutter/post/logic/bloc/post_composer_bloc.dart';
 
 class FeedCoordinator extends NavigationCoordinator {
   final DIContainer diContainer;
@@ -25,6 +26,7 @@ class FeedCoordinator extends NavigationCoordinator {
   Widget showMain() {
     return FeedScreen(
       feedBloc: diContainer.resolve<FeedBloc>(),
+      postComposerBloc: diContainer.resolve<PostComposerBloc>(),
       onShowProfile: onShowProfile,
       onShowSettings: onShowSettings,
       onShowComments: onShowComments,

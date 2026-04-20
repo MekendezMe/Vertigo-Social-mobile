@@ -1,24 +1,14 @@
-import 'dart:io';
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
-import 'package:social_network_flutter/common/framework/media/media_service.dart';
 import 'package:social_network_flutter/common/framework/permissions/permission_service.dart';
-import 'package:social_network_flutter/common/launcher/launcher_dependencies.dart';
 import 'package:social_network_flutter/post/logic/entities/post.dart';
 import 'package:social_network_flutter/post/logic/entities/post_types.dart';
-import 'package:social_network_flutter/feed/logic/entites/request/user/subscribe_request.dart';
-import 'package:social_network_flutter/post/logic/entities/request/create_post_request.dart';
-import 'package:social_network_flutter/post/logic/entities/request/delete_post_request.dart';
-import 'package:social_network_flutter/post/logic/entities/request/edit_post_request.dart';
-import 'package:social_network_flutter/post/logic/entities/request/like_post_request.dart';
 import 'package:social_network_flutter/post/logic/entities/request/request/get_posts_request.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:social_network_flutter/feed/logic/repository/feed_repository.dart';
-import 'package:social_network_flutter/post/logic/entities/request/unlike_post_request.dart';
 import 'package:social_network_flutter/post/logic/repository/post_repository.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 part 'feed_event.dart';
@@ -31,32 +21,21 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final ErrorHandler errorHandler;
   final UserService userService;
   final PermissionService permissionService;
-  final MediaService mediaService;
-  final ILogoutHandler logoutHandler;
   FeedBloc({
     required this.feedRepository,
     required this.talker,
     required this.errorHandler,
     required this.userService,
     required this.permissionService,
-    required this.mediaService,
-    required this.logoutHandler,
     required this.postRepository,
   }) : super(FeedInitial()) {
     on<LoadFeed>(_onLoadFeed);
     on<LoadMorePosts>(_onLoadMorePosts);
     on<ChangeFeedType>(_onChangeFeedType);
-    on<CreatePost>(_onCreatePost);
-    on<EditPost>(_onUpdatePost);
-    on<DeletePost>(_onDeletePost);
-
-    on<ToggleLike>(_onToggleLike);
-
-    on<PickImageFromCamera>(_onPickImageFromCamera);
-    on<PickMediaFromGallery>(_onPickMediaFromGallery);
-    on<RemoveMediaFromPost>(_onRemoveMediaFromPost);
-    on<ClearMedia>(_onClearMedia);
-    on<Subscribe>(_onSubscribe);
+    on<AddPostToTop>(_onAddPostToTop);
+    on<ReplacePostInFeed>(_onReplacePostInFeed);
+    on<RemovePostFromFeed>(_onRemovePostFromFeed);
+    on<MarkUserSubscribedInFeed>(_onMarkUserSubscribedInFeed);
   }
 
   Future<void> _onLoadFeed(LoadFeed event, Emitter<FeedState> emit) async {
@@ -138,340 +117,56 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     }
   }
 
-  Future<void> _onCreatePost(CreatePost event, Emitter<FeedState> emit) async {
-    if (state is! FeedLoaded) return;
-    final currentState = state as FeedLoaded;
-    if (currentState.isCreating) return;
-    try {
-      emit(currentState.copyWith(isCreating: true, isCreateSuccess: false));
-      final createdPost = await postRepository.createPost(
-        CreatePostRequest(text: event.text, media: event.media),
-      );
-      emit(
-        currentState.copyWith(
-          posts: [createdPost.post, ...currentState.posts],
-          isCreating: false,
-          createError: null,
-          media: null,
-          isCreateSuccess: true,
-        ),
-      );
-    } catch (e, st) {
-      emit(
-        currentState.copyWith(
-          isCreating: false,
-          createError: e.toString(),
-          isCreateSuccess: false,
-        ),
-      );
-      talker.handle(e, st);
-      errorHandler.handle(e);
-    }
-  }
-
-  Future<void> _onUpdatePost(EditPost event, Emitter<FeedState> emit) async {
-    if (state is! FeedLoaded) return;
-
-    final currentState = state as FeedLoaded;
-    if (currentState.isUpdating) return;
-    emit(currentState.copyWith(isUpdating: true, isUpdateSuccess: false));
-    try {
-      final response = await postRepository.editPost(
-        EditPostRequest(
-          postId: event.postId,
-          text: event.text,
-          deletedMedia: event.deletedImages,
-          media: event.media,
-        ),
-      );
-
-      final updatedPosts = currentState.posts
-          .where((post) => post.id != event.postId)
-          .toList();
-
-      emit(
-        currentState.copyWith(
-          posts: [response.post, ...updatedPosts],
-          isUpdateSuccess: true,
-          isUpdating: false,
-          updateError: null,
-          media: null,
-        ),
-      );
-    } catch (e, st) {
-      emit(
-        currentState.copyWith(
-          isUpdateSuccess: false,
-          isUpdating: false,
-          updateError: e.toString(),
-        ),
-      );
-      talker.handle(e, st);
-      errorHandler.handle(e);
-    }
-  }
-
-  Future<void> _onDeletePost(DeletePost event, Emitter<FeedState> emit) async {
-    if (state is! FeedLoaded) return;
-
-    final currentState = state as FeedLoaded;
-    if (currentState.isDeleting) return;
-    emit(currentState.copyWith(isDeleting: true, isDeleteSuccess: false));
-    try {
-      final response = await postRepository.deletePost(
-        DeletePostRequest(postId: event.postId),
-      );
-
-      if (!response.success) {
-        throw ApiException(
-          message: "Ошибка при удалении поста. Попробуйте еще раз",
-        );
-      }
-
-      final updatedPosts = currentState.posts
-          .where((post) => post.id != event.postId)
-          .toList();
-
-      emit(
-        currentState.copyWith(
-          posts: updatedPosts,
-          isDeleteSuccess: true,
-          isDeleting: false,
-        ),
-      );
-    } catch (e, st) {
-      emit(
-        currentState.copyWith(
-          isDeleteSuccess: false,
-          isDeleting: false,
-          deleteError: e.toString(),
-        ),
-      );
-      talker.handle(e, st);
-      errorHandler.handle(e);
-    }
-  }
-
-  Future<void> _onToggleLike(ToggleLike event, Emitter<FeedState> emit) async {
-    if (state is! FeedLoaded) return;
-    final currentState = state as FeedLoaded;
-
-    final targetPost = currentState.posts.firstWhere(
-      (post) => post.id == event.postId,
-    );
-    final willLike = !targetPost.likedByUser;
-    final delta = willLike ? 1 : -1;
-    final errorMessage = willLike
-        ? "Не удалось поставить лайк"
-        : "Не удалось убрать лайк";
-    final originalPost = targetPost;
-
-    final optimisticPosts = currentState.posts.map((post) {
-      if (post.id == event.postId) {
-        return post.copyWith(
-          likesCount: post.likesCount + delta,
-          likedByUser: willLike,
-        );
-      }
-      return post;
-    }).toList();
-
-    emit(currentState.copyWith(posts: optimisticPosts, likeError: null));
-
-    try {
-      final response = willLike
-          ? await postRepository.likePost(LikePostRequest(postId: event.postId))
-          : await postRepository.unlikePost(
-              UnlikePostRequest(postId: event.postId),
-            );
-
-      if (!response.success) {
-        final rolledBackPosts = _getRolledBackPosts(
-          postId: event.postId,
-          originalPost: originalPost,
-          currentState: currentState,
-        );
-        emit(
-          currentState.copyWith(
-            posts: rolledBackPosts,
-            likeError: errorMessage,
-          ),
-        );
-        throw ApiException(message: errorMessage);
-      }
-    } catch (e, st) {
-      final rolledBackPosts = _getRolledBackPosts(
-        postId: event.postId,
-        originalPost: originalPost,
-        currentState: currentState,
-      );
-      emit(
-        currentState.copyWith(posts: rolledBackPosts, likeError: errorMessage),
-      );
-      talker.handle(e, st);
-      errorHandler.handle(e);
-    }
-  }
-
-  List<Post> _getRolledBackPosts({
-    required int postId,
-    required Post originalPost,
-    required FeedLoaded currentState,
-  }) {
-    return currentState.posts.map((post) {
-      if (post.id == postId) {
-        return originalPost;
-      }
-      return post;
-    }).toList();
-  }
-
-  Future<void> _onPickImageFromCamera(
-    PickImageFromCamera event,
+  Future<void> _onAddPostToTop(
+    AddPostToTop event,
     Emitter<FeedState> emit,
   ) async {
     if (state is! FeedLoaded) return;
     final currentState = state as FeedLoaded;
-    emit(currentState.copyWith(isMediaLoading: true));
-    try {
-      final image = await mediaService.takePhotoWithPermission();
-      if (image == null) {
-        emit(currentState.copyWith(isMediaLoading: false));
-        return;
-      }
-      final currentMedia = currentState.media ?? [];
-      final totalCount = currentMedia.length + 1;
-
-      if (totalCount > 10) {
-        errorHandler.handle("Можно выбрать максимум 10 файлов");
-        emit(currentState.copyWith(isMediaLoading: false));
-        return;
-      }
-
-      emit(
-        currentState.copyWith(
-          isMediaLoading: false,
-          media: [image, ...currentMedia],
-        ),
-      );
-    } catch (e, st) {
-      emit(currentState.copyWith(isMediaLoading: false));
-      talker.handle(e, st);
-      errorHandler.handle(e);
-    }
+    final withoutDuplicate = currentState.posts
+        .where((post) => post.id != event.post.id)
+        .toList();
+    emit(currentState.copyWith(posts: [event.post, ...withoutDuplicate]));
   }
 
-  Future<void> _onPickMediaFromGallery(
-    PickMediaFromGallery event,
+  Future<void> _onReplacePostInFeed(
+    ReplacePostInFeed event,
     Emitter<FeedState> emit,
   ) async {
     if (state is! FeedLoaded) return;
     final currentState = state as FeedLoaded;
-
-    emit(currentState.copyWith(isMediaLoading: true));
-
-    try {
-      final media = await mediaService.pickMultipleMedia();
-
-      if (media.isEmpty) {
-        emit(currentState.copyWith(isMediaLoading: false));
-        return;
-      }
-
-      final currentMedia = currentState.media ?? [];
-      final totalCount = currentMedia.length + media.length;
-
-      if (totalCount > 10) {
-        errorHandler.handle("Можно выбрать максимум 10 файлов");
-        emit(currentState.copyWith(isMediaLoading: false));
-        return;
-      }
-
-      final filteredMedia = <File>[];
-      for (final m in media) {
-        final size = await m.length();
-        if (getFileSizeInMB(size) < 10) {
-          filteredMedia.add(m);
-        }
-      }
-
-      if (filteredMedia.length != media.length) {
-        errorHandler.handle(
-          "Не удалось прикрепить файл. Размер каждого файла должен быть не больше 10 МБ",
-        );
-        emit(currentState.copyWith(isMediaLoading: false));
-        return;
-      }
-
-      emit(
-        currentState.copyWith(
-          isMediaLoading: false,
-          media: [...filteredMedia, ...currentMedia],
-        ),
-      );
-    } catch (e, st) {
-      emit(currentState.copyWith(isMediaLoading: false));
-      talker.handle(e, st);
-      errorHandler.handle(e);
-    }
+    final index = currentState.posts.indexWhere((p) => p.id == event.post.id);
+    if (index == -1) return;
+    final updatedPosts = List<Post>.from(currentState.posts);
+    updatedPosts[index] = event.post;
+    emit(currentState.copyWith(posts: updatedPosts));
   }
 
-  double getFileSizeInMB(int bytes, {int fractionDigits = 2}) {
-    final mb = bytes / (1024 * 1024);
-    return double.parse(mb.toStringAsFixed(fractionDigits));
-  }
-
-  Future<void> _onRemoveMediaFromPost(
-    RemoveMediaFromPost event,
+  Future<void> _onRemovePostFromFeed(
+    RemovePostFromFeed event,
     Emitter<FeedState> emit,
   ) async {
     if (state is! FeedLoaded) return;
-    final current = state as FeedLoaded;
-    try {
-      final currentMedia = current.media ?? [];
-      final newMedia = List<File>.from(currentMedia)..removeAt(event.index);
-
-      emit(current.copyWith(media: newMedia.isEmpty ? null : newMedia));
-    } catch (e, st) {
-      talker.handle(e, st);
-      errorHandler.handle(e);
-    }
+    final currentState = state as FeedLoaded;
+    final updatedPosts = currentState.posts
+        .where((post) => post.id != event.postId)
+        .toList();
+    emit(currentState.copyWith(posts: updatedPosts));
   }
 
-  Future<void> _onClearMedia(ClearMedia event, Emitter<FeedState> emit) async {
-    if (state is FeedLoaded) {
-      final currentState = state as FeedLoaded;
-      emit(currentState.copyWith(media: null));
-    }
-  }
-
-  Future<void> _onSubscribe(Subscribe event, Emitter<FeedState> emit) async {
+  Future<void> _onMarkUserSubscribedInFeed(
+    MarkUserSubscribedInFeed event,
+    Emitter<FeedState> emit,
+  ) async {
     if (state is! FeedLoaded) return;
-    final current = state as FeedLoaded;
-    try {
-      final response = await feedRepository.subscribeToUser(
-        SubscribeRequest(userId: event.userId),
-      );
-
-      if (!response.success) {
-        errorHandler.handle("Не удалось оформить подписку. Попробуйте снова");
-      }
-
-      final posts = current.posts
-          .map(
-            (post) => post.creator.id == event.userId
-                ? post.copyWith(subscribedByUser: true)
-                : post,
-          )
-          .toList();
-
-      emit(current.copyWith(posts: posts, isSuccessSubscribed: true));
-
-      emit(current.copyWith(posts: posts));
-    } catch (e, st) {
-      emit(current.copyWith(isSuccessSubscribed: false));
-      talker.handle(e, st);
-      errorHandler.handle(e);
-    }
+    final currentState = state as FeedLoaded;
+    final updatedPosts = currentState.posts
+        .map(
+          (post) => post.creator.id == event.userId
+              ? post.copyWith(subscribedByUser: true)
+              : post,
+        )
+        .toList();
+    emit(currentState.copyWith(posts: updatedPosts));
   }
 }

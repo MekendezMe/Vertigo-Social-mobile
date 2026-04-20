@@ -8,19 +8,26 @@ class HeaderWidget extends StatelessWidget {
     required this.current,
     required this.canGoBack,
     required this.onNavigateBack,
+    this.showClose = true,
   });
   final NavigationItem current;
   final bool canGoBack;
   final Function onNavigateBack;
+  final bool showClose;
 
   @override
   Widget build(BuildContext context) {
     final title = current.type == NavigationType.comments
         ? 'Комментарии'
         : 'Ответы';
+    final double verticalPadding = showClose ? 4 : 14;
+    final double horizontalPadding = !showClose ? 4 : 16;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: verticalPadding,
+      ),
       child: Row(
         children: [
           if (canGoBack)
@@ -35,8 +42,10 @@ class HeaderWidget extends StatelessWidget {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             )
+          else if (showClose)
+            const SizedBox(width: 40)
           else
-            const SizedBox(width: 40),
+            const SizedBox(width: 48),
 
           const SizedBox(width: 8),
 
@@ -49,17 +58,20 @@ class HeaderWidget extends StatelessWidget {
             ),
           ),
 
-          IconButton(
-            style: IconButton.styleFrom(
-              splashFactory: NoSplash.splashFactory,
-              highlightColor: Colors.transparent,
-              overlayColor: Colors.transparent,
-            ),
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
+          if (showClose)
+            IconButton(
+              style: IconButton.styleFrom(
+                splashFactory: NoSplash.splashFactory,
+                highlightColor: Colors.transparent,
+                overlayColor: Colors.transparent,
+              ),
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            )
+          else
+            const SizedBox(width: 48),
         ],
       ),
     );

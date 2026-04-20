@@ -34,6 +34,7 @@ import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/firebase_options.dart';
 import 'package:social_network_flutter/post/logic/bloc/post_bloc.dart';
+import 'package:social_network_flutter/post/logic/bloc/post_composer_bloc.dart';
 import 'package:social_network_flutter/post/post_assembly.dart';
 import 'package:social_network_flutter/post/post_coordinator.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger_observer.dart';
@@ -79,8 +80,10 @@ void handleNotificationNavigation(String payload) {
       final type = parts[0];
 
       switch (type) {
-        // case 'post':
-        //   break;
+        case 'post':
+          final postId = int.parse(parts[1]);
+          postCoordinator.onShowPostScreen(context: context, postId: postId);
+          break;
 
         case 'comment':
           final postId = int.parse(parts[1]);
@@ -138,7 +141,11 @@ final launcherCoordinator = LauncherCoordinator(
   onLoggedOutWidget: authCoordinator.getAuthScreen,
 );
 
-final postCoordinator = PostCoordinator(diContainer: diContainer);
+final postCoordinator = PostCoordinator(
+  diContainer: diContainer,
+  showCommentScreen: ({required int postId}) =>
+      commentCoordinator.showCommentScreen(postId: postId),
+);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -154,6 +161,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => diContainer.resolve<FeedBloc>()),
         BlocProvider(create: (context) => diContainer.resolve<CommentBloc>()),
         BlocProvider(create: (context) => diContainer.resolve<PostBloc>()),
+        BlocProvider(
+          create: (context) => diContainer.resolve<PostComposerBloc>(),
+        ),
       ],
       child: MaterialApp(
         navigatorKey: NavigationService.navigatorKey,

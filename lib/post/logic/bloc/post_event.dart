@@ -9,3 +9,12 @@ class LoadPost extends PostEvent {
   @override
   List<Object?> get props => [postId];
 }
+
+class PostPatchedLocally extends PostEvent {
+  final Post post;
+
+  PostPatchedLocally({required this.post});
+
+  @override
+  List<Object?> get props => [post];
+}

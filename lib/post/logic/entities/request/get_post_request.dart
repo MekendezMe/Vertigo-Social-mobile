@@ -5,7 +5,7 @@ class GetPostRequest extends IRequest {
 
   GetPostRequest({required this.postId});
   @override
-  String get method => "posts/$postId/comments";
+  String get method => "posts/$postId";
   @override
   HttpMethod get httpMethod => HttpMethod.get;
 }

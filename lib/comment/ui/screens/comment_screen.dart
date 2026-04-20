@@ -8,12 +8,10 @@ import 'package:social_network_flutter/comment/ui/widgets/drag_handle_widget.dar
 import 'package:social_network_flutter/comment/ui/widgets/header_widget.dart';
 import 'package:social_network_flutter/comment/ui/widgets/comment_create_widget.dart';
 import 'package:social_network_flutter/comment/ui/widgets/comment_scroll_view_widget.dart';
-import 'package:social_network_flutter/comment/ui/widgets/empty_comment_widget.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/comment/logic/bloc/comment_bloc.dart';
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
-import 'package:social_network_flutter/ui/widgets/button/main_button.dart';
 import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
 import 'package:social_network_flutter/ui/widgets/loading/build_loading_failure.dart';
 
@@ -22,9 +20,11 @@ class CommentScreen extends StatefulWidget {
     super.key,
     required this.commentBloc,
     required this.postId,
+    this.fromModal = true,
   });
   final CommentBloc commentBloc;
   final int postId;
+  final bool fromModal;
 
   @override
   State<CommentScreen> createState() => _CommentScreenState();
@@ -140,19 +140,23 @@ class _CommentScreenState extends State<CommentScreen> {
   @override
   Widget build(BuildContext context) {
     final current = _navigationStack.last;
+    final double height = widget.fromModal
+        ? MediaQuery.of(context).size.height * 0.9
+        : MediaQuery.of(context).size.height * 0.6;
     return Container(
-      height: MediaQuery.of(context).size.height * 0.9,
+      height: height,
       decoration: BoxDecoration(
         color: context.color.veryLightGray,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         children: [
-          DragHandleWidget(),
+          if (widget.fromModal) DragHandleWidget(),
           HeaderWidget(
             current: current,
             canGoBack: _canGoBack,
             onNavigateBack: _navigateBack,
+            showClose: widget.fromModal,
           ),
           Divider(color: context.color.darkGray, height: 1, thickness: 0.5),
           Expanded(

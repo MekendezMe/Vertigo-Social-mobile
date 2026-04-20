@@ -8,9 +8,10 @@ import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.da
 import 'package:social_network_flutter/common/framework/ui/toast/custom_toast_widget.dart';
 import 'package:social_network_flutter/feed/logic/bloc/feed_bloc.dart';
 import 'package:social_network_flutter/post/logic/entities/post.dart';
-import 'package:social_network_flutter/feed/ui/widgets/create_post_widget.dart';
+import 'package:social_network_flutter/post/logic/bloc/post_composer_bloc.dart';
 import 'package:social_network_flutter/feed/ui/widgets/show_posts_widget.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
+import 'package:social_network_flutter/ui/widgets/post/post_composer_section.dart';
 import 'package:social_network_flutter/ui/widgets/custom_circular_progress_indicator.dart';
 import 'package:social_network_flutter/ui/widgets/drawer/custom_drawer.dart';
 import 'package:social_network_flutter/ui/widgets/loading/build_loading_failure.dart';
@@ -19,6 +20,7 @@ class FeedScreen extends StatefulWidget {
   const FeedScreen({
     super.key,
     required this.feedBloc,
+    required this.postComposerBloc,
     required this.onShowProfile,
     required this.onShowSettings,
     required this.onShowGallery,
@@ -26,6 +28,7 @@ class FeedScreen extends StatefulWidget {
     required this.onShowPost,
   });
   final FeedBloc feedBloc;
+  final PostComposerBloc postComposerBloc;
   final Function({required BuildContext context}) onShowProfile;
   final Function({required BuildContext context}) onShowSettings;
   final Function({required BuildContext context, required int postId})
@@ -45,10 +48,6 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   Post? _editPost;
-  bool _isSuccessCreate = false;
-  bool _isSuccessUpdate = false;
-  String? _createError;
-  String? _updateError;
   @override
   void initState() {
     super.initState();
@@ -69,111 +68,149 @@ class _FeedScreenState extends State<FeedScreen> {
           onShowFeed: null,
         ),
       ),
-      body: BlocConsumer<FeedBloc, FeedState>(
-        bloc: widget.feedBloc,
-        listener: (context, state) {
-          CustomToast.init(context);
-          if (state is FeedLoaded) {
-            if (state.isCreateSuccess) {
-              CustomToast.show(
-                CustomToastWidget(text: "Пост успешно создан"),
-                dismissAfter: const Duration(milliseconds: 1500),
-              );
-              setState(() {
-                _isSuccessCreate = true;
-                _updateError = null;
-              });
-            }
-            if (state.createError != null) {
-              CustomToast.show(
-                CustomToastWidget(
-                  text: "Ошибка ${state.createError} при создании поста",
-                ),
-                dismissAfter: const Duration(milliseconds: 1500),
-              );
-              setState(() {
-                _isSuccessCreate = false;
-                _createError = state.createError;
-              });
-            }
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<PostComposerBloc, PostComposerState>(
+            bloc: widget.postComposerBloc,
+            listenWhen: (previous, current) =>
+                previous.isCreateSuccess != current.isCreateSuccess ||
+                previous.isUpdateSuccess != current.isUpdateSuccess ||
+                previous.isDeleteSuccess != current.isDeleteSuccess ||
+                previous.createdPost != current.createdPost ||
+                previous.updatedPost != current.updatedPost ||
+                previous.deletedPostId != current.deletedPostId ||
+                previous.createError != current.createError ||
+                previous.updateError != current.updateError ||
+                previous.deleteError != current.deleteError ||
+                previous.likedPost != current.likedPost ||
+                previous.likeError != current.likeError ||
+                previous.subscribedUserId != current.subscribedUserId ||
+                previous.subscribeError != current.subscribeError,
+            listener: (context, state) {
+              CustomToast.init(context);
+              if (state.isCreateSuccess) {
+                CustomToast.show(
+                  CustomToastWidget(text: "Пост успешно создан"),
+                  dismissAfter: const Duration(milliseconds: 1500),
+                );
+                if (state.createdPost != null) {
+                  widget.feedBloc.add(AddPostToTop(post: state.createdPost!));
+                }
+              }
+              if (state.createError != null) {
+                CustomToast.show(
+                  CustomToastWidget(
+                    text: "Ошибка ${state.createError} при создании поста",
+                  ),
+                  dismissAfter: const Duration(milliseconds: 1500),
+                );
+              }
+              if (state.isUpdateSuccess) {
+                CustomToast.show(
+                  CustomToastWidget(text: "Пост успешно обновлен"),
+                  dismissAfter: const Duration(milliseconds: 1500),
+                );
+                if (state.updatedPost != null) {
+                  widget.feedBloc.add(
+                    ReplacePostInFeed(post: state.updatedPost!),
+                  );
+                }
+              }
+              if (state.updateError != null) {
+                CustomToast.show(
+                  CustomToastWidget(
+                    text: "Ошибка ${state.updateError} при обновлении поста",
+                  ),
+                  dismissAfter: const Duration(milliseconds: 1500),
+                );
+              }
+              if (state.isDeleteSuccess) {
+                CustomToast.show(
+                  CustomToastWidget(text: "Пост успешно удален"),
+                  dismissAfter: const Duration(milliseconds: 1500),
+                );
+                if (state.deletedPostId != null) {
+                  widget.feedBloc.add(
+                    RemovePostFromFeed(postId: state.deletedPostId!),
+                  );
+                }
+              }
+              if (state.deleteError != null) {
+                CustomToast.show(
+                  CustomToastWidget(
+                    text: "Ошибка при удалении поста. Попробуйте еще раз",
+                  ),
+                  dismissAfter: const Duration(milliseconds: 1500),
+                );
+              }
+              if (state.likedPost != null) {
+                widget.feedBloc.add(ReplacePostInFeed(post: state.likedPost!));
+              }
+              if (state.likeError != null) {
+                CustomToast.show(
+                  CustomToastWidget(text: state.likeError!),
+                  dismissAfter: const Duration(milliseconds: 1500),
+                );
+              }
+              if (state.subscribedUserId != null) {
+                widget.feedBloc.add(
+                  MarkUserSubscribedInFeed(userId: state.subscribedUserId!),
+                );
+                CustomToast.show(
+                  CustomToastWidget(text: "Успешная подписка"),
+                  dismissAfter: const Duration(milliseconds: 1500),
+                );
+              }
+              if (state.subscribeError != null) {
+                CustomToast.show(
+                  CustomToastWidget(text: state.subscribeError!),
+                  dismissAfter: const Duration(milliseconds: 1500),
+                );
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<FeedBloc, FeedState>(
+          bloc: widget.feedBloc,
+          builder: (context, state) {
+            return BlocBuilder<PostComposerBloc, PostComposerState>(
+              bloc: widget.postComposerBloc,
+              builder: (context, composerState) {
+                final composerState = widget.postComposerBloc.state;
+                if (state is FeedLoading) {
+                  return Center(
+                    child: customCircularProgressIndicator(context: context),
+                  );
+                }
+                if (state is FeedLoadingFailure) {
+                  return buildLoadingFailure(
+                    error: state.error?.toString(),
+                    context: context,
+                    onTap: () => widget.feedBloc.add(LoadFeed()),
+                  );
+                }
 
-            if (state.isUpdateSuccess) {
-              CustomToast.show(
-                CustomToastWidget(text: "Пост успешно обновлен"),
-                dismissAfter: const Duration(milliseconds: 1500),
-              );
-              setState(() {
-                _isSuccessUpdate = true;
-                _updateError = null;
-              });
-            }
-
-            if (state.updateError != null) {
-              CustomToast.show(
-                CustomToastWidget(
-                  text: "Ошибка ${state.updateError} при обновлении поста",
-                ),
-                dismissAfter: Duration(milliseconds: 1500),
-              );
-              setState(() {
-                _isSuccessUpdate = false;
-                _updateError = state.updateError;
-              });
-            }
-            if (state.isSuccessSubscribed) {
-              CustomToast.show(
-                CustomToastWidget(text: "Успешная подписка"),
-                dismissAfter: Duration(milliseconds: 1500),
-              );
-            }
-            if (state.isDeleteSuccess) {
-              CustomToast.show(
-                CustomToastWidget(text: "Пост успешно удален"),
-                dismissAfter: Duration(milliseconds: 1500),
-              );
-            }
-            if (state.deleteError != null) {
-              CustomToast.show(
-                CustomToastWidget(
-                  text: "Ошибка при удалении поста. Попробуйте еще раз",
-                ),
-                dismissAfter: Duration(milliseconds: 1500),
-              );
-            }
-          }
-        },
-        builder: (context, state) {
-          if (state is FeedLoading) {
-            return Center(
-              child: customCircularProgressIndicator(context: context),
+                if (state is FeedLoaded) {
+                  return _buildFeedContent(state, composerState);
+                }
+                return SizedBox.shrink();
+              },
             );
-          }
-          if (state is FeedLoadingFailure) {
-            return buildLoadingFailure(
-              error: state.error?.toString(),
-              context: context,
-              onTap: () => widget.feedBloc.add(LoadFeed()),
-            );
-          }
-
-          if (state is FeedLoaded) {
-            return _buildFeedContent(state);
-          }
-          return SizedBox.shrink();
-        },
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildFeedContent(FeedLoaded state) {
+  Widget _buildFeedContent(FeedLoaded state, PostComposerState composerState) {
     return Column(
       children: [
-        CreatePostWidget(
+        PostComposerSection(
           onShowGallery: widget.onShowGallery,
           post: _editPost,
-          media: state.media,
+          media: composerState.media,
           user: state.user,
-          isCreating: state.isCreating,
+          isCreating: composerState.isCreating || composerState.isUpdating,
           onCreatePost: onCreatePost,
           onEditPost: onEditPost,
           onCancelEdit: onCancelEdit,
@@ -182,10 +219,10 @@ class _FeedScreenState extends State<FeedScreen> {
           onPickMedia: onPickMedia,
           onClearMedia: onClearMedia,
           onRemoveMediaFromPost: onRemoveMediaFromPost,
-          isSuccessCreate: _isSuccessCreate,
-          isSuccessUpdate: _isSuccessUpdate,
-          createError: _createError,
-          updateError: _updateError,
+          isSuccessCreate: composerState.isCreateSuccess,
+          isSuccessUpdate: composerState.isUpdateSuccess,
+          createError: composerState.createError,
+          updateError: composerState.updateError,
         ),
         SizedBox(height: 10),
         Expanded(
@@ -212,10 +249,13 @@ class _FeedScreenState extends State<FeedScreen> {
               feedBloc: widget.feedBloc,
               onShowGallery: widget.onShowGallery,
               onShowComments: widget.onShowComments,
-              onShowPost: widget.onShowPost,
+              onShowPost:
+                  ({required BuildContext context, required int postId}) =>
+                      onShowPost(context, postId),
               onEdit: ({required Post post}) => onEditing(post),
               onDelete: ({required Post post}) => onDelete(post),
               onSubscribe: ({required Post post}) => onSubscribe(post),
+              onLike: ({required Post post}) => onLike(post),
             ),
           ),
         ),
@@ -223,24 +263,35 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
+  void clearPost() {
+    setState(() {
+      _editPost = null;
+    });
+  }
+
+  void onShowPost(BuildContext context, int postId) {
+    clearPost();
+    widget.onShowPost(context: context, postId: postId);
+  }
+
   void onClearMedia() {
-    widget.feedBloc.add(ClearMedia());
+    widget.postComposerBloc.add(ClearMediaRequested());
   }
 
   void onPickMedia() {
-    widget.feedBloc.add(PickMediaFromGallery());
+    widget.postComposerBloc.add(PickMediaFromGalleryRequested());
   }
 
   void onPickImage() {
-    widget.feedBloc.add(PickImageFromCamera());
+    widget.postComposerBloc.add(PickImageFromCameraRequested());
   }
 
   void onRemoveMediaFromPost({required int index}) {
-    widget.feedBloc.add(RemoveMediaFromPost(index: index));
+    widget.postComposerBloc.add(RemoveMediaRequested(index: index));
   }
 
   void onCreatePost({required String text, required List<File> media}) {
-    widget.feedBloc.add(CreatePost(text: text, media: media));
+    widget.postComposerBloc.add(CreatePostRequested(text: text, media: media));
   }
 
   void onEditPost({
@@ -249,8 +300,8 @@ class _FeedScreenState extends State<FeedScreen> {
     required List<File> media,
     required List<String> deletedImages,
   }) {
-    widget.feedBloc.add(
-      EditPost(
+    widget.postComposerBloc.add(
+      EditPostRequested(
         postId: postId,
         text: text,
         media: media,
@@ -268,24 +319,24 @@ class _FeedScreenState extends State<FeedScreen> {
   void onSuccessEdit() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        setState(() {
-          _editPost = null;
-        });
+        clearPost();
       }
     });
   }
 
   void onCancelEdit() {
-    setState(() {
-      _editPost = null;
-    });
+    clearPost();
   }
 
   void onDelete(Post post) {
-    widget.feedBloc.add(DeletePost(postId: post.id));
+    widget.postComposerBloc.add(DeletePostRequested(postId: post.id));
   }
 
   void onSubscribe(Post post) {
-    widget.feedBloc.add(Subscribe(userId: post.creator.id));
+    widget.postComposerBloc.add(Subscribe(userId: post.creator.id));
+  }
+
+  void onLike(Post post) {
+    widget.postComposerBloc.add(ToggleLike(post: post));
   }
 }

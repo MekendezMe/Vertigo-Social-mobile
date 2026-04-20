@@ -7,7 +7,7 @@ class BaseContainerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      margin: EdgeInsets.symmetric(horizontal: 2, vertical: 14),
       padding: EdgeInsets.only(bottom: 20, top: 14, right: 18, left: 14),
       decoration: BoxDecoration(
         color: context.color.lightGray.withOpacity(0.2),

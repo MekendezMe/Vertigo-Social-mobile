@@ -62,7 +62,7 @@ class _CommentCreateWidgetState extends State<CommentCreateWidget> {
             left: 14,
             right: 14,
             top: 14,
-            bottom: keyboardHeight + 14,
+            bottom: keyboardHeight + 20,
           ),
           child: Column(
             children: [

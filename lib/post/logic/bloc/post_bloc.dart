@@ -25,6 +25,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     required this.userService,
   }) : super(PostInitial()) {
     on<LoadPost>(_onLoadPost);
+    on<PostPatchedLocally>(_onPostPatchedLocally);
   }
 
   Future<void> _onLoadPost(LoadPost event, Emitter<PostState> emit) async {
@@ -37,17 +38,20 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       if (currentUser == null) {
         throw AuthException();
       }
-      emit(
-        PostLoaded(
-          post: response.post,
-          comments: response.comments,
-          user: currentUser,
-        ),
-      );
+      emit(PostLoaded(post: response.post, user: currentUser));
     } catch (e, st) {
       emit(PostLoadingFailure(error: e));
       talker.handle(e, st);
       errorHandler.handle(e);
     }
+  }
+
+  Future<void> _onPostPatchedLocally(
+    PostPatchedLocally event,
+    Emitter<PostState> emit,
+  ) async {
+    if (state is! PostLoaded) return;
+    final current = state as PostLoaded;
+    emit(PostLoaded(post: event.post, user: current.user));
   }
 }

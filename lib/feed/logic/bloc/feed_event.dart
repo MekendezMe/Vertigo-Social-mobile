@@ -27,76 +27,38 @@ class ChangeFeedType extends FeedEvent {
   List<Object?> get props => [type];
 }
 
-class CreatePost extends FeedEvent {
-  final String text;
-  final List<File> media;
+class AddPostToTop extends FeedEvent {
+  AddPostToTop({required this.post});
 
-  CreatePost({required this.text, required this.media});
-  @override
-  List<Object?> get props => [text, media];
-}
-
-class EditPost extends FeedEvent {
-  final int postId;
-  final String text;
-  final List<File> media;
-  final List<String> deletedImages;
-
-  EditPost({
-    required this.postId,
-    required this.text,
-    required this.media,
-    required this.deletedImages,
-  });
+  final Post post;
 
   @override
-  List<Object?> get props => [postId, text, media, deletedImages];
+  List<Object?> get props => [post];
 }
 
-class DeletePost extends FeedEvent {
+class ReplacePostInFeed extends FeedEvent {
+  ReplacePostInFeed({required this.post});
+
+  final Post post;
+
+  @override
+  List<Object?> get props => [post];
+}
+
+class RemovePostFromFeed extends FeedEvent {
+  RemovePostFromFeed({required this.postId});
+
   final int postId;
 
-  DeletePost({required this.postId});
   @override
   List<Object?> get props => [postId];
 }
 
-class ToggleLike extends FeedEvent {
-  final int postId;
+class MarkUserSubscribedInFeed extends FeedEvent {
+  MarkUserSubscribedInFeed({required this.userId});
 
-  ToggleLike({required this.postId});
-  @override
-  List<Object?> get props => [postId];
-}
-
-class PickImageFromCamera extends FeedEvent {
-  @override
-  List<Object?> get props => [];
-}
-
-class PickMediaFromGallery extends FeedEvent {
-  @override
-  List<Object?> get props => [];
-}
-
-class RemoveMediaFromPost extends FeedEvent {
-  final int index;
-
-  RemoveMediaFromPost({required this.index});
-
-  @override
-  List<Object?> get props => [index];
-}
-
-class ClearMedia extends FeedEvent {
-  @override
-  List<Object?> get props => [];
-}
-
-class Subscribe extends FeedEvent {
   final int userId;
 
-  Subscribe({required this.userId});
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [userId];
 }

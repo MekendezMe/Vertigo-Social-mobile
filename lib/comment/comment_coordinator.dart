@@ -17,6 +17,14 @@ class CommentCoordinator extends NavigationCoordinator {
     _onShowCommentModal(context, postId);
   }
 
+  Widget showCommentScreen({required int postId}) {
+    return CommentScreen(
+      commentBloc: diContainer.resolve<CommentBloc>(),
+      postId: postId,
+      fromModal: false,
+    );
+  }
+
   void _onShowCommentModal(BuildContext context, postId) {
     showModalBottomSheet(
       context: context,

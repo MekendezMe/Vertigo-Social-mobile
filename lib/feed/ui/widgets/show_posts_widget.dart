@@ -17,6 +17,7 @@ class ShowPostsWidget extends StatefulWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onSubscribe,
+    required this.onLike,
     required this.onShowPost,
   });
   final FeedBloc feedBloc;
@@ -35,6 +36,7 @@ class ShowPostsWidget extends StatefulWidget {
   final Function({required Post post}) onEdit;
   final Function({required Post post}) onDelete;
   final Function({required Post post}) onSubscribe;
+  final Function({required Post post}) onLike;
 
   @override
   State<ShowPostsWidget> createState() => _ShowPostsWidgetState();
@@ -126,9 +128,7 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget>
                     widget.onShowPost(context: context, postId: post.id),
                 child: PostItemWidget(
                   post: post,
-                  onLikePressed: () {
-                    widget.feedBloc.add(ToggleLike(postId: post.id));
-                  },
+                  onLikePressed: () => widget.onLike(post: post),
                   onShowGallery: widget.onShowGallery,
                   onShowComments: widget.onShowComments,
                   user: state.user,

@@ -14,12 +14,11 @@ class PostLoading extends PostState {
 
 class PostLoaded extends PostState {
   final Post post;
-  final List<Comment> comments;
   final User user;
 
-  PostLoaded({required this.post, required this.comments, required this.user});
+  PostLoaded({required this.post, required this.user});
   @override
-  List<Object?> get props => [post, comments, user];
+  List<Object?> get props => [post, user];
 }
 
 class PostLoadingFailure extends PostState {

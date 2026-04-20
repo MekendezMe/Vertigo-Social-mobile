@@ -41,7 +41,7 @@ class CreatePostWidget extends StatefulWidget {
   })
   onShowGallery;
   final Post? post;
-  final Function({required String text, required List<File> media})
+  final Function({required String text, required List<File> media})?
   onCreatePost;
   final Function({
     required int postId,
@@ -99,11 +99,13 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
       _showEmojiPicker = false;
     });
 
-    widget.onCreatePost(text: _controller.text, media: media);
+    if (widget.onCreatePost != null) {
+      widget.onCreatePost!(text: _controller.text, media: media);
+    }
   }
 
   void _onUpdatePost(List<File> media, int postId) {
-    if (_controller.text.isEmpty && media.isEmpty) {
+    if (_controller.text.isEmpty && media.isEmpty && _urlMedia.isEmpty) {
       setState(() {
         _isInputError = true;
       });
@@ -139,16 +141,31 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _initFromPost();
+  }
+
+  void _initFromPost() {
+    if (widget.post != null) {
+      _controller.text = widget.post!.text;
+      _urlMedia = List.from(widget.post!.media);
+      _deletedUrlMedia = [];
+    } else {
+      _controller.clear();
+      _urlMedia = [];
+      _deletedUrlMedia = [];
+    }
+  }
+
+  @override
   void didUpdateWidget(covariant CreatePostWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.post != oldWidget.post && widget.post != null) {
-      widget.onClearMedia();
-      setState(() {
-        _controller.text = widget.post!.text;
-        _urlMedia = List.from(widget.post!.media);
-        _deletedUrlMedia = [];
-      });
+    widget.onClearMedia();
+
+    if (widget.post != oldWidget.post) {
+      _initFromPost();
     }
 
     if (widget.createError != null &&
