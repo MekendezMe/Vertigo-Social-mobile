@@ -294,16 +294,13 @@ class PostComposerBloc extends Bloc<PostComposerEvent, PostComposerState> {
       likedByUser: willLike,
     );
 
-    emit(
-      state.copyWith(
-        likedPost: optimisticPost,
-        likeError: null,
-      ),
-    );
+    emit(state.copyWith(likedPost: optimisticPost, likeError: null));
 
     try {
       final response = willLike
-          ? await postRepository.likePost(LikePostRequest(postId: event.post.id))
+          ? await postRepository.likePost(
+              LikePostRequest(postId: event.post.id),
+            )
           : await postRepository.unlikePost(
               UnlikePostRequest(postId: event.post.id),
             );
@@ -333,7 +330,9 @@ class PostComposerBloc extends Bloc<PostComposerEvent, PostComposerState> {
         emit(state.copyWith(subscribeError: message, subscribedUserId: null));
         throw ApiException(message: message);
       }
-      emit(state.copyWith(subscribeError: null, subscribedUserId: event.userId));
+      emit(
+        state.copyWith(subscribeError: null, subscribedUserId: event.userId),
+      );
     } catch (e, st) {
       emit(
         state.copyWith(

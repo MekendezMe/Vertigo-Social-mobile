@@ -16,10 +16,6 @@ class CreatePostRequest extends IRequest {
 
   CreatePostRequest({required this.text, required this.media});
 
-  Map<String, dynamic> toJson() {
-    return {"content": text};
-  }
-
   Future<FormData> getBodyWithMedia() async {
     final formData = FormData();
     formData.fields.add(MapEntry('content', text));

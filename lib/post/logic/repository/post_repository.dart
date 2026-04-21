@@ -50,7 +50,6 @@ class PostRepository {
         request: request,
         fromJson: (json) => CreatePostResponse.fromJson(json),
         formData: formData,
-        body: request.toJson(),
       );
       return response;
     } catch (e) {

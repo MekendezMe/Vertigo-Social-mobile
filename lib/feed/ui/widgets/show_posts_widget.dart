@@ -112,9 +112,14 @@ class _ShowPostsWidgetState extends State<ShowPostsWidget>
               padding: EdgeInsets.only(top: 14),
               child: Align(
                 alignment: Alignment.topCenter,
-                child: Text(
-                  'Нет постов',
-                  style: context.theme.textTheme.headlineLarge,
+                child: Column(
+                  children: [
+                    Icon(Icons.post_add, size: 48, color: context.color.gray),
+                    Text(
+                      'Нет постов',
+                      style: context.theme.textTheme.headlineMedium,
+                    ),
+                  ],
                 ),
               ),
             ),

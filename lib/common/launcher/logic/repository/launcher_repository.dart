@@ -51,6 +51,7 @@ class LauncherRepository {
       final response = await requestSender.send<SaveTokenResponse>(
         request: request,
         fromJson: (json) => SaveTokenResponse.fromJson(json),
+        body: request.toJson(),
       );
 
       return response;

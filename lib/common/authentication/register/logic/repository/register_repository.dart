@@ -1,7 +1,6 @@
 import 'package:social_network_flutter/common/authentication/entities/auth_response.dart';
 import 'package:social_network_flutter/common/authentication/register/entities/register_request.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
-import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
 import 'package:social_network_flutter/common/framework/network/request_sender.dart';
 import 'package:social_network_flutter/common/framework/storages/secure_storage.dart';
 import 'package:social_network_flutter/common/launcher/logic/service/token_service.dart';

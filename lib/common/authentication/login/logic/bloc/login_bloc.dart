@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/authentication/login/logic/entities/login_request.dart';
@@ -48,6 +50,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     if (token == null) {
       return;
     }
-    await launcherRepository.saveToken(SaveTokenRequest(fcmToken: token));
+    try {
+      await launcherRepository.saveToken(SaveTokenRequest(fcmToken: token));
+    } catch (e) {
+      return;
+    }
   }
 }

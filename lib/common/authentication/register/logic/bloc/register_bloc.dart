@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/authentication/register/entities/register_request.dart';
@@ -53,6 +55,10 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     if (token == null) {
       return;
     }
-    await launcherRepository.saveToken(SaveTokenRequest(fcmToken: token));
+    try {
+      await launcherRepository.saveToken(SaveTokenRequest(fcmToken: token));
+    } catch (e) {
+      return;
+    }
   }
 }

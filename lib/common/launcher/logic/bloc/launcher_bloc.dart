@@ -106,7 +106,7 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
   ) async {
     try {
       await userService.loadCurrentUser();
-      // await _saveFcmToken();
+      await _saveFcmToken();
       final String? pendingPayload = await notificationService
           .getPendingNotification();
       if (pendingPayload != null && pendingPayload.isNotEmpty) {
@@ -120,14 +120,16 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
     }
   }
 
-  // TODO: РАСКОММЕНТИРОВАТЬ _SAVE
-
   Future<void> _saveFcmToken() async {
     final token = preferencesStorage.fcmToken;
     if (token == null) {
       return;
     }
-    await launcherRepository.saveToken(SaveTokenRequest(fcmToken: token));
+    try {
+      await launcherRepository.saveToken(SaveTokenRequest(fcmToken: token));
+    } catch (e) {
+      return;
+    }
   }
 
   Future<void> _onLogout(
@@ -141,12 +143,10 @@ class LauncherBloc extends Bloc<LauncherEvent, LauncherState> {
       }
       userService.clear();
       await secureStorage.clear();
-      await secureStorage.save();
       await preferencesStorage.clear();
       _logout(emit);
     } catch (e, st) {
       talker.handle(e, st);
-      errorHandler.handle(e);
       _logout(emit);
     }
   }
