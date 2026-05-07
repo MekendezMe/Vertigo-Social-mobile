@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/ui/widgets/drawer/screen_item.dart';
 
-enum TypeScreen { feed, profile, settings }
+enum TypeScreen { feed, profile, settings, messages }
 
 class Screen {
   final TypeScreen name;
@@ -20,19 +20,26 @@ List<Screen> screens = [
     text: "Настройки",
     icon: Icon(Icons.settings),
   ),
+  Screen(
+    name: TypeScreen.messages,
+    text: "Сообщения",
+    icon: Icon(Icons.message),
+  ),
 ];
 
 Widget customDrawer({
   required BuildContext context,
   required TypeScreen active,
-  required VoidCallback? onShowFeed,
+  required VoidCallback? onShowMain,
   required VoidCallback? onShowProfile,
   required VoidCallback? onShowSettings,
+  required VoidCallback? onShowChatList,
 }) {
   final Map<TypeScreen, VoidCallback?> onTapMap = {
-    TypeScreen.feed: onShowFeed,
+    TypeScreen.feed: onShowMain,
     TypeScreen.profile: onShowProfile,
     TypeScreen.settings: onShowSettings,
+    TypeScreen.messages: onShowChatList,
   };
   return Drawer(
     shape: RoundedRectangleBorder(

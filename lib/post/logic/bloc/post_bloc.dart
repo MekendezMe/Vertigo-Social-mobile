@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_network_flutter/comment/logic/entities/comment.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
 import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';

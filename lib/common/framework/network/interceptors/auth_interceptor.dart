@@ -72,6 +72,7 @@ class AuthInterceptor extends Interceptor {
         }
 
         tokenService.setToken(tokens.accessToken);
+        await secureStorage.load();
         secureStorage.refreshToken = tokens.refreshToken;
         await secureStorage.save();
 

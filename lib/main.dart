@@ -1,9 +1,14 @@
-import 'dart:io';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_network_flutter/app_coordinator.dart';
+import 'package:social_network_flutter/chat/chat_assembly.dart';
+import 'package:social_network_flutter/chat/chat_coordinator.dart';
+import 'package:social_network_flutter/chat/logic/bloc/chat_bloc.dart';
+import 'package:social_network_flutter/chat_list/chat_list_assembly.dart';
+import 'package:social_network_flutter/chat_list/chat_list_coordinator.dart';
+import 'package:social_network_flutter/chat_list/logic/bloc/chat_list_bloc.dart';
 import 'package:social_network_flutter/comment/comment_assembly.dart';
 import 'package:social_network_flutter/comment/comment_coordinator.dart';
 import 'package:social_network_flutter/common/authentication/auth/auth_assembly.dart';
@@ -48,83 +53,58 @@ void main() async {
       talker.handle(details.exception, details.stack);
   Bloc.observer = TalkerBlocObserver(talker: talker);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  final messaging = FirebaseMessaging.instance;
-  print(await messaging.getToken());
+  // final messaging = FirebaseMessaging.instance;
+  // print(await messaging.getToken());
   final notificationService = diContainer.resolve<NotificationService>();
   await notificationService.init();
 
   notificationService.onNotificationTap = (payload) {
     handleNotificationNavigation(payload);
   };
-
-  // final String? pendingPayload = await notificationService
-  //     .getPendingNotification();
-  // if (pendingPayload != null) {
-  //   _handleNotificationNavigation(pendingPayload);
-  // }
   runApp(MyApp());
 }
 
 void handleNotificationNavigation(String payload) {
-  final trimmed = payload.trim();
-  if (trimmed.isEmpty) return;
-
   WidgetsBinding.instance.addPostFrameCallback((_) {
     try {
       final context = NavigationService.navigatorKey.currentContext;
       if (context == null) return;
+
       final userService = diContainer.resolve<UserService>();
       if (userService.currentUser == null) return;
 
-      final parts = trimmed.split(':');
-      final type = parts[0];
-
-      switch (type) {
-        case 'post':
-          final postId = int.parse(parts[1]);
-          postCoordinator.onShowPostScreen(context: context, postId: postId);
-          break;
-
-        case 'comment':
-          final postId = int.parse(parts[1]);
-          commentCoordinator.onShowCommentScreen(
-            context: context,
-            postId: postId,
-          );
-          break;
-
-        // case 'profile':
-        //   final userId = int.parse(parts[1]);
-        //   diContainer.resolve<ProfileCoordinator>().showProfile(context, userId);
-        //   break;
-      }
+      appCoordinator.onNotificationTap(context: context, payload: payload);
     } catch (e) {
       return;
     }
   });
 }
 
-final mainCoordinator = FeedCoordinator(
-  diContainer: diContainer,
-  onShowProfile: ({required BuildContext context}) => {"qwe": "qq"},
-  onShowSettings: ({required BuildContext context}) => {"qwe": "qq"},
-  onShowComments: ({required BuildContext context, required int postId}) =>
-      commentCoordinator.onShowCommentScreen(context: context, postId: postId),
-  onShowPost: ({required BuildContext context, required int postId}) =>
-      postCoordinator.onShowPostScreen(context: context, postId: postId),
-);
+final appCoordinator = AppCoordinator(diContainer: diContainer);
 
-final commentCoordinator = CommentCoordinator(diContainer: diContainer);
+// final mainCoordinator = FeedCoordinator(
+//   diContainer: diContainer,
+//   onShowProfile: ({required BuildContext context}) => {"qwe": "qq"},
+//   onShowSettings: ({required BuildContext context}) => {"qwe": "qq"},
+//   onShowChatList: ({required BuildContext context}) =>
+//       chatListCoordinator.onShowChatListScreen(context: context),
+//   onShowComments: ({required BuildContext context, required int postId}) =>
+//       commentCoordinator.onShowCommentScreen(context: context, postId: postId),
+//   onShowPost: ({required BuildContext context, required int postId}) =>
+//       postCoordinator.onShowPostScreen(context: context, postId: postId),
+// );
+
+// final commentCoordinator = CommentCoordinator(diContainer: diContainer);
 
 final loginCoordinator = LoginCoordinator(
   diContainer: diContainer,
-  showMain: mainCoordinator.showMain,
+  showMain: appCoordinator.getMain,
   onShowForgotPassword: ({required BuildContext context}) => {"qwe": "qq"},
 );
 
 final registerCoordinator = RegisterCoordinator(
   diContainer: diContainer,
-  showMain: mainCoordinator.showMain,
+  showMain: appCoordinator.getMain,
 );
 
 final authCoordinator = AuthCoordinator(
@@ -137,15 +117,27 @@ final authCoordinator = AuthCoordinator(
 
 final launcherCoordinator = LauncherCoordinator(
   diContainer: diContainer,
-  onLoggedInWidget: mainCoordinator.showMain,
+  onLoggedInWidget: appCoordinator.getMain,
   onLoggedOutWidget: authCoordinator.getAuthScreen,
 );
 
-final postCoordinator = PostCoordinator(
-  diContainer: diContainer,
-  showCommentScreen: ({required int postId}) =>
-      commentCoordinator.showCommentScreen(postId: postId),
-);
+// final postCoordinator = PostCoordinator(
+//   diContainer: diContainer,
+//   showCommentScreen: ({required int postId}) =>
+//       commentCoordinator.showCommentScreen(postId: postId),
+// );
+
+// final chatListCoordinator = ChatListCoordinator(
+//   diContainer: diContainer,
+//   onShowProfile: ({required BuildContext context}) => {"qwe": "qq"},
+//   onShowSettings: ({required BuildContext context}) => {"qwe": "qq"},
+//   onShowMain: ({required BuildContext context}) =>
+//       mainCoordinator.onShowMain(context: context),
+//   onShowChat: ({required BuildContext context, required int chatId}) =>
+//       chatCoordinator.onShowChatScreen(context: context, chatId: chatId),
+// );
+
+// final chatCoordinator = ChatCoordinator(diContainer: diContainer);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -164,6 +156,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => diContainer.resolve<PostComposerBloc>(),
         ),
+        BlocProvider(create: (context) => diContainer.resolve<ChatListBloc>()),
+        BlocProvider(create: (context) => diContainer.resolve<ChatBloc>()),
       ],
       child: MaterialApp(
         builder: (context, child) {
@@ -200,5 +194,7 @@ void _registerAssemblies() {
     FeedAssembly(),
     AuthInterceptorAssembly(),
     CommentAssembly(),
+    ChatListAssembly(),
+    ChatAssembly(),
   ]);
 }

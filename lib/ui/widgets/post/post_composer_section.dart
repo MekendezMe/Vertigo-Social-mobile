@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
-import 'package:social_network_flutter/feed/ui/widgets/create_post_widget.dart';
+import 'package:social_network_flutter/ui/widgets/post/create_post_widget.dart';
 import 'package:social_network_flutter/post/logic/entities/post.dart';
 
 class PostComposerSection extends StatelessWidget {

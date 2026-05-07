@@ -13,7 +13,6 @@ abstract class ISecureStorage {
 }
 
 class SecureStorage extends ISecureStorage {
-  /// Инициализация secure storage
   late final _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(
       resetOnError: true,

@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
+import 'package:social_network_flutter/common/launcher/logic/bloc/launcher_bloc.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:social_network_flutter/post/logic/entities/post.dart';
 import 'package:social_network_flutter/feed/ui/widgets/base_container_widget.dart';
@@ -155,14 +157,13 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
       _controller.clear();
       _urlMedia = [];
       _deletedUrlMedia = [];
+      widget.onClearMedia();
     }
   }
 
   @override
   void didUpdateWidget(covariant CreatePostWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    widget.onClearMedia();
 
     if (widget.post != oldWidget.post) {
       _initFromPost();
@@ -171,19 +172,19 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
     if (widget.createError != null &&
         widget.createError != oldWidget.createError) {
       _isInputError = false;
-      _focusNode.requestFocus();
     }
     if (widget.updateError != null &&
         widget.updateError != oldWidget.updateError) {
       _isInputError = false;
-      _focusNode.requestFocus();
     }
 
     if (widget.isSuccessCreate && !oldWidget.isSuccessCreate) {
       afterCreate();
+      widget.onClearMedia();
     }
     if (widget.isSuccessUpdate && !oldWidget.isSuccessUpdate) {
       afterUpdate();
+      widget.onClearMedia();
     }
   }
 

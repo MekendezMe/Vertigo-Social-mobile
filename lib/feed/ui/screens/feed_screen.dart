@@ -26,6 +26,7 @@ class FeedScreen extends StatefulWidget {
     required this.onShowGallery,
     required this.onShowComments,
     required this.onShowPost,
+    required this.onShowChatList,
   });
   final FeedBloc feedBloc;
   final PostComposerBloc postComposerBloc;
@@ -35,6 +36,7 @@ class FeedScreen extends StatefulWidget {
   onShowComments;
   final Function({required BuildContext context, required int postId})
   onShowPost;
+  final Function({required BuildContext context}) onShowChatList;
   final Function({
     required BuildContext context,
     required List<String> media,
@@ -65,7 +67,8 @@ class _FeedScreenState extends State<FeedScreen> {
           active: TypeScreen.feed,
           onShowSettings: () => widget.onShowSettings(context: context),
           onShowProfile: () => widget.onShowProfile(context: context),
-          onShowFeed: null,
+          onShowChatList: () => widget.onShowChatList(context: context),
+          onShowMain: null,
         ),
       ),
       body: MultiBlocListener(
@@ -98,12 +101,12 @@ class _FeedScreenState extends State<FeedScreen> {
                 }
               }
               if (state.createError != null) {
-                CustomToast.show(
-                  CustomToastWidget(
-                    text: "Ошибка ${state.createError} при создании поста",
-                  ),
-                  dismissAfter: const Duration(milliseconds: 1500),
-                );
+                // CustomToast.show(
+                //   CustomToastWidget(
+                //     text: "Ошибка ${state.createError} при создании поста",
+                //   ),
+                //   dismissAfter: const Duration(milliseconds: 1500),
+                // );
               }
               if (state.isUpdateSuccess) {
                 CustomToast.show(
@@ -117,12 +120,12 @@ class _FeedScreenState extends State<FeedScreen> {
                 }
               }
               if (state.updateError != null) {
-                CustomToast.show(
-                  CustomToastWidget(
-                    text: "Ошибка ${state.updateError} при обновлении поста",
-                  ),
-                  dismissAfter: const Duration(milliseconds: 1500),
-                );
+                // CustomToast.show(
+                //   CustomToastWidget(
+                //     text: "Ошибка ${state.updateError} при обновлении поста",
+                //   ),
+                //   dismissAfter: const Duration(milliseconds: 1500),
+                // );
               }
               if (state.isDeleteSuccess) {
                 CustomToast.show(
@@ -136,12 +139,12 @@ class _FeedScreenState extends State<FeedScreen> {
                 }
               }
               if (state.deleteError != null) {
-                CustomToast.show(
-                  CustomToastWidget(
-                    text: "Ошибка при удалении поста. Попробуйте еще раз",
-                  ),
-                  dismissAfter: const Duration(milliseconds: 1500),
-                );
+                // CustomToast.show(
+                //   CustomToastWidget(
+                //     text: "Ошибка при удалении поста. Попробуйте еще раз",
+                //   ),
+                //   dismissAfter: const Duration(milliseconds: 1500),
+                // );
               }
               if (state.likedPost != null) {
                 widget.feedBloc.add(ReplacePostInFeed(post: state.likedPost!));
@@ -162,10 +165,10 @@ class _FeedScreenState extends State<FeedScreen> {
                 );
               }
               if (state.subscribeError != null) {
-                CustomToast.show(
-                  CustomToastWidget(text: state.subscribeError!),
-                  dismissAfter: const Duration(milliseconds: 1500),
-                );
+                // CustomToast.show(
+                //   CustomToastWidget(text: state.subscribeError!),
+                //   dismissAfter: const Duration(milliseconds: 1500),
+                // );
               }
             },
           ),
@@ -271,6 +274,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   void onShowPost(BuildContext context, int postId) {
     clearPost();
+    onClearMedia();
     widget.onShowPost(context: context, postId: postId);
   }
 
@@ -312,6 +316,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   void onEditing(Post post) {
     setState(() {
+      widget.postComposerBloc.add(ClearMediaRequested());
       _editPost = post;
     });
   }

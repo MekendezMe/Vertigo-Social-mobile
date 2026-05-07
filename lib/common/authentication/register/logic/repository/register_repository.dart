@@ -28,6 +28,7 @@ class RegisterRepository {
         body: registerRequest.toJson(),
         fromJson: (json) => AuthResponse.fromJson(json),
       );
+      await secureStorage.load();
       secureStorage.refreshToken = response.refreshToken;
       secureStorage.deviceId = response.deviceId;
       await secureStorage.save();

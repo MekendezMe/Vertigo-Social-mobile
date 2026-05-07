@@ -62,6 +62,9 @@ class _ModalGalleryState extends State<ModalGallery> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final paddingTop = MediaQuery.of(context).padding.top;
+    final paddingBottom = MediaQuery.of(context).padding.bottom;
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.zero,
@@ -74,8 +77,8 @@ class _ModalGalleryState extends State<ModalGallery> {
             ),
           ),
           Positioned(
-            top: 40,
-            right: 20,
+            top: paddingTop + 16,
+            right: 16,
             child: IconButton(
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.close, color: Colors.white),
@@ -104,7 +107,7 @@ class _ModalGalleryState extends State<ModalGallery> {
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.8,
+                  height: screenHeight - (paddingTop + paddingBottom + 100),
                   child: PageView.builder(
                     controller: _pageController,
                     onPageChanged: (int index) {

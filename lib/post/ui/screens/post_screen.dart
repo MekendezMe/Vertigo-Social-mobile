@@ -109,15 +109,15 @@ class _PostScreenState extends State<PostScreen> with WidgetsBindingObserver {
                   );
                 }
               }
-              if (composerState.updateError != null) {
-                CustomToast.show(
-                  CustomToastWidget(
-                    text:
-                        "Ошибка ${composerState.updateError} при обновлении поста",
-                  ),
-                  dismissAfter: const Duration(milliseconds: 1500),
-                );
-              }
+              // if (composerState.updateError != null) {
+              //   // CustomToast.show(
+              //   //   CustomToastWidget(
+              //   //     text:
+              //   //         "Ошибка ${composerState.updateError} при обновлении поста",
+              //   //   ),
+              //   //   dismissAfter: const Duration(milliseconds: 1500),
+              //   // );
+              // }
               if (composerState.isDeleteSuccess) {
                 CustomToast.show(
                   CustomToastWidget(text: "Пост успешно удален"),
@@ -128,14 +128,14 @@ class _PostScreenState extends State<PostScreen> with WidgetsBindingObserver {
                 );
                 Navigator.of(context).pop();
               }
-              if (composerState.deleteError != null) {
-                CustomToast.show(
-                  CustomToastWidget(
-                    text: "Ошибка при удалении поста. Попробуйте еще раз",
-                  ),
-                  dismissAfter: const Duration(milliseconds: 1500),
-                );
-              }
+              // if (composerState.deleteError != null) {
+              //   // CustomToast.show(
+              //   //   CustomToastWidget(
+              //   //     text: "Ошибка при удалении поста. Попробуйте еще раз",
+              //   //   ),
+              //   //   dismissAfter: const Duration(milliseconds: 1500),
+              //   // );
+              // }
               if (composerState.likedPost != null &&
                   composerState.likedPost!.id == widget.postId) {
                 widget.postBloc.add(
@@ -145,12 +145,12 @@ class _PostScreenState extends State<PostScreen> with WidgetsBindingObserver {
                   ReplacePostInFeed(post: composerState.updatedPost!),
                 );
               }
-              if (composerState.likeError != null) {
-                CustomToast.show(
-                  CustomToastWidget(text: composerState.likeError!),
-                  dismissAfter: const Duration(milliseconds: 1500),
-                );
-              }
+              // if (composerState.likeError != null) {
+              //   // CustomToast.show(
+              //   //   CustomToastWidget(text: composerState.likeError!),
+              //   //   dismissAfter: const Duration(milliseconds: 1500),
+              //   // );
+              // }
               if (composerState.subscribedUserId != null) {
                 final currentState = widget.postBloc.state;
                 if (currentState is PostLoaded &&
@@ -170,12 +170,12 @@ class _PostScreenState extends State<PostScreen> with WidgetsBindingObserver {
                   dismissAfter: const Duration(milliseconds: 1500),
                 );
               }
-              if (composerState.subscribeError != null) {
-                CustomToast.show(
-                  CustomToastWidget(text: composerState.subscribeError!),
-                  dismissAfter: const Duration(milliseconds: 1500),
-                );
-              }
+              // if (composerState.subscribeError != null) {
+              //   // CustomToast.show(
+              //   //   CustomToastWidget(text: composerState.subscribeError!),
+              //   //   dismissAfter: const Duration(milliseconds: 1500),
+              //   // );
+              // }
             },
           ),
         ],
@@ -310,6 +310,7 @@ class _PostScreenState extends State<PostScreen> with WidgetsBindingObserver {
   }
 
   void onEditing(Post post) {
+    widget.postComposerBloc.add(ClearMediaRequested());
     setState(() {
       _editPost = post;
     });
