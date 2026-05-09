@@ -10,6 +10,7 @@ class Chat {
   final int countMedia;
   final int countMessages;
   final int countUrls;
+  final int countUnread;
   final User? user;
   final Message? lastMessage;
   final Message? lastReadMessage;
@@ -23,6 +24,7 @@ class Chat {
     required this.countMedia,
     required this.countMessages,
     required this.countUrls,
+    required this.countUnread,
     required this.user,
     required this.lastMessage,
     required this.lastReadMessage,
@@ -38,6 +40,7 @@ class Chat {
       countMedia: json['count_media'] as int,
       countMessages: json['count_messages'] as int,
       countUrls: json['count_url'] as int,
+      countUnread: json['count_unread'] as int,
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       lastMessage: json['last_message'] != null
           ? Message.fromJson(json['last_message'])
@@ -57,6 +60,7 @@ class Chat {
     int? countMedia,
     int? countMessages,
     int? countUrls,
+    int? countUnread,
     User? user,
     Message? lastMessage,
     Message? lastReadMessage,
@@ -70,6 +74,7 @@ class Chat {
       countMedia: countMedia ?? this.countMedia,
       countMessages: countMessages ?? this.countMessages,
       countUrls: countUrls ?? this.countUrls,
+      countUnread: countUnread ?? this.countUnread,
       user: user ?? this.user,
       lastMessage: lastMessage ?? this.lastMessage,
       lastReadMessage: lastReadMessage ?? this.lastReadMessage,

@@ -7,5 +7,7 @@ PreferredSizeWidget appBar(BuildContext context) {
     elevation: 0,
     centerTitle: true,
     title: Image.asset("assets/logo.png", width: 240, height: 240),
+    surfaceTintColor: Colors.transparent,
+    scrolledUnderElevation: 0,
   );
 }

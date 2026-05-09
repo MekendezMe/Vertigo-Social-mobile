@@ -5,6 +5,8 @@ import 'package:social_network_flutter/chat_list/logic/entities/request/get_chat
 import 'package:social_network_flutter/chat_list/logic/repository/chat_list_repository.dart';
 import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/errors/error_handler.dart';
+import 'package:social_network_flutter/common/framework/errors/exceptions/app_exceptions.dart';
+import 'package:social_network_flutter/feed/logic/entites/user.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 part 'chat_list_event.dart';
@@ -31,7 +33,17 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
       final response = await chatListRepository.getChats(
         GetChatsRequest(pageNumber: event.pageNumber ?? 1),
       );
-      emit(ChatsLoaded(chats: response.chats, lastPage: response.lastPage));
+      final user = userService.currentUser;
+      if (user == null) {
+        throw AuthException();
+      }
+      emit(
+        ChatsLoaded(
+          chats: response.chats,
+          lastPage: response.lastPage,
+          user: user,
+        ),
+      );
     } catch (e, st) {
       emit(ChatsLoadingFailure(error: e));
       errorHandler.handle(e);

@@ -14,6 +14,23 @@ String formatDate(String date) {
   return DateFormat('d MMM в H:mm').format(parseCustomDate(date));
 }
 
+String formatMessageDate(String date) {
+  try {
+    final parsedDate = parseCustomDate(date);
+    final now = DateTime.now();
+
+    if (parsedDate.day == now.day &&
+        parsedDate.month == now.month &&
+        parsedDate.year == now.year) {
+      return DateFormat('H:mm').format(parsedDate);
+    }
+
+    return DateFormat('E').format(parsedDate).toLowerCase();
+  } catch (e) {
+    return date;
+  }
+}
+
 String formatCreatedDate(String date) {
   try {
     final parsedDate = parseCustomDate(date);

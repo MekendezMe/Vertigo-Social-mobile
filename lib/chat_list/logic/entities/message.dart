@@ -8,10 +8,10 @@ class Message {
   final bool isDeleted;
   final String createdAt;
   final List<String> media;
-  final User senderUser;
-  final User? forwarderFromUser;
+  final User? senderUser;
   final Message? forwarderMessage;
   final Message? replyToMessage;
+  final bool isRead;
 
   Message({
     required this.id,
@@ -22,9 +22,9 @@ class Message {
     required this.createdAt,
     required this.media,
     required this.senderUser,
-    required this.forwarderFromUser,
     required this.forwarderMessage,
     required this.replyToMessage,
+    required this.isRead,
   });
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
@@ -33,11 +33,13 @@ class Message {
       content: json['content'] as Object,
       isEdited: json['is_edited'] as bool,
       isDeleted: json['is_deleted'] as bool,
+      isRead: json['is_read'] as bool,
       createdAt: json['created_at'] as String,
-      media: json['media'] != null ? json['media'] as List<String> : [],
-      senderUser: User.fromJson(json['sender_user']),
-      forwarderFromUser: json['forwarder_from_user'] != null
-          ? User.fromJson(json['forwarder_from_user'])
+      media: json['media'] != null && json['media'] is List
+          ? (json['media'] as List).cast<String>()
+          : [],
+      senderUser: json['sender_user'] != null
+          ? User.fromJson(json['sender_user'])
           : null,
       forwarderMessage: json['forwarder_message'] != null
           ? Message.fromJson(json['forwarder_message'])
@@ -54,6 +56,7 @@ class Message {
     Object? content,
     bool? isEdited,
     bool? isDeleted,
+    bool? isRead,
     String? createdAt,
     List<String>? media,
     User? senderUser,
@@ -67,10 +70,10 @@ class Message {
       content: content ?? this.content,
       isEdited: isEdited ?? this.isEdited,
       isDeleted: isDeleted ?? this.isDeleted,
+      isRead: isRead ?? this.isRead,
       createdAt: createdAt ?? this.createdAt,
       media: media ?? this.media,
       senderUser: senderUser ?? this.senderUser,
-      forwarderFromUser: forwarderFromUser ?? this.forwarderFromUser,
       forwarderMessage: forwarderMessage ?? this.forwarderMessage,
       replyToMessage: replyToMessage ?? this.replyToMessage,
     );

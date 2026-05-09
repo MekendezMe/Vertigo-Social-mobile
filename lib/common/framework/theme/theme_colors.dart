@@ -159,7 +159,7 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
       yellow: const Color(0xFFFFBA34),
       butterscotch: const Color(0xFFFFC64B),
       lightYellow: const Color(0xFF472F00),
-      white: const Color(0xFF121212),
+      white: Color(0xFF121212),
       lightBlueGradient: const Color(0xFF0D262C),
       brightLightGray: const Color(0xFF222222),
       purple: const Color.fromARGB(255, 94, 46, 161),

@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_network_flutter/chat_list/logic/bloc/chat_list_bloc.dart';
 import 'package:social_network_flutter/chat_list/ui/widgets/chat_item_widget.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
+import 'package:social_network_flutter/common/framework/ui/toast/custom_toast.dart';
 import 'package:social_network_flutter/ui/app_bar/main_app_bar.dart';
 import 'package:social_network_flutter/ui/widgets/drawer/custom_drawer.dart';
+import 'package:social_network_flutter/ui/widgets/loading/build_loading_failure.dart';
 
 class ChatListScreen extends StatefulWidget {
   final Function({required BuildContext context}) onShowSettings;
@@ -37,6 +41,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    CustomToast.init(context);
     return Scaffold(
       appBar: appBar(context),
       drawer: Padding(
@@ -54,6 +59,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
         bloc: widget.chatListBloc,
         listener: (context, state) {},
         builder: (context, state) {
+          if (state is ChatsLoadingFailure) {
+            return buildLoadingFailure(
+              error: state.error?.toString(),
+              context: context,
+              onTap: () => widget.chatListBloc.add(LoadChats()),
+            );
+          }
           if (state is ChatsLoaded) {
             return _buildLoadedContent(state);
           }
@@ -64,46 +76,65 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 
   Widget _buildLoadedContent(ChatsLoaded state) {
-    return CustomScrollView(
-      controller: _scrollController,
-      physics: state.chats.isEmpty
-          ? const NeverScrollableScrollPhysics()
-          : const AlwaysScrollableScrollPhysics(),
-      slivers: [
-        if (state.chats.isEmpty)
-          SliverFillRemaining(
-            child: Container(
-              padding: EdgeInsets.only(top: 14),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.chat_bubble,
-                      size: 48,
-                      color: context.color.gray,
-                    ),
-                    Text(
-                      'Чатов нет',
-                      style: context.theme.textTheme.headlineMedium,
-                    ),
-                  ],
+    return RefreshIndicator(
+      backgroundColor: context.color.darkGray,
+      color: context.color.lightPurple,
+      onRefresh: () async {
+        final completer = Completer<void>();
+
+        final subscription = widget.chatListBloc.stream.listen((state) {
+          if (state is ChatsLoaded || state is ChatsLoadingFailure) {
+            completer.complete();
+          }
+        });
+
+        widget.chatListBloc.add(LoadChats());
+
+        await completer.future;
+
+        await subscription.cancel();
+      },
+      child: CustomScrollView(
+        controller: _scrollController,
+        physics: state.chats.isEmpty
+            ? const NeverScrollableScrollPhysics()
+            : const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          if (state.chats.isEmpty)
+            SliverFillRemaining(
+              child: Container(
+                padding: EdgeInsets.only(top: 14),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.chat_bubble,
+                        size: 48,
+                        color: context.color.gray,
+                      ),
+                      Text(
+                        'Чатов нет',
+                        style: context.theme.textTheme.headlineMedium,
+                      ),
+                    ],
+                  ),
                 ),
               ),
+            )
+          else
+            SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final chat = state.chats[index];
+                return GestureDetector(
+                  onTap: () =>
+                      widget.onShowChat(context: context, chatId: chat.id),
+                  child: ChatItemWidget(chat: chat, user: state.user),
+                );
+              }, childCount: state.chats.length),
             ),
-          )
-        else
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final chat = state.chats[index];
-              return GestureDetector(
-                onTap: () =>
-                    widget.onShowChat(context: context, chatId: chat.id),
-                child: ChatItemWidget(chat: chat),
-              );
-            }, childCount: state.chats.length),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

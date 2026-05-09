@@ -13,8 +13,48 @@ class ChatLoading extends ChatState {
 }
 
 class ChatLoaded extends ChatState {
+  final List<Message> messages;
+  final Chat chat;
+  final bool lastPage;
+  final bool isLoadingMore;
+  final int currentPage;
+  final User user;
+
+  ChatLoaded({
+    required this.messages,
+    required this.lastPage,
+    required this.user,
+    required this.chat,
+    this.isLoadingMore = false,
+    this.currentPage = 1,
+  });
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+    messages,
+    lastPage,
+    user,
+    chat,
+    isLoadingMore,
+    currentPage,
+  ];
+
+  ChatLoaded copyWith({
+    List<Message>? messages,
+    bool? isLoadingMore,
+    bool? lastPage,
+    int? currentPage,
+    User? user,
+    Chat? chat,
+  }) {
+    return ChatLoaded(
+      messages: messages ?? this.messages,
+      isLoadingMore: isLoadingMore ?? false,
+      lastPage: lastPage ?? false,
+      currentPage: currentPage ?? this.currentPage,
+      user: user ?? this.user,
+      chat: chat ?? this.chat,
+    );
+  }
 }
 
 class ChatLoadingFailure extends ChatState {

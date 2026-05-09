@@ -19,6 +19,7 @@ class VertigoTheme {
 
     final appBarTheme = AppBarTheme(
       backgroundColor: themeColors.scaffoldBackground,
+      elevation: 0,
     );
 
     final textTheme = TextTheme(
@@ -65,9 +66,9 @@ class VertigoTheme {
       brightness: Brightness.dark,
     );
 
-    final appBarTheme = AppBarTheme(
-      backgroundColor: themeColors.scaffoldBackground,
-    );
+    final backgroundColor = const Color(0xFF202020);
+
+    final appBarTheme = AppBarTheme(backgroundColor: backgroundColor);
 
     final textTheme = TextTheme(
       displayLarge: textStyle.title1Bold,
@@ -95,7 +96,7 @@ class VertigoTheme {
       visualDensity: VisualDensity.adaptivePlatformDensity,
       primaryColor: themeColors.primary,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: themeColors.scaffoldBackground,
+      scaffoldBackgroundColor: backgroundColor,
       highlightColor: themeColors.veryLightGray.withValues(alpha: 0.6),
       splashColor: themeColors.veryLightGray,
       textTheme: textTheme,
