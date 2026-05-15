@@ -3,7 +3,12 @@ import 'package:social_network_flutter/common/framework/network/request_sender.d
 class GetMessagesRequest extends IRequest {
   final int chatId;
   final int pageNumber;
-  GetMessagesRequest({required this.chatId, required this.pageNumber});
+  // final int lastReadMessageId;
+  GetMessagesRequest({
+    required this.chatId,
+    required this.pageNumber,
+    // required this.lastReadMessageId,
+  });
   @override
   String get method => "chats/$chatId/messages";
 
@@ -11,6 +16,6 @@ class GetMessagesRequest extends IRequest {
   HttpMethod get httpMethod => HttpMethod.get;
 
   Map<String, dynamic> queryParamsToJson() {
-    return {"page_number": pageNumber};
+    return {"page_number": pageNumber}; // TODO: ласт рид месседж еще
   }
 }

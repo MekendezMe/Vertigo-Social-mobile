@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_network_flutter/chat/logic/entities/request/create_message_request.dart';
 import 'package:social_network_flutter/chat/logic/entities/request/get_messages_request.dart';
 import 'package:social_network_flutter/chat/logic/repository/chat_repository.dart';
 import 'package:social_network_flutter/chat_list/logic/entities/chat.dart';
@@ -25,6 +28,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }) : super(ChatInitial()) {
     on<LoadChat>(_onLoadChat);
     on<LoadMoreChat>(_onLoadMoreChat);
+    on<LoadPrevChat>(_onLoadPrevChat);
+    on<CreateMessage>(_onCreateMessage);
   }
 
   Future<void> _onLoadChat(LoadChat event, Emitter<ChatState> emit) async {
@@ -70,9 +75,67 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         current.copyWith(
           isLoadingMore: false,
           messages: [...current.messages, ...response.messages],
-          currentPage: event.pageNumber,
+          currentPage: response.pageNumber ?? event.pageNumber,
           lastPage: response.lastPage,
         ),
+      );
+    } catch (e, st) {
+      emit(current.copyWith(isLoadingMore: false, lastPage: true));
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onLoadPrevChat(
+    LoadPrevChat event,
+    Emitter<ChatState> emit,
+  ) async {
+    if (state is! ChatLoaded) return;
+    final current = state as ChatLoaded;
+    try {
+      emit(current.copyWith(isLoadingMore: true));
+      final response = await chatRepository.getMessages(
+        GetMessagesRequest(pageNumber: event.pageNumber, chatId: event.chatId),
+      );
+      emit(
+        current.copyWith(
+          isLoadingMore: false,
+          messages: [...response.messages, ...current.messages],
+          currentPage: response.pageNumber ?? event.pageNumber,
+          lastPage: response.lastPage,
+        ),
+      );
+    } catch (e, st) {
+      emit(current.copyWith(isLoadingMore: false, lastPage: true));
+      talker.handle(e, st);
+      errorHandler.handle(e);
+    }
+  }
+
+  Future<void> _onCreateMessage(
+    CreateMessage event,
+    Emitter<ChatState> emit,
+  ) async {
+    if (state is! ChatLoaded) return;
+    final current = state as ChatLoaded;
+    try {
+      emit(current.copyWith(isLoadingMore: true));
+      final response = await chatRepository.createMessage(
+        CreateMessageRequest(
+          chatId: event.chatId.toString(),
+          senderId: event.senderId.toString(),
+          type: event.type ?? null,
+          content: event.content,
+          media: event.media,
+          replyId: event.replyId?.toString(),
+          postId: event.postId?.toString(),
+          forwardedMessageIds: event.forwardedMessageIds
+              ?.map((e) => e.toString())
+              .toList(),
+        ),
+      );
+      emit(
+        current.copyWith(messages: [...current.messages, ...response.messages]),
       );
     } catch (e, st) {
       emit(current.copyWith(isLoadingMore: false, lastPage: true));

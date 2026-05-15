@@ -4,7 +4,6 @@ import 'package:video_player/video_player.dart';
 
 class VideoListItem extends StatefulWidget {
   final String videoUrl;
-
   const VideoListItem({super.key, required this.videoUrl});
 
   @override

@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:social_network_flutter/chat/chat_coordinator.dart';
 import 'package:social_network_flutter/chat_list/chat_list_coordinator.dart';
 import 'package:social_network_flutter/comment/comment_coordinator.dart';
-import 'package:social_network_flutter/common/authentication/user/service/user_service.dart';
 import 'package:social_network_flutter/common/framework/di/di_container.dart';
-import 'package:social_network_flutter/common/framework/navigation/navigation_service.dart';
 import 'package:social_network_flutter/feed/feed_coordinator.dart';
 import 'package:social_network_flutter/post/post_coordinator.dart';
 
@@ -21,6 +19,12 @@ class AppCoordinator {
     if (trimmed.isEmpty) return;
 
     final parts = trimmed.split(':');
+
+    if (parts.length < 2) {
+      debugPrint('Invalid push payload: $payload');
+      return;
+    }
+
     final type = parts[0];
 
     switch (type) {
@@ -35,6 +39,14 @@ class AppCoordinator {
           context: context,
           postId: postId,
         );
+        break;
+      case 'message':
+        final id = int.tryParse(parts[1]);
+        if (id == null) {
+          debugPrint('Invalid notification id: $payload');
+          return;
+        }
+        chatCoordinator.onShowChatScreen(context: context, chatId: id);
         break;
     }
   }

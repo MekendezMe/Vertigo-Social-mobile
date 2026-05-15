@@ -49,6 +49,7 @@ class _ChatScreenState extends State<ChatScreen> {
         Expanded(
           child: CustomScrollView(
             controller: _scrollController,
+            reverse: true,
             physics: state.messages.isEmpty
                 ? const NeverScrollableScrollPhysics()
                 : const AlwaysScrollableScrollPhysics(),
@@ -78,8 +79,7 @@ class _ChatScreenState extends State<ChatScreen> {
               else
                 SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    final message =
-                        state.messages[state.messages.length - 1 - index];
+                    final message = state.messages[index];
                     return GestureDetector(
                       onTap: () {},
                       child: MessageItemWidget(
@@ -92,8 +92,33 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
         ),
-        CreateMessageWidget(),
+        SizedBox(height: 5),
+        CreateMessageWidget(
+          onSendMessage: ({String? type, required String content}) =>
+              _sendMessage(
+                chatId: state.chat.id,
+                senderId: state.user.id,
+                type: type,
+                content: content,
+              ),
+        ),
       ],
+    );
+  }
+
+  void _sendMessage({
+    required int chatId,
+    required int senderId,
+    String? type,
+    required String content,
+  }) {
+    widget.chatBloc.add(
+      CreateMessage(
+        chatId: chatId,
+        senderId: senderId,
+        type: type,
+        content: content,
+      ),
     );
   }
 
@@ -106,12 +131,15 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }
     final max = _scrollController.position.maxScrollExtent;
+    final min = _scrollController.position.minScrollExtent;
     final current = _scrollController.position.pixels;
 
-    if (current >= max - 200 && !(blocState.lastPage)) {
-      final nextPage = blocState.currentPage + 1;
+    if (current >= max - 200) {
       widget.chatBloc.add(
-        LoadMoreChat(pageNumber: nextPage, chatId: blocState.chat.id),
+        LoadPrevChat(
+          pageNumber: blocState.currentPage + 1,
+          chatId: blocState.chat.id,
+        ),
       );
     }
   }

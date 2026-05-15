@@ -5,11 +5,12 @@ class GetMessagesResponse {
   final List<Message> messages;
   final bool lastPage;
   final Chat chat;
-
+  final int? pageNumber;
   GetMessagesResponse({
     required this.messages,
     required this.lastPage,
     required this.chat,
+    required this.pageNumber,
   });
 
   factory GetMessagesResponse.fromJson(Map<String, dynamic> json) {
@@ -19,6 +20,7 @@ class GetMessagesResponse {
           .toList(),
       lastPage: json['last_page'] as bool,
       chat: Chat.fromJson(json['chat']),
+      pageNumber: json['page_number'] as int?,
     );
   }
 }

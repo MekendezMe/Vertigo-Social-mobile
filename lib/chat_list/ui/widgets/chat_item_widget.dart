@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:social_network_flutter/chat_list/logic/entities/chat.dart';
 import 'package:social_network_flutter/common/framework/theme/vertigo_theme.dart';
 import 'package:social_network_flutter/feed/logic/entites/user.dart';
-import 'package:social_network_flutter/helpers/chat/parse_content.dart';
 import 'package:social_network_flutter/helpers/date_parser.dart';
 import 'package:social_network_flutter/ui/widgets/avatar/build_avatar.dart';
 
@@ -15,8 +14,9 @@ class ChatItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final username = chat.user?.username ?? chat.title ?? "";
     final avatar = chat.user?.avatar ?? chat.avatar;
-    String textMessage = chat.lastMessage != null
-        ? parseContent(chat.lastMessage!.content)
+    String textMessage =
+        chat.lastMessage != null && chat.lastMessage!.content != null
+        ? chat.lastMessage!.content!
         : "";
     textMessage = textMessage == "" ? "Напишите что-нибудь..." : textMessage;
     final text = textMessage.length > 40
@@ -29,7 +29,7 @@ class ChatItemWidget extends StatelessWidget {
     final formatDate = chat.lastMessage != null
         ? formatMessageDate(chat.lastMessage!.createdAt)
         : "";
-    final countUnread = 122;
+    final countUnread = chat.countUnread;
     final isRead = chat.lastMessage != null ? chat.lastMessage!.isRead : false;
     final width = MediaQuery.of(context).size.width;
     return Container(

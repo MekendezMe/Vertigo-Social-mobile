@@ -231,6 +231,8 @@ class ThemeColors extends ThemeExtension<ThemeColors> {
     required this.dimPurple,
   });
 
+  Color? get black => null;
+
   @override
   ThemeExtension<ThemeColors> copyWith() {
     return ThemeColors(

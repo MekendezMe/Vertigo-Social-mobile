@@ -41,7 +41,6 @@ import 'package:social_network_flutter/firebase_options.dart';
 import 'package:social_network_flutter/post/logic/bloc/post_bloc.dart';
 import 'package:social_network_flutter/post/logic/bloc/post_composer_bloc.dart';
 import 'package:social_network_flutter/post/post_assembly.dart';
-import 'package:social_network_flutter/post/post_coordinator.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger_observer.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -64,20 +63,39 @@ void main() async {
   runApp(MyApp());
 }
 
+String? _pendingNotificationPayload;
+
 void handleNotificationNavigation(String payload) {
+  _pendingNotificationPayload = payload;
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    try {
-      final context = NavigationService.navigatorKey.currentContext;
-      if (context == null) return;
-
-      final userService = diContainer.resolve<UserService>();
-      if (userService.currentUser == null) return;
-
-      appCoordinator.onNotificationTap(context: context, payload: payload);
-    } catch (e) {
-      return;
-    }
+    _tryHandlePendingNotification();
   });
+}
+
+void _tryHandlePendingNotification() {
+  final payload = _pendingNotificationPayload;
+  if (payload == null) return;
+
+  final context = NavigationService.navigatorKey.currentContext;
+  if (context == null) {
+    debugPrint('Navigator context is not ready');
+    return;
+  }
+
+  final userService = diContainer.resolve<UserService>();
+  if (userService.currentUser == null) {
+    debugPrint('Current user is not ready');
+    return;
+  }
+
+  try {
+    appCoordinator.onNotificationTap(context: context, payload: payload);
+
+    _pendingNotificationPayload = null;
+  } catch (e, st) {
+    debugPrint('Notification navigation error: $e');
+    debugPrintStack(stackTrace: st);
+  }
 }
 
 final appCoordinator = AppCoordinator(diContainer: diContainer);
